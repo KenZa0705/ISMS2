@@ -221,7 +221,7 @@ $department_id = $_SESSION['user']['department_id'];
                             </div>
 
                             <div class="form-check mb-3">
-                                <input class="form-check-input" type="checkbox" id="sendSms" name="sendSms">
+                                <input class="form-check-input" type="checkbox" id="sendSms" name="sendSms" value="1">
                                 <label class="form-check-label" for="sendSms">
                                     Send SMS notifications
                                 </label>
@@ -292,7 +292,7 @@ $department_id = $_SESSION['user']['department_id'];
             $('#submitBtn').click(function(e) {
                 if ($('#sendSms').is(':checked')) {
                     let recipientCount = parseInt($('#recipientCount').text());
-                    if (recipientCount > 100) { 
+                    if (recipientCount >= 1) { 
                         e.preventDefault();
                         if (confirm(`You are about to send SMS to ${recipientCount} recipients. Are you sure you want to proceed?`)) {
                             $('form').submit();
@@ -301,11 +301,11 @@ $department_id = $_SESSION['user']['department_id'];
                 }
             });
 
-            $('input[type="checkbox"]').each(function() {
+            $('#sendSms').each(function() {
                 lastCheckedState[this.id] = this.checked;
             });
 
-            $('input[type="checkbox"]').change(function() {
+            $('#sendSms').change(function() {
                 if (!Object.values(lastCheckedState).some(Boolean) && this.checked) {
                     alert("Remember: Students will only receive SMS if they match ALL selected tags.");
                 }

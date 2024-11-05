@@ -1,13 +1,15 @@
 <?php
+// Enable error reporting
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+ini_set("error_log", "error.log"); // Replace with the desired log file path
+error_reporting(E_ALL);
+
 // Database configuration
 require_once '../login/dbh.inc.php';
+require 'config.php';
 
-use Infobip\Configuration;
-use Infobip\Api\SmsApi;
-use Infobip\Model\SmsDestination;
-use Infobip\Model\SmsTextualMessage;
-use Infobip\Model\SmsAdvancedTextualRequest;
-
+// Function to log SMS status in the database
 function logSmsStatus($pdo, $announcement_id, $student_id, $status) {
     $query = "INSERT INTO sms_log (announcement_id, student_id, status) VALUES (:announcement_id, :student_id, :status)";
     $stmt = $pdo->prepare($query);
@@ -18,6 +20,7 @@ function logSmsStatus($pdo, $announcement_id, $student_id, $status) {
     ]);
 }
 
+// Function to get student contact information for an announcement
 function getStudentsForAnnouncement($pdo, $announcement_id, $year_levels, $departments, $courses) {
     $query = 'SELECT DISTINCT s.student_id, s.contact_number
               FROM student s
@@ -59,34 +62,47 @@ function getStudentsForAnnouncement($pdo, $announcement_id, $year_levels, $depar
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-function sendSmsToStudents($pdo, $announcement_id, $students, $title, $message) {
-    require __DIR__ . "/vendor/autoload.php";
+// Replaces sendSmsToStudents function, using a working sendMessage function
+function sendMessage($contact_number, $message) {
+    $infobip_url = "https://wg43qy.api.infobip.com/sms/2/text/advanced";
+    $api_key = INFOPB_API_KEY; // Replace with your Infobip API key
 
-    $apiURL = 'wg43qy.api.infobip.com';
-    $apiKey = '90f70a7a0843650f0cd70d01ac47e048-8c7ffe9f-c816-4b9a-88c6-3370b9584292';
+    $data = [
+        "messages" => [
+            [
+                "from" => "447491163443", // Replace with sender name if required
+                "destinations" => [
+                    ["to" => $contact_number]
+                ],
+                "text" => $message
+            ]
+        ]
+    ];
 
-    $configuration = new Configuration(host: $apiURL, apiKey: $apiKey);
-    $api = new SmsApi(config: $configuration);
+    $headers = [
+        "Authorization: App $api_key",
+        "Content-Type: application/json",
+        "Accept: application/json"
+    ];
 
-    foreach ($students as $student) {
-        $destination = new SmsDestination(to: $student['contact_number']);
-        $smsMessage = new SmsTextualMessage(
-            destinations: [$destination],
-            text: $title . "\n" . $message,
-            from: "447491163443"
-        );
+    $options = [
+        'http' => [
+            'header'  => implode("\r\n", $headers),
+            'method'  => 'POST',
+            'content' => json_encode($data),
+        ],
+    ];
 
-        $request = new SmsAdvancedTextualRequest(messages: [$smsMessage]);
+    $context = stream_context_create($options);
+    $result = file_get_contents($infobip_url, false, $context);
+    if ($result === FALSE) {
+        error_log("Failed to send SMS to $contact_number");
 
-        try {
-            $response = $api->sendSmsMessage($request);
-            logSmsStatus($pdo, $announcement_id, $student['student_id'], 'SENT');
-            error_log("SMS sent successfully to student ID {$student['student_id']}: " . json_encode($response));
-        } catch (Exception $e) {
-            logSmsStatus($pdo, $announcement_id, $student['student_id'], 'FAILED');
-            error_log("SMS sending failed for student ID {$student['student_id']}: " . $e->getMessage());
-        }
+        return false;
     }
+    error_log("Sent SMS to $contact_number: $result");
+    return json_decode($result, true); // Decode response for further inspection if needed
+
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -123,6 +139,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                 // Move the uploaded file to the upload directory
                 if (move_uploaded_file($image['tmp_name'], $uploadFilePath)) {
+                    $pdo->beginTransaction();
                     try {
                         // Insert the file details into the database using PDO
                         $stmt = $pdo->prepare("INSERT INTO announcement (image, description, title, admin_id) VALUES (:filename, :description, :title, :admin_id)");
@@ -137,28 +154,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                             // Check if SMS notifications should be sent
                             if (isset($_POST['sendSms'])) {
-                                $title = $_POST['title'];
-                                $description = $_POST['description'];
+                                echo "Preparing to send SMS notifications..."; // Debug statement
                                 $message = substr($description, 0, 250);
-
-                                $sql = "INSERT INTO announcement (announcement_id, message) VALUES (?, ?)";
-                                $stmt = $pdo->prepare($sql);
-                                $stmt->execute([$announcement_id, $message]);
-
-                                // Get students based on tags
                                 $students = getStudentsForAnnouncement($pdo, $announcement_id, $year_levels, $departments, $courses);
+                                echo "Students retrieved for announcement: " . count($students); // Debug statement
+                                error_log("Students fetched: " . print_r($students, true));
 
-                                // Send SMS to students
-                                sendSmsToStudents($pdo, $announcement_id, $students, $title, $message);
+                                foreach ($students as $student) {
+                                    $contact_number = $student['contact_number'];
+                                    $content = $title . "\n" . $message;
+                                    if (sendMessage($contact_number, $content)) {
+                                        logSmsStatus($pdo, $announcement_id, $student['student_id'], 'SENT');
+                                    } else {
+                                        logSmsStatus($pdo, $announcement_id, $student['student_id'], 'FAILED');
+                                    }
+                                }
+                            } else {
+                                error_log("sendSms not set in POST.");
                             }
-
 
                             // Function to get the corresponding ID from a table based on a name field
                             function getIdByName($pdo, $table, $column, $value, $id) {
                                 $sql = "SELECT $id FROM $table WHERE $column = ?";
                                 $stmt = $pdo->prepare($sql);
                                 $stmt->execute([$value]);
-                                return $stmt->fetchColumn(); // Fetch the id (assuming the id column is named `id`)
+                                return $stmt->fetchColumn(); 
                             }
 
                             // Insert into the `announcement_year_level` junction table
@@ -190,14 +210,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                     $stmt->execute([$announcement_id, $course_id]);
                                 }
                             }
-
+                            $pdo->commit();
                             echo "<script>
                             window.location.href = 'admin.php';
                                 </script>";
                         } else {
+                            $pdo->rollBack();
                             echo "Failed to save details to database.";
                         }
                     } catch (PDOException $e) {
+                        $pdo->rollBack();
+
                         echo "Database error: " . $e->getMessage();
                     }
                 } else {
