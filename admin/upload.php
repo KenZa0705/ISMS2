@@ -2,7 +2,7 @@
 // Enable error reporting
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
-ini_set("error_log", "error.log"); // Replace with the desired log file path
+ini_set("error_log", "error.log");
 error_reporting(E_ALL);
 
 // Database configuration
@@ -20,57 +20,76 @@ function logSmsStatus($pdo, $announcement_id, $student_id, $status) {
     ]);
 }
 
-// Function to get student contact information for an announcement
-function getStudentsForAnnouncement($pdo, $announcement_id, $year_levels, $departments, $courses) {
-    $query = 'SELECT DISTINCT s.student_id, s.contact_number
-              FROM student s
-              WHERE s.year_level_id IN (
-                  SELECT DISTINCT ayl.year_level_id 
-                  FROM announcement_year_level ayl 
-                  WHERE ayl.announcement_id = :announcement_id
-              )
-              AND s.department_id IN (
-                  SELECT DISTINCT ad.department_id 
-                  FROM announcement_department ad 
-                  WHERE ad.announcement_id = :announcement_id
-              )
-              AND s.course_id IN (
-                  SELECT DISTINCT ac.course_id 
-                  FROM announcement_course ac 
-                  WHERE ac.announcement_id = :announcement_id
-              )';
-
-    $params = [':announcement_id' => $announcement_id];
-
-    if (!empty($year_levels)) {
-        $query .= ' AND s.year_level_id IN (' . implode(',', array_fill(0, count($year_levels), '?')) . ')';
-        $params = array_merge($params, $year_levels);
-    }
-
-    if (!empty($departments)) {
-        $query .= ' AND s.department_id IN (' . implode(',', array_fill(0, count($departments), '?')) . ')';
-        $params = array_merge($params, $departments);
-    }
-
-    if (!empty($courses)) {
-        $query .= ' AND s.course_id IN (' . implode(',', array_fill(0, count($courses), '?')) . ')';
-        $params = array_merge($params, $courses);
-    }
-
-    $stmt = $pdo->prepare($query);
-    $stmt->execute($params);
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+// Function to get the corresponding ID from a table based on a name field
+function getIdByName($pdo, $table, $column, $value, $id) {
+    $sql = "SELECT $id FROM $table WHERE $column = ?";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([$value]);
+    $result = $stmt->fetchColumn();
+    error_log("getIdByName for $table: Column $column, Value $value, Result: $result");
+    return (int) $result; 
 }
+
+
+//  Function to get student contact information for an announcement
+function getStudentsForAnnouncement($pdo, $year_levels, $departments, $courses) {
+    // Convert descriptive names to their corresponding IDs for filtering
+    $year_level_ids = [];
+    foreach ($year_levels as $year_level_name) {
+        $year_level_id = getIdByName($pdo, 'year_level', 'year_level', $year_level_name, 'year_level_id');
+        if ($year_level_id !== null) {
+            $year_level_ids[] = $year_level_id; // Store the integer ID
+        }
+    }
+
+    $department_ids = [];
+    foreach ($departments as $department_name) {
+        $department_id = getIdByName($pdo, 'department', 'department_name', $department_name, 'department_id');
+        if ($department_id !== null) {
+            $department_ids[] = $department_id; // Store the integer ID
+        }
+    }
+
+    $course_ids = [];
+    foreach ($courses as $course_name) {
+        $course_id = getIdByName($pdo, 'course', 'course_name', $course_name, 'course_id');
+        if ($course_id !== null) {
+            $course_ids[] = $course_id; // Store the integer ID
+        }
+    }
+
+    // Construct the query using IN clauses for filtering
+    $query = "SELECT DISTINCT s.student_id, s.contact_number
+              FROM student s
+              WHERE s.year_level_id IN (" . implode(',', array_fill(0, count($year_level_ids), '?')) . ")
+              AND s.department_id IN (" . implode(',', array_fill(0, count($department_ids), '?')) . ")
+              AND s.course_id IN (" . implode(',', array_fill(0, count($course_ids), '?')) . ")";
+
+    // Prepare the statement
+    $stmt = $pdo->prepare($query);
+
+    // Bind the values for year_levels, departments, and courses
+    $params = array_merge($year_level_ids, $department_ids, $course_ids);
+    $stmt->execute($params);
+
+    // Fetch and return the results
+    $output = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    error_log('Result: ' . print_r($output, true)); 
+
+    return $output;
+}
+
+
 
 // Replaces sendSmsToStudents function, using a working sendMessage function
 function sendMessage($contact_number, $message) {
     $infobip_url = "https://wg43qy.api.infobip.com/sms/2/text/advanced";
-    $api_key = INFOPB_API_KEY; // Replace with your Infobip API key
+    $api_key = INFOPB_API_KEY;
 
     $data = [
         "messages" => [
             [
-                "from" => "447491163443", // Replace with sender name if required
+                "from" => "447491163443",
                 "destinations" => [
                     ["to" => $contact_number]
                 ],
@@ -101,7 +120,7 @@ function sendMessage($contact_number, $message) {
         return false;
     }
     error_log("Sent SMS to $contact_number: $result");
-    return json_decode($result, true); // Decode response for further inspection if needed
+    return json_decode($result, true);
 
 }
 
@@ -155,8 +174,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             // Check if SMS notifications should be sent
                             if (isset($_POST['sendSms'])) {
                                 echo "Preparing to send SMS notifications..."; // Debug statement
-                                $message = substr($description, 0, 250);
-                                $students = getStudentsForAnnouncement($pdo, $announcement_id, $year_levels, $departments, $courses);
+                                $message = substr($description, 0, 100);
+                                $students = getStudentsForAnnouncement($pdo, $year_levels, $departments, $courses);
                                 echo "Students retrieved for announcement: " . count($students); // Debug statement
                                 error_log("Students fetched: " . print_r($students, true));
 
@@ -171,14 +190,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                 }
                             } else {
                                 error_log("sendSms not set in POST.");
-                            }
-
-                            // Function to get the corresponding ID from a table based on a name field
-                            function getIdByName($pdo, $table, $column, $value, $id) {
-                                $sql = "SELECT $id FROM $table WHERE $column = ?";
-                                $stmt = $pdo->prepare($sql);
-                                $stmt->execute([$value]);
-                                return $stmt->fetchColumn(); 
                             }
 
                             // Insert into the `announcement_year_level` junction table
@@ -212,7 +223,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             }
                             $pdo->commit();
                             echo "<script>
-                            window.location.href = 'admin.php';
+                                    alert('Announcement posted successfully!');
+                                    setTimeout(function() {
+                                        window.location.href = 'admin.php';
+                                    }, 5000);
                                 </script>";
                         } else {
                             $pdo->rollBack();
