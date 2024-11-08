@@ -169,7 +169,7 @@ function addNewStudent($s_first_name, $s_last_name, $s_email, $s_contact_number,
                     <span class="icon-label">Create</span>
                 </a>
 
-                <a class="btn nav-bottom-btn" href="#">
+                <a class="btn nav-bottom-btn" href="logPage.php">
                     <i class="bi bi-clipboard"></i>
                     <span class="icon-label">Logs</span>
                 </a>
@@ -194,7 +194,7 @@ function addNewStudent($s_first_name, $s_last_name, $s_email, $s_contact_number,
                                     <a href="admin.php" class="btn mb-3"><i class="bi bi-house"></i> Home</a>
                                     <a class="btn mb-3" href="create.php"><i class="bi bi-megaphone"></i> Create Announcement</a>
                                     <a class="btn mb-3" href="manage.php"><i class="bi bi-kanban"></i> Manage Post</a>
-                                    <a class="btn mb-3" href="#"><i class="bi bi-clipboard"></i> Logs</a>
+                                    <a class="btn mb-3" href="logPage.php"><i class="bi bi-clipboard"></i> Logs</a>
                                     <a class="btn active mb-3" href="#"><i class="bi bi-person-plus"></i> Manage Student Account</a>
                                 </div>
                             </div>

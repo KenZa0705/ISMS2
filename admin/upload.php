@@ -8,17 +8,7 @@ error_reporting(E_ALL);
 // Database configuration
 require_once '../login/dbh.inc.php';
 require 'config.php';
-
-// Function to log SMS status in the database
-function logSmsStatus($pdo, $announcement_id, $student_id, $status) {
-    $query = "INSERT INTO sms_log (announcement_id, student_id, status) VALUES (:announcement_id, :student_id, :status)";
-    $stmt = $pdo->prepare($query);
-    $stmt->execute([
-        ':announcement_id' => $announcement_id,
-        ':student_id' => $student_id,
-        ':status' => $status
-    ]);
-}
+require 'log.php';
 
 // Function to get the corresponding ID from a table based on a name field
 function getIdByName($pdo, $table, $column, $value, $id) {
@@ -170,6 +160,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         if ($stmt->execute()) {
                             // Get the ID of the last inserted announcement
                             $announcement_id = $pdo->lastInsertId();
+
+                            // Log the announcement creation action
+                            logAction($pdo, $admin_id, 'admin', 'CREATE', 'announcement', $announcement_id, "New announcement created: $title");
 
                             // Check if SMS notifications should be sent
                             if (isset($_POST['sendSms'])) {

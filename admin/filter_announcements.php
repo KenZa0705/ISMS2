@@ -5,30 +5,50 @@ $admin_id = $_SESSION['user']['admin_id'] ?? null;
 $filters = [];
 $filterParams = [];
 
+$searchTerm = isset($_POST['search']) ? trim($_POST['search']) : '';
+
+// Split the search term into individual words and add each word as a condition
+if ($searchTerm !== '') {
+    $searchWords = preg_split('/\s+/', $searchTerm); // Split by spaces into an array of words
+    $searchConditions = [];
+
+    foreach ($searchWords as $word) {
+        $searchConditions[] = "(LOWER(a.title) LIKE ? OR LOWER(a.description) LIKE ?)";
+        $filterParams[] = '%' . strtolower($word) . '%';
+        $filterParams[] = '%' . strtolower($word) . '%';
+    }
+
+    // Join all individual word conditions with OR
+    $filters[] = '(' . implode(' OR ', $searchConditions) . ')';
+}
+
 // Get filter values
 $selected_departments = isset($_POST['department_filter']) ? $_POST['department_filter'] : [];
 $selected_year_levels = isset($_POST['year_level']) ? $_POST['year_level'] : [];
 $selected_courses = isset($_POST['course']) ? $_POST['course'] : [];
 
-// Build filter conditions
+// Department filter
 if (!empty($selected_departments)) {
     $placeholders = str_repeat('?,', count($selected_departments) - 1) . '?';
     $filters[] = "d.department_name IN ($placeholders)";
     $filterParams = array_merge($filterParams, $selected_departments);
 }
 
+// Year level filter
 if (!empty($selected_year_levels)) {
     $placeholders = str_repeat('?,', count($selected_year_levels) - 1) . '?';
     $filters[] = "yl.year_level IN ($placeholders)";
     $filterParams = array_merge($filterParams, $selected_year_levels);
 }
 
+// Course filter
 if (!empty($selected_courses)) {
     $placeholders = str_repeat('?,', count($selected_courses) - 1) . '?';
     $filters[] = "c.course_name IN ($placeholders)";
     $filterParams = array_merge($filterParams, $selected_courses);
 }
 
+// Combine filters into a WHERE clause
 $whereClause = count($filters) > 0 ? "WHERE " . implode(" AND ", $filters) : '';
 
 $query = "

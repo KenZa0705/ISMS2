@@ -52,7 +52,7 @@ $department_id = $_SESSION['user']['department_id'];
                     <span class="icon-label">Create</span>
                 </a>
 
-                <a class="btn nav-bottom-btn" href="#">
+                <a class="btn nav-bottom-btn" href="logPage.php">
                     <i class="bi bi-clipboard"></i>
                     <span class="icon-label">Logs</span>
                 </a>

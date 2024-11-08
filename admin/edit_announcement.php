@@ -46,6 +46,7 @@ $department_id = $_SESSION['user']['department_id'];
 
                     <?php
                     require_once '../login/dbh.inc.php';
+                    require 'log.php';
 
                     if (isset($_GET['id'])) {
                         $announcement_id = $_GET['id'];
@@ -109,6 +110,7 @@ $department_id = $_SESSION['user']['department_id'];
                                 $stmt->bindParam(':description', $new_description);
                                 $stmt->bindParam(':id', $announcement_id);
                                 $stmt->execute();
+                                logAction($pdo, $admin_id, 'admin', 'update', 'announcement', $announcement_id, 'updated an announcement');
 
                                 // Update the year levels
                                 $delete_query = "DELETE FROM announcement_year_level WHERE announcement_id = :id";
@@ -122,6 +124,7 @@ $department_id = $_SESSION['user']['department_id'];
                                     $stmt->bindParam(':announcement_id', $announcement_id);
                                     $stmt->bindParam(':year_level_id', $year_level_id);
                                     $stmt->execute();
+                                    logAction($pdo, $admin_id, 'admin', 'update', 'announcement_year_level', $year_level_id, 'updated an announcement, modified year level');
                                 }
 
                                 // Update the department 
@@ -136,9 +139,10 @@ $department_id = $_SESSION['user']['department_id'];
                                     $stmt->bindParam(':announcement_id', $announcement_id);
                                     $stmt->bindParam(':department_id', $new_department_id);
                                     $stmt->execute();
+                                    logAction($pdo, $admin_id, 'admin', 'update', 'announcement_department', $new_department_id, 'updated an announcement, modified department');
                                 }
 
-                                // Update the year levels
+                                // Update the courses
                                 $delete_query = "DELETE FROM announcement_course WHERE announcement_id = :id";
                                 $stmt = $pdo->prepare($delete_query);
                                 $stmt->bindParam(':id', $announcement_id);
@@ -150,6 +154,7 @@ $department_id = $_SESSION['user']['department_id'];
                                     $stmt->bindParam(':announcement_id', $announcement_id);
                                     $stmt->bindParam(':course_id', $new_courses_id);
                                     $stmt->execute();
+                                    logAction($pdo, $admin_id, 'admin', 'update', 'announcement_course', $new_courses_id, 'updated an announcement, modified courses');
                                 }
                                 // Handle image upload
                                 if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
@@ -170,6 +175,7 @@ $department_id = $_SESSION['user']['department_id'];
                                         move_uploaded_file($image_tmp_name, $uploadFilePath);
                                         $new_image = $filename; // Set the new image filename
                                     }
+                                    logAction($pdo, $admin_id, 'admin', 'update', 'announcement', $announcement_id, 'updated an announcement, modified image');
                                 } else {
                                     $new_image = $image; // Keep the old image
                                 }

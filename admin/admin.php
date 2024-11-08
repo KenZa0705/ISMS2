@@ -51,7 +51,7 @@ $selected_courses = [];
                     <span class="icon-label">Create</span>
                 </a>
 
-                <a class="btn nav-bottom-btn" href="#">
+                <a class="btn nav-bottom-btn" href="logPage.php">
                     <i class="bi bi-clipboard"></i>
                     <span class="icon-label">Logs</span>
                 </a>
@@ -84,7 +84,7 @@ $selected_courses = [];
                                     <a href="admin.php" class="btn active mb-3"><i class="bi bi-house"></i> Home</a>
                                     <a class="btn mb-3" href="create.php"><i class="bi bi-megaphone"></i> Create Announcement</a>
                                     <a class="btn mb-3" href="manage.php"><i class="bi bi-kanban"></i> Manage Post</a>
-                                    <a class="btn mb-3" href="#"><i class="bi bi-clipboard"></i> Logs</a>
+                                    <a class="btn mb-3" href="logPage.php"><i class="bi bi-clipboard"></i> Logs</a>
                                     <a class="btn" href="manage_student.php"><i class="bi bi-person-plus"></i> Manage Student Account</a>
                                 </div>
                             </div>
@@ -162,16 +162,16 @@ $selected_courses = [];
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         const filterForm = document.querySelector('#filterForm');
+        const searchForm = document.querySelector('#searchForm');
+        const searchInput = searchForm.querySelector('input[name="search"]');
         const loadingIndicator = document.getElementById('loading');
         const feedContainer = document.querySelector('.feed-container');
-        
-        filterForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
+
+        function fetchAnnouncements(form) {
             loadingIndicator.style.display = 'block';
             feedContainer.style.opacity = '0.5';
-            
-            const formData = new FormData(this);
+
+            const formData = new FormData(form);
             
             fetch('filter_announcements.php', {
                 method: 'POST',
@@ -188,15 +188,29 @@ $selected_courses = [];
                 loadingIndicator.style.display = 'none';
                 feedContainer.style.opacity = '1';
             });
+        }
+
+        // Handle filter form submit
+        filterForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            fetchAnnouncements(this);
         });
 
-        // Handle reset button
+        // Handle search form submit
+        searchForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            fetchAnnouncements(this);
+        });
+
+        // Handle reset button on filter form
         filterForm.addEventListener('reset', function(e) {
             setTimeout(() => {
-                filterForm.dispatchEvent(new Event('submit'));
+                searchInput.value = ''; // Clear the search input
+                fetchAnnouncements(filterForm);
             }, 10);
         });
     });
+
     </script>
     <script src="admin.js"></script>
 
