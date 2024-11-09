@@ -5,6 +5,10 @@ require '../login/vendor/autoload.php';
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
+// Load PhpSpreadsheet
+require 'vendor/autoload.php';
+use PhpOffice\PhpSpreadsheet\IOFactory;
+
 session_start();
 if (!isset($_SESSION['user'])) {
     header("Location: ../login/login.php");
@@ -21,6 +25,7 @@ $contact_number = $_SESSION['user']['contact_number'];
 $department_id = $_SESSION['user']['department_id'];
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    
     $s_first_name = $_POST['firstName'];
     $s_last_name = $_POST['lastName'];
     $s_email = $_POST['email'];
@@ -37,6 +42,40 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $s_course_id = $pdo->prepare("SELECT course_id FROM course WHERE course_name = :cname");
     $s_course_id->execute([':cname' => $_POST['course']]);
     $s_course = (int)$s_course_id->fetchColumn();
+
+    if (isset($_FILES['excelFile']) && $_FILES['excelFile']['error'] == UPLOAD_ERR_OK) {
+        $fileTmpPath = $_FILES['excelFile']['tmp_name'];
+        $fileName = $_FILES['excelFile']['name'];
+        $fileSize = $_FILES['excelFile']['size'];
+        $fileType = $_FILES['excelFile']['type'];
+        
+        // Read the Excel file
+        try {
+            $spreadsheet = IOFactory::load($fileTmpPath);
+        } catch (\PhpOffice\PhpSpreadsheet\Reader\Exception $e) {
+            echo "Error loading file: " . $e->getMessage();
+            exit;
+        }
+        $sheetData = $spreadsheet->getActiveSheet()->toArray();
+
+        foreach ($sheetData as $row) {
+            $s_first_name = $row[0]; // Assuming first name is in the first column
+            $s_last_name = $row[1]; // Assuming last name is in the second column
+            $s_email = $row[2]; // Assuming email is in the third column
+            $s_contact_number = $row[3]; // Assuming contact number is in the fourth column
+            $s_year = $row[4]; // Assuming year level is in the fifth column
+            $s_dept = $row[5]; // Assuming department is in the sixth column
+            $s_course = $row[6]; // Assuming course is in the seventh column
+
+            // Fetch IDs from the database as done previously
+            // Insert student into the database using addNewStudent function
+            addNewStudent($s_first_name, $s_last_name, $s_email, $s_contact_number, $s_year, $s_dept, $s_course);
+        }
+        
+        echo "<script>alert('Students added successfully.');</script>";
+    } else {
+        echo "<script>alert('Error uploading file.');</script>";
+    }
 
     if ($s_year && $s_dept && $s_course) {
         addNewStudent($s_first_name, $s_last_name, $s_email, $s_contact_number, $s_year, $s_dept, $s_course);
@@ -298,7 +337,7 @@ function addNewStudent($s_first_name, $s_last_name, $s_email, $s_contact_number,
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                <form id="addStudentForm" method="POST" action="">
+                                <form id="addStudentForm" method="POST" action="" enctype="multipart/form-data">
                                     <div class="form-group">
                                         <label for="firstName">First Name</label>
                                         <input type="text" class="form-control" id="firstName" name="firstName" placeholder="Enter first name" required>
@@ -360,6 +399,30 @@ function addNewStudent($s_first_name, $s_last_name, $s_email, $s_contact_number,
                                 </form>
                             </div>
 
+                        </div>
+                    </div>
+                </div>
+                <!-- Upload Excel Modal -->
+                <div class="modal fade" id="uploadExcelModal" tabindex="-1" aria-labelledby="uploadExcelModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="uploadExcelModalLabel">Upload Excel File</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="uploadExcelForm" method="POST" action="" enctype="multipart/form-data">
+                                    <input type="hidden" name="uploadExcel" value="1">
+                                    <div class="form-group">
+                                        <label for="excelFile">Upload Excel File</label>
+                                        <input type="file" class="form-control" id="excelFile" name="excelFile" accept=".xlsx, .xls" required>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        <button type="submit" class="btn btn-primary">Upload File</button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>

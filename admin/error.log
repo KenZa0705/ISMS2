@@ -865,3 +865,31 @@ Stack trace:
 [08-Nov-2024 05:30:29 Europe/Berlin] getIdByName for course: Column course_name, Value BSP, Result: 3
 [08-Nov-2024 05:30:29 Europe/Berlin] getIdByName for course: Column course_name, Value BSIE, Result: 5
 [08-Nov-2024 05:35:08 Europe/Berlin] sendSms not set in POST.
+[09-Nov-2024 05:59:35 Europe/Berlin] sendSms not set in POST.
+[09-Nov-2024 05:59:35 Europe/Berlin] getIdByName for year_level: Column year_level, Value 1st Year, Result: 1
+[09-Nov-2024 05:59:35 Europe/Berlin] getIdByName for year_level: Column year_level, Value 2nd Year, Result: 2
+[09-Nov-2024 05:59:35 Europe/Berlin] getIdByName for year_level: Column year_level, Value 3rd Year, Result: 3
+[09-Nov-2024 05:59:35 Europe/Berlin] getIdByName for year_level: Column year_level, Value 4th Year, Result: 4
+[09-Nov-2024 05:59:35 Europe/Berlin] getIdByName for department: Column department_name, Value CICS, Result: 1
+[09-Nov-2024 05:59:35 Europe/Berlin] getIdByName for department: Column department_name, Value CABE, Result: 2
+[09-Nov-2024 05:59:35 Europe/Berlin] getIdByName for department: Column department_name, Value CAS, Result: 3
+[09-Nov-2024 05:59:35 Europe/Berlin] getIdByName for department: Column department_name, Value CIT, Result: 5
+[09-Nov-2024 05:59:35 Europe/Berlin] getIdByName for department: Column department_name, Value CTE, Result: 6
+[09-Nov-2024 05:59:35 Europe/Berlin] getIdByName for department: Column department_name, Value CE, Result: 4
+[09-Nov-2024 05:59:35 Europe/Berlin] getIdByName for course: Column course_name, Value BSBA, Result: 1
+[09-Nov-2024 05:59:35 Europe/Berlin] getIdByName for course: Column course_name, Value BSMA, Result: 2
+[09-Nov-2024 05:59:35 Europe/Berlin] getIdByName for course: Column course_name, Value BSP, Result: 3
+[09-Nov-2024 05:59:35 Europe/Berlin] getIdByName for course: Column course_name, Value BAC, Result: 4
+[09-Nov-2024 05:59:35 Europe/Berlin] getIdByName for course: Column course_name, Value BSIE, Result: 5
+[09-Nov-2024 05:59:35 Europe/Berlin] getIdByName for course: Column course_name, Value BSIT-CE, Result: 6
+[09-Nov-2024 05:59:35 Europe/Berlin] getIdByName for course: Column course_name, Value BSIT-Electrical, Result: 7
+[09-Nov-2024 05:59:35 Europe/Berlin] getIdByName for course: Column course_name, Value BSIT-Electronic, Result: 8
+[09-Nov-2024 05:59:35 Europe/Berlin] getIdByName for course: Column course_name, Value BSIT-ICT, Result: 9
+[09-Nov-2024 05:59:35 Europe/Berlin] getIdByName for course: Column course_name, Value BSIT, Result: 10
+[09-Nov-2024 05:59:35 Europe/Berlin] getIdByName for course: Column course_name, Value BSE, Result: 11
+[09-Nov-2024 06:24:22 Europe/Berlin] sendSms not set in POST.
+[09-Nov-2024 06:24:22 Europe/Berlin] getIdByName for year_level: Column year_level, Value 3rd Year, Result: 3
+[09-Nov-2024 06:24:22 Europe/Berlin] getIdByName for year_level: Column year_level, Value 4th Year, Result: 4
+[09-Nov-2024 06:24:22 Europe/Berlin] getIdByName for department: Column department_name, Value CAS, Result: 3
+[09-Nov-2024 06:24:22 Europe/Berlin] getIdByName for course: Column course_name, Value BSIT-Electrical, Result: 7
+[09-Nov-2024 06:24:22 Europe/Berlin] getIdByName for course: Column course_name, Value BSIT-Electronic, Result: 8

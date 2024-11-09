@@ -14,7 +14,54 @@ $last_name = $_SESSION['user']['last_name'];
 $email = $_SESSION['user']['email'];
 $contact_number = $_SESSION['user']['contact_number'];
 $department_id = $_SESSION['user']['department_id'];
+
+// Database queries for analytics
+try {
+    // Posts by department
+    $departmentQuery = $pdo->query("SELECT d.department_name, COUNT(ad.announcement_id) AS post_count
+                                    FROM department d
+                                    LEFT JOIN announcement_department ad ON d.department_id = ad.department_id
+                                    GROUP BY d.department_name");
+    $departments = $departmentQuery->fetchAll(PDO::FETCH_ASSOC);
+
+    // Posts by course
+    $courseQuery = $pdo->query("SELECT c.course_name, COUNT(ac.announcement_id) AS post_count
+                                FROM course c
+                                LEFT JOIN announcement_course ac ON c.course_id = ac.course_id
+                                GROUP BY c.course_name");
+    $courses = $courseQuery->fetchAll(PDO::FETCH_ASSOC);
+
+    // Posts by year level
+    $yearLevelQuery = $pdo->query("SELECT yl.year_level, COUNT(ay.announcement_id) AS post_count
+                                   FROM year_level yl
+                                   LEFT JOIN announcement_year_level ay ON yl.year_level_id = ay.year_level_id
+                                   GROUP BY yl.year_level");
+    $yearLevels = $yearLevelQuery->fetchAll(PDO::FETCH_ASSOC);
+
+    // Posts by admin
+    $adminQuery = $pdo->query("SELECT CONCAT(a.first_name, ' ', a.last_name) AS admin_name, COUNT(ann.announcement_id) AS post_count
+                               FROM admin a
+                               LEFT JOIN announcement ann ON a.admin_id = ann.admin_id
+                               GROUP BY a.admin_id, a.first_name, a.last_name");
+    $admins = $adminQuery->fetchAll(PDO::FETCH_ASSOC);
+
+    // Active student and admin counts
+    $activeStudents = $pdo->query("SELECT COUNT(*) AS active_students FROM student")->fetch(PDO::FETCH_ASSOC)['active_students'];
+    $activeAdmins = $pdo->query("SELECT COUNT(*) AS active_admins FROM admin")->fetch(PDO::FETCH_ASSOC)['active_admins'];
+} catch (PDOException $e) {
+    echo 'Database error: ' . $e->getMessage();
+}
 ?>
+<script>
+    const analyticsData = {
+        departments: <?php echo json_encode($departments); ?>,
+        courses: <?php echo json_encode($courses); ?>,
+        yearLevels: <?php echo json_encode($yearLevels); ?>,
+        admins: <?php echo json_encode($admins); ?>,
+        activeStudents: <?php echo json_encode($activeStudents); ?>,
+        activeAdmins: <?php echo json_encode($activeAdmins); ?>
+    };
+</script>
 <!doctype html>
 <html lang="en">
 
@@ -78,12 +125,18 @@ $department_id = $_SESSION['user']['department_id'];
                                     <a class="btn active mb-3" href=""><i class="bi bi-kanban"></i> Manage Post</a>
                                     <a class="btn" href="logPage.php"><i class="bi bi-clipboard"></i> Logs</a>
                                     <a class="btn" href="manage_student.php"><i class="bi bi-person-plus"></i> Manage Student Account</a>
+                                    <!-- Button to Open Analytics Modal -->
+                                    <div class="col-md-6 main-content pt-5 px-5">
+                                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#analyticsModal">
+                                            View Analytics
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-
+            
                 <!-- main content -->
                 <div class="col-md-6 main-content pt-5 px-5">
                     <div class="feed-container">
@@ -226,9 +279,119 @@ $department_id = $_SESSION['user']['department_id'];
                 </div>
                 <script src="admin.js"></script>
                 <script src="manage.js"></script>
+                <!-- Analytics Modal -->
+                <div class="modal fade" id="analyticsModal" tabindex="-1" aria-labelledby="analyticsModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="analyticsModalLabel">Analytics</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <!-- Analytics Section -->
+                                <div class="analytics-section">
+                                    <!-- Bar Charts -->
+                                    <canvas id="departmentChart"></canvas>
+                                    <canvas id="courseChart"></canvas>
+                                    <canvas id="yearLevelChart"></canvas>
+
+                                    <!-- Pie Chart for Admins -->
+                                    <canvas id="adminChart"></canvas>
+
+                                    <!-- Counters for Active Users -->
+                                    <div>
+                                        <p>Active Students: <span id="activeStudents"></span></p>
+                                        <p>Active Admins: <span id="activeAdmins"></span></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
     </main>
     <!-- Body CDN links -->
     <?php include '../cdn/body.html'; ?>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+        // Set up data for each chart using analyticsData object
+
+        // Department Chart
+        const departmentLabels = analyticsData.departments.map(dept => dept.department_name);
+        const departmentCounts = analyticsData.departments.map(dept => dept.post_count);
+        new Chart(document.getElementById('departmentChart'), {
+            type: 'bar',
+            data: {
+                labels: departmentLabels,
+                datasets: [{
+                    label: 'Posts per Department',
+                    data: departmentCounts,
+                    backgroundColor: 'rgba(75, 192, 192, 0.6)'
+                }]
+            }
+        });
+
+        // Course Chart
+        const courseLabels = analyticsData.courses.map(course => course.course_name);
+        const courseCounts = analyticsData.courses.map(course => course.post_count);
+        new Chart(document.getElementById('courseChart'), {
+            type: 'bar',
+            data: {
+                labels: courseLabels,
+                datasets: [{
+                    label: 'Posts per Course',
+                    data: courseCounts,
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)'
+                }]
+            }
+        });
+
+        // Year Level Chart
+        const yearLevelLabels = analyticsData.yearLevels.map(level => level.year_level);
+        const yearLevelCounts = analyticsData.yearLevels.map(level => level.post_count);
+        new Chart(document.getElementById('yearLevelChart'), {
+            type: 'bar',
+            data: {
+                labels: yearLevelLabels,
+                datasets: [{
+                    label: 'Posts per Year Level',
+                    data: yearLevelCounts,
+                    backgroundColor: 'rgba(255, 206, 86, 0.6)'
+                }]
+            }
+        });
+
+        // Admin Chart
+        const adminLabels = analyticsData.admins.map(admin => admin.admin_name);
+        const adminCounts = analyticsData.admins.map(admin => admin.post_count);
+        new Chart(document.getElementById('adminChart'), {
+            type: 'pie',
+            data: {
+                labels: adminLabels,
+                datasets: [{
+                    label: 'Posts per Admin',
+                    data: adminCounts,
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.6)',
+                        'rgba(54, 162, 235, 0.6)',
+                        'rgba(255, 206, 86, 0.6)',
+                        'rgba(75, 192, 192, 0.6)',
+                        'rgba(153, 102, 255, 0.6)'
+                    ]
+                }]
+            }
+        });
+
+        // Display active user counts
+        document.getElementById('activeStudents').textContent = analyticsData.activeStudents;
+        document.getElementById('activeAdmins').textContent = analyticsData.activeAdmins;
+    });
+    </script>
+
+
 </body>
 
 </html>

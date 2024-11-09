@@ -10,13 +10,6 @@
             <a class="navbar-brand d-flex align-items-center" href="#"><img src="img/brand.png" class="img-fluid branding" alt=""></a>
         </div>
 
-        <div class="search-container mb-4">
-            <form id="searchForm" class="d-flex">
-                <input type="text" name="search" class="form-control" placeholder="Search announcements..." />
-                <button type="submit" class="btn btn-primary ms-2">Search</button>
-            </form>
-        </div>
-
         <div class="user-right d-flex align-items-center justify-content-center">
             <p class="username d-flex align-items-center m-0"><?php echo $first_name ?></p>
             <div class="user-profile">
