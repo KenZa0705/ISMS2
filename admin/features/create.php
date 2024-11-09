@@ -1,8 +1,8 @@
 <?php
-require_once '../login/dbh.inc.php'; // DATABASE CONNECTION
+require_once '../../login/dbh.inc.php'; // DATABASE CONNECTION
 session_start();
 if (!isset($_SESSION['user'])) {
-    header("Location: ../login/login.php");
+    header("Location: ../../login/login.php");
     exit();
 }
 
@@ -27,14 +27,14 @@ $department_id = $_SESSION['user']['department_id'];
         content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 
     <!-- head CDN links -->
-    <?php include '../cdn/head.html'; ?>
-    <link rel="stylesheet" href="admin.css">
-    <link rel="stylesheet" href="create.css">
+    <?php include '../../cdn/head.html'; ?>
+    <link rel="stylesheet" href="../css/admin.css">
+    <link rel="stylesheet" href="../css/create.css">
 </head>
 
 <body>
     <header>
-        <?php include '../cdn/navbar.php'; ?>
+        <?php include '../../cdn/navbar.php'; ?>
         <nav class="navbar nav-bottom fixed-bottom d-block d-md-none mt-5">
             <div class="container-fluid justify-content-around">
                 <a href="admin.php" class="btn nav-bottom-btn">
@@ -69,7 +69,7 @@ $department_id = $_SESSION['user']['department_id'];
         <div class="container-fluid pt-5">
             <div class="row g-4">
                 <!-- left sidebar -->
-                <?php include '../cdn/sidebar.php'; ?>
+                <?php include '../../cdn/sidebar.php'; ?>
 
                 <!-- main content -->
                 <div class="col-md-6 pt-5 px-5">
@@ -238,12 +238,12 @@ $department_id = $_SESSION['user']['department_id'];
                     </div>
 
                 </div>
-                <script src="create.js"></script>
+                <script src="../js/create.js"></script>
             </div>
         </div>
     </main>
     <!-- Body CDN links -->
-    <?php include '../cdn/body.html'; ?>
+    <?php include '../../cdn/body.html'; ?>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function() {

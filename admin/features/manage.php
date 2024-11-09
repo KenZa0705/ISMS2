@@ -1,8 +1,8 @@
 <?php
-require_once '../login/dbh.inc.php'; // DATABASE CONNECTION
+require_once '../../login/dbh.inc.php'; // DATABASE CONNECTION
 session_start();
 if (!isset($_SESSION['user'])) {
-    header("Location: ../login/login.php");
+    header("Location: ../../login/login.php");
     exit();
 }
 
@@ -73,17 +73,17 @@ try {
         content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 
     <!-- head CDN links -->
-    <?php include '../cdn/head.html'; ?>
-    <link rel="stylesheet" href="admin.css">
-    <link rel="stylesheet" href="modals.css">
+    <?php include '../../cdn/head.html'; ?>
+    <link rel="stylesheet" href="../css/admin.css">
+    <link rel="stylesheet" href="../css/modals.css">
 </head>
 
 <body>
     <header>
-        <?php include '../cdn/navbar.php'; ?>
+        <?php include '../../cdn/navbar.php'; ?>
         <nav class="navbar nav-bottom fixed-bottom d-block d-md-none mt-5">
             <div class="container-fluid justify-content-around">
-                <a href="admin.php" class="btn nav-bottom-btn">
+                <a href="../admin.php" class="btn nav-bottom-btn">
                     <i class="bi bi-house"></i>
                     <span class="icon-label">Home</span>
                 </a>
@@ -120,7 +120,7 @@ try {
                         <div class="sidebar">
                             <div class="card">
                                 <div class="card-body d-flex flex-column">
-                                    <a href="admin.php" class="btn mb-3"><i class="bi bi-house"></i> Home</a>
+                                    <a href="../admin.php" class="btn mb-3"><i class="bi bi-house"></i> Home</a>
                                     <a class="btn mb-3" href="create.php"><i class="bi bi-megaphone"></i> Create Announcement</a>
                                     <a class="btn active mb-3" href=""><i class="bi bi-kanban"></i> Manage Post</a>
                                     <a class="btn" href="logPage.php"><i class="bi bi-clipboard"></i> Logs</a>
@@ -141,7 +141,7 @@ try {
                 <div class="col-md-6 main-content pt-5 px-5">
                     <div class="feed-container">
                         <?php
-                        require_once '../login/dbh.inc.php';
+                        require_once '../../login/dbh.inc.php';
 
                         try {
                             // Query to get the announcements along with the year level, department, and course
@@ -211,7 +211,7 @@ try {
                                         </div>
 
                                         <div class="image-container mx-3">
-                                            <img src="uploads/<?php echo htmlspecialchars($image); ?>" alt="Post Image" class="img-fluid">
+                                            <img src="../uploads/<?php echo htmlspecialchars($image); ?>" alt="Post Image" class="img-fluid">
                                         </div>
 
                                         <div class="card-body">
@@ -277,8 +277,7 @@ try {
                         </div>
                     </div>
                 </div>
-                <script src="admin.js"></script>
-                <script src="manage.js"></script>
+                
                 <!-- Analytics Modal -->
                 <div class="modal fade" id="analyticsModal" tabindex="-1" aria-labelledby="analyticsModalLabel" aria-hidden="true">
                     <div class="modal-dialog modal-lg">
@@ -313,7 +312,9 @@ try {
                 </div>
     </main>
     <!-- Body CDN links -->
-    <?php include '../cdn/body.html'; ?>
+    <?php include '../../cdn/body.html'; ?>
+    <script src="../js/admin.js"></script>
+    <script src="../js/manage.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
     document.addEventListener("DOMContentLoaded", () => {

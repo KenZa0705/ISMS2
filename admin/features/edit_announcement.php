@@ -1,8 +1,8 @@
 <?php
-require_once '../login/dbh.inc.php'; // DATABASE CONNECTION
+require_once '../../login/dbh.inc.php'; // DATABASE CONNECTION
 session_start();
 if (!isset($_SESSION['user'])) {
-    header("Location: ../login/login.php");
+    header("Location: ../../login/login.php");
     exit();
 }
 
@@ -24,28 +24,28 @@ $department_id = $_SESSION['user']['department_id'];
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 
     <!-- Include your head CDN links -->
-    <?php include '../cdn/head.html'; ?>
-    <link rel="stylesheet" href="admin.css">
-    <link rel="stylesheet" href="create.css">
+    <?php include '../../cdn/head.html'; ?>
+    <link rel="stylesheet" href="../css/admin.css">
+    <link rel="stylesheet" href="../css/create.css">
 </head>
 
 <body>
     <header>
-        <?php include '../cdn/navbar.php'; ?> 
+        <?php include '../../cdn/navbar.php'; ?> 
     </header>
 
     <main>
         <div class="container-fluid pt-5">
             <div class="row g-4">
                 <!-- Sidebar -->
-                <?php include '../cdn/sidebar.php'; ?>
+                <?php include '../../cdn/sidebar.php'; ?>
 
                 <!-- Main content -->
                 <div class="col-md-6 pt-5 px-5">
                     <h3 class="text-center"><b>Edit Announcement</b></h3>
 
                     <?php
-                    require_once '../login/dbh.inc.php';
+                    require_once '../../login/dbh.inc.php';
                     require 'log.php';
 
                     if (isset($_GET['id'])) {
@@ -192,7 +192,7 @@ $department_id = $_SESSION['user']['department_id'];
                                 if ($stmt->execute()) {
                                     echo "<script>
                                             alert('Announcement was updated successfully!');
-                                            window.location.href = 'admin.php';
+                                            window.location.href = '../admin.php';
                                           </script>";
                                 } else {
                                     echo "<div class='alert alert-danger'>Error updating announcement.</div>";
@@ -289,7 +289,7 @@ $department_id = $_SESSION['user']['department_id'];
                                             <button class="btn btn-light" id="file-upload-btn">
                                                 <i class="bi bi-upload"></i>
                                             </button>
-                                            <img id="image-preview" src="uploads/<?php echo htmlspecialchars($image); ?>" alt="Image Preview" style="display: block; max-width: 100%; margin:0;">
+                                            <img id="image-preview" src="../uploads/<?php echo htmlspecialchars($image); ?>" alt="Image Preview" style="display: block; max-width: 100%; margin:0;">
                                         </div>
                                         <div class="blur-background" style="display: none;"></div>
                                         <i id="delete-icon" class="bi bi-trash" style="position: absolute; top: 5px; right: 5px; display: none; cursor: pointer;" onclick="deleteImage()"></i>
@@ -306,8 +306,8 @@ $department_id = $_SESSION['user']['department_id'];
                 </div>
             </div>
         </div>
-        <script src="create.js"></script>
-        <script src="edit.js"></script>
+        <script src="../js/create.js"></script>
+        <script src="../js/edit.js"></script>
     </main>
 
     <!-- Body CDN links -->

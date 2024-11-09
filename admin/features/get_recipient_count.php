@@ -1,5 +1,5 @@
 <?php
-require_once '../login/dbh.inc.php'; // Adjust this path as needed
+require_once '../../login/dbh.inc.php'; // Adjust this path as needed
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $yearLevels = $_POST['year_levels'] ?? [];

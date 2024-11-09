@@ -1,5 +1,5 @@
 <?php
-require_once '../login/dbh.inc.php'; // Database connection
+require_once '../../login/dbh.inc.php'; // Database connection
 require 'log.php';
 //Get info from admin session
 session_start();

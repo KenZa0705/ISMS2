@@ -1,6 +1,6 @@
 <?php
-require_once '../login/dbh.inc.php'; // DATABASE CONNECTION
-require '../login/vendor/autoload.php';
+require_once '../../login/dbh.inc.php'; // DATABASE CONNECTION
+require '../../login/vendor/autoload.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -11,7 +11,7 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 
 session_start();
 if (!isset($_SESSION['user'])) {
-    header("Location: ../login/login.php");
+    header("Location: ../../login/login.php");
     exit();
 }
 
@@ -182,18 +182,18 @@ function addNewStudent($s_first_name, $s_last_name, $s_email, $s_contact_number,
         content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 
     <!-- head CDN links -->
-    <?php include '../cdn/head.html'; ?>
-    <link rel="stylesheet" href="admin.css">
-    <link rel="stylesheet" href="modals.css">
+    <?php include '../../cdn/head.html'; ?>
+    <link rel="stylesheet" href="../css/admin.css">
+    <link rel="stylesheet" href="../css/modals.css">
 </head>
 
 <body>
     <header>
-        <?php include '../cdn/navbar.php' ?>
+        <?php include '../../cdn/navbar.php' ?>
 
         <nav class="navbar nav-bottom fixed-bottom d-block d-md-none mt-5">
             <div class="container-fluid justify-content-around">
-                <a href="admin.php" class="btn nav-bottom-btn">
+                <a href="../admin.php" class="btn nav-bottom-btn">
                     <i class="bi bi-house"></i>
                     <span class="icon-label">Home</span>
                 </a>
@@ -230,7 +230,7 @@ function addNewStudent($s_first_name, $s_last_name, $s_email, $s_contact_number,
                         <div class="sidebar">
                             <div class="card">
                                 <div class="card-body d-flex flex-column">
-                                    <a href="admin.php" class="btn mb-3"><i class="bi bi-house"></i> Home</a>
+                                    <a href="../admin.php" class="btn mb-3"><i class="bi bi-house"></i> Home</a>
                                     <a class="btn mb-3" href="create.php"><i class="bi bi-megaphone"></i> Create Announcement</a>
                                     <a class="btn mb-3" href="manage.php"><i class="bi bi-kanban"></i> Manage Post</a>
                                     <a class="btn mb-3" href="logPage.php"><i class="bi bi-clipboard"></i> Logs</a>
@@ -246,7 +246,7 @@ function addNewStudent($s_first_name, $s_last_name, $s_email, $s_contact_number,
                         <button class="btn btn-primary" id="addNewStudent" data-bs-toggle="modal" data-bs-target="#studentModal">Add new student</button>
 
                         <?php
-                        require_once '../login/dbh.inc.php';
+                        require_once '../../login/dbh.inc.php';
 
                         try {
                             $query = "SELECT s.*, yl.year_level, d.department_name, c.course_name 
@@ -478,10 +478,10 @@ function addNewStudent($s_first_name, $s_last_name, $s_email, $s_contact_number,
 
                 <!-- offcanvas  -->
 
-                <script src="admin.js"></script>
+                <script src="../js/admin.js"></script>
     </main>
     <!-- Body CDN links -->
-    <?php include '../cdn/body.html'; ?>
+    <?php include '../../cdn/body.html'; ?>
 </body>
 
 </html>

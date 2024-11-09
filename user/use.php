@@ -6,7 +6,7 @@ if (!isset($_SESSION['user'])) {
     exit();
 }
 
-//Get info from admin session
+//Get info from student session
 $user = $_SESSION['user'];
 $admin_id = $_SESSION['user']['admin_id'];
 $first_name = $_SESSION['user']['first_name'];
@@ -28,8 +28,7 @@ $selected_courses = [];
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <?php include '../cdn/head.html'; ?>
-    <link rel="stylesheet" href="css/admin.css">
-    <link rel="stylesheet" href="css/modals.css">
+    <link rel="stylesheet" href="user.css">
 </head>
 <body>
     <header>
@@ -67,76 +66,11 @@ $selected_courses = [];
                 </div>
             </div>
     </nav>
-        <nav class="navbar nav-bottom fixed-bottom d-block d-md-none mt-5">
-            <div class="container-fluid justify-content-around">
-                <a href="admin.php" class="btn nav-bottom-btn active">
-                    <i class="bi bi-house"></i>
-                    <span class="icon-label">Home</span>
-                </a>
-
-                <a class="btn nav-bottom-btn" href="features/manage.php">
-                    <i class="bi bi-kanban"></i>
-                    <span class="icon-label">Manage</span>
-                </a>
-
-                <a class="btn nav-bottom-btn" href="features/create.php">
-                    <i class="bi bi-megaphone"></i>
-                    <span class="icon-label">Create</span>
-                </a>
-
-                <a class="btn nav-bottom-btn" href="features/logPage.php">
-                    <i class="bi bi-clipboard"></i>
-                    <span class="icon-label">Logs</span>
-                </a>
-
-                <a class="btn nav-bottom-btn" href="features/manage_student.php">
-                    <i class="bi bi-person-plus"></i>
-                    <span class="icon-label">Students</span>
-                </a>
-
-            </div>
-        </nav>
-        <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
-            <div class="offcanvas-header">
-                <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Menu</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-            </div>
-        </div>
     </header>
     
     <main>
         <div class="container-fluid pt-5">
             <div class="row g-4">
-                <!-- Left sidebar -->
-                <div class="col-md-3 d-none d-md-block">
-                    <!-- Your existing sidebar code -->
-                    <div class="sticky-sidebar pt-5">
-                        <div class="sidebar">
-                            <div class="card">
-                                <div class="card-body d-flex flex-column">
-                                    <a href="admin.php" class="btn active mb-3"><i class="bi bi-house"></i> Home</a>
-                                    <a class="btn mb-3" href="features/create.php"><i class="bi bi-megaphone"></i> Create Announcement</a>
-                                    <a class="btn mb-3" href="features/manage.php"><i class="bi bi-kanban"></i> Manage Post</a>
-                                    <a class="btn mb-3" href="features/logPage.php"><i class="bi bi-clipboard"></i> Logs</a>
-                                    <a class="btn" href="features/manage_student.php"><i class="bi bi-person-plus"></i> Manage Student Account</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Main content -->
-                <div class="col-md-6 main-content pt-5 px-5">
-                    <div class="feed-container">
-                        <div id="loading" style="display: none;" class="text-center">
-                            <div class="spinner-border" role="status">
-                                <span class="visually-hidden">Loading...</span>
-                            </div>
-                        </div>
-                        <?php include 'filter_announcements.php'; ?>
-                    </div>
-                </div>
-
                 <!-- Right sidebar with filters -->
                 <div class="col-md-3 d-none d-md-block">
                     <div class="sticky-sidebar pt-5">
@@ -188,6 +122,20 @@ $selected_courses = [];
                         </div>
                     </div>
                 </div>
+
+                <!-- Main content -->
+                <div class="col-md-6 main-content pt-5 px-5">
+                    <div class="feed-container">
+                        <div id="loading" style="display: none;" class="text-center">
+                            <div class="spinner-border" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                        <?php include 'filter_announcements.php'; ?>
+                    </div>
+                </div>
+
+                
             </div>
         </div>
     </main>
@@ -245,7 +193,7 @@ $selected_courses = [];
     });
 
     </script>
-    <script src="js/admin.js"></script>
+    <script src="user.js"></script>
 
     <?php include '../cdn/body.html'; ?>
 </body>

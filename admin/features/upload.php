@@ -6,7 +6,7 @@ ini_set("error_log", "error.log");
 error_reporting(E_ALL);
 
 // Database configuration
-require_once '../login/dbh.inc.php';
+require_once '../../login/dbh.inc.php';
 require 'config.php';
 require 'log.php';
 
@@ -130,7 +130,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // Check if admin_id is a valid integer
         if (!empty($admin_id) && filter_var($admin_id, FILTER_VALIDATE_INT)) {
             // Define the upload directory
-            $uploadDir = 'uploads/';
+            $uploadDir = '../uploads/';
             // Create the directory if it doesn't exist
             if (!is_dir($uploadDir)) {
                 mkdir($uploadDir, 0777, true);
@@ -218,8 +218,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             echo "<script>
                                     alert('Announcement posted successfully!');
                                     setTimeout(function() {
-                                        window.location.href = 'admin.php';
-                                    }, 5000);
+                                        window.location.href = '../admin.php';
+                                    }, 2000);
                                 </script>";
                         } else {
                             $pdo->rollBack();
