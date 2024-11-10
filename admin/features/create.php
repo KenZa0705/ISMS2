@@ -20,7 +20,7 @@ $department_id = $_SESSION['user']['department_id'];
 <html lang="en">
 
 <head>
-    <title>Title</title>
+    <title>Create Announcement</title>
     <meta charset="utf-8" />
     <meta
         name="viewport"
@@ -238,82 +238,14 @@ $department_id = $_SESSION['user']['department_id'];
                     </div>
 
                 </div>
-                <script src="../js/create.js"></script>
+                
             </div>
         </div>
     </main>
     <!-- Body CDN links -->
     <?php include '../../cdn/body.html'; ?>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            let lastCheckedState = {};
-
-            function updateRecipientCount() {
-                let yearLevels = $('input[name="year_level[]"]:checked').map(function() {
-                    return this.value;
-                }).get();
-                let departments = $('input[name="department[]"]:checked').map(function() {
-                    return this.value;
-                }).get();
-                let courses = $('input[name="course[]"]:checked').map(function() {
-                    return this.value;
-                }).get();
-
-                if (yearLevels.length && departments.length && courses.length) {
-                    $.ajax({
-                        url: 'get_recipient_count.php',
-                        method: 'POST',
-                        data: {
-                            year_levels: yearLevels,
-                            departments: departments,
-                            courses: courses
-                        },
-                        success: function(response) {
-                            $('#recipientCount').text(response);
-                            $('#smsInfo').show();
-                        }
-                    });
-                } else {
-                    $('#smsInfo').hide();
-                }
-            }
-
-            $('input[name="year_level[]"], input[name="department[]"], input[name="course[]"]').change(updateRecipientCount);
-
-            $('#sendSms').change(function() {
-                if (this.checked) {
-                    updateRecipientCount();
-                } else {
-                    $('#smsInfo').hide();
-                }
-            });
-
-            $('#submitBtn').click(function(e) {
-                if ($('#sendSms').is(':checked')) {
-                    let recipientCount = parseInt($('#recipientCount').text());
-                    if (recipientCount >= 1) { 
-                        e.preventDefault();
-                        if (confirm(`You are about to send SMS to ${recipientCount} recipients. Are you sure you want to proceed?`)) {
-                            $('form').submit();
-                        }
-                    }
-                }
-            });
-
-            $('#sendSms').each(function() {
-                lastCheckedState[this.id] = this.checked;
-            });
-
-            $('#sendSms').change(function() {
-                if (!Object.values(lastCheckedState).some(Boolean) && this.checked) {
-                    alert("Remember: Students will only receive SMS if they match ALL selected tags.");
-                }
-                
-                lastCheckedState[this.id] = this.checked;
-            });
-        });
-    </script>
+    <script src="../js/create.js"></script>
 </body>
 
 </html>

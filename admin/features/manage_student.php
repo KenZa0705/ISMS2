@@ -1,6 +1,9 @@
 <?php
 require_once '../../login/dbh.inc.php'; // DATABASE CONNECTION
 require '../../login/vendor/autoload.php';
+require 'functions.php';
+require 'log.php';
+require 'config.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -83,92 +86,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         echo "<script>alert('Error: One or more of the selected values are invalid.');</script>";
     }
 }
-
-function addNewStudent($s_first_name, $s_last_name, $s_email, $s_contact_number, $s_year, $s_dept, $s_course)
-{
-    global $pdo;
-
-    // Check if email already exists in the student table
-    $checkEmailQuery = "SELECT COUNT(*) FROM student WHERE email = :email";
-    $checkStmt = $pdo->prepare($checkEmailQuery);
-    $checkStmt->bindParam(':email', $s_email);
-    $checkStmt->execute();
-
-    $emailExists = $checkStmt->fetchColumn();
-
-    if ($emailExists > 0) {
-        echo "<script>alert('Error: This email address is already registered.');</script>";
-        return;
-    } else {
-        // Check if email exists in the admin table
-        $checkEmailQuery = "SELECT COUNT(*) FROM admin WHERE email = :email";
-        $checkStmt = $pdo->prepare($checkEmailQuery);
-        $checkStmt->bindParam(':email', $s_email);
-        $checkStmt->execute();
-
-        $emailExists = $checkStmt->fetchColumn();
-        if ($emailExists > 0) {
-            echo "<script>alert('Error: This email address is already registered.');</script>";
-            return;
-        }
-    }
-
-    // Generate a password using first name and last 4 digits of the contact number
-    $formattedFirstName = ucfirst(strtolower($s_first_name));
-    $lastFourDigits = substr($s_contact_number, -4); // Extract last four digits
-    $password = $formattedFirstName . $lastFourDigits;
-    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-
-    // Prepare the SQL statement with the generated password
-    $sql = "INSERT INTO student (password, first_name, last_name, email, contact_number, year_level_id, department_id, course_id) 
-            VALUES (:password, :first_name, :last_name, :email, :contact_number, :ylevel, :dept, :course)";
-
-    $stmt = $pdo->prepare($sql);
-    $stmt->bindParam(':password', $hashedPassword);
-    $stmt->bindParam(':first_name', $s_first_name);
-    $stmt->bindParam(':last_name', $s_last_name);
-    $stmt->bindParam(':email', $s_email);
-    $stmt->bindParam(':contact_number', $s_contact_number);
-    $stmt->bindParam(':ylevel', $s_year);
-    $stmt->bindParam(':dept', $s_dept);
-    $stmt->bindParam(':course', $s_course);
-
-    if ($stmt->execute()) {
-        // Send email with password setup link
-        $mail = new PHPMailer(true);
-        // Server settings
-        $mail->isSMTP();                                 
-        $mail->Host = 'smtp.gmail.com';                  
-        $mail->SMTPAuth = true;                          
-        $mail->Username = 'ranonline1219@gmail.com';      
-        $mail->Password = 'cavv jhhh onzy rwiu';         
-        $mail->SMTPSecure = 'tls';                       
-        $mail->Port = 587;                               
-
-        // Recipients
-        $mail->setFrom('ranonline1219@gmail.com', 'ISMS - BSU Announcement Portal');
-        $mail->addAddress($s_email);                     
-
-        // Content
-        $mail->isHTML(true);                             
-        $mail->Subject = 'Your Account for the ISMS Portal was created successfully';
-        $setupLink = "localhost/I-SMS/login/login.php";
-        $mail->Body = "Your account was created successfully. <br> 
-                        You can login using your email address and your password will be your first name + the last four digits of your contact number. <br>
-                        Example: if first name is 'John' and contact number is '09635242249', password will be 'John2249' <br>
-                        Note: The first letter of of your first name is uppercase. 
-                        Log in to the website by clicking on the link below.<br>
-                        <a href='" . $setupLink . "'>Login Here</a>";
-
-        $mail->send();
-        echo "<script>alert('New record created successfully.');</script>";
-    } else {
-        echo "<script>alert('Error: Could not add student.');</script>";
-    }
-}
-
-
-
 ?>
 
 <!DOCTYPE html>
@@ -300,7 +217,7 @@ function addNewStudent($s_first_name, $s_last_name, $s_email, $s_contact_number,
                                                             <i class='bi bi-three-dots'></i>
                                                         </span>
                                                         <ul class='dropdown-menu' aria-labelledby='dropdownMenuButton <?= $student_id ?>'>
-                                                            <li><a class='dropdown-item d-none' href='edit_announcement.php?id=<?= $student_id ?>'>Edit</a></li>
+                                                            <li><a class='dropdown-item d-none' href='edit_student.php?id=<?= $student_id ?>'>Edit</a></li>
                                                             <li>
                                                                 <a class='dropdown-item text-danger' href='#'
                                                                     data-bs-toggle='modal'

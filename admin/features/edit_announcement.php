@@ -93,9 +93,6 @@ $department_id = $_SESSION['user']['department_id'];
                             $description = $announcement['description'];
                             $image = $announcement['image'];
 
-
-
-
                             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 $new_title = $_POST['title'];
                                 $new_description = $_POST['description'];
@@ -179,7 +176,6 @@ $department_id = $_SESSION['user']['department_id'];
                                 } else {
                                     $new_image = $image; // Keep the old image
                                 }
-
 
                                 // Update the announcement
                                 $update_query = "UPDATE announcement SET title = :title, description = :description, image = :image, updated_at = NOW() WHERE announcement_id = :id";

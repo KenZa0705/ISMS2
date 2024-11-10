@@ -289,6 +289,12 @@ try {
                             <div class="modal-body">
                                 <!-- Analytics Section -->
                                 <div class="analytics-section">
+                                    <!-- Counters for Active Users -->
+                                    <div>
+                                        <p>Active Students: <span id="activeStudents"></span></p>
+                                        <p>Active Admins: <span id="activeAdmins"></span></p>
+                                    </div>
+                                    
                                     <!-- Bar Charts -->
                                     <canvas id="departmentChart"></canvas>
                                     <canvas id="courseChart"></canvas>
@@ -296,12 +302,6 @@ try {
 
                                     <!-- Pie Chart for Admins -->
                                     <canvas id="adminChart"></canvas>
-
-                                    <!-- Counters for Active Users -->
-                                    <div>
-                                        <p>Active Students: <span id="activeStudents"></span></p>
-                                        <p>Active Admins: <span id="activeAdmins"></span></p>
-                                    </div>
                                 </div>
                             </div>
                             <div class="modal-footer">

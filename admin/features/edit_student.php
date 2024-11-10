@@ -1,25 +1,62 @@
 <?php
-require_once '../../login/dbh.inc.php'; // DATABASE CONNECTION
+// Include database connection
+require_once '../../login/dbh.inc.php';
 session_start();
+
+// Verify user session
 if (!isset($_SESSION['user'])) {
     header("Location: ../../login/login.php");
     exit();
 }
 
-//Get info from admin session
-$user = $_SESSION['user'];
-$admin_id = $_SESSION['user']['admin_id'];
-$first_name = $_SESSION['user']['first_name'];
-$last_name = $_SESSION['user']['last_name'];
-$email = $_SESSION['user']['email'];
-$contact_number = $_SESSION['user']['contact_number'];
-$department_id = $_SESSION['user']['department_id'];
-?>
-<!doctype html>
-<html lang="en">
+// Check if student ID is set
+if (isset($_GET['student_id'])) {
+    $student_id = $_GET['student_id'];
 
+    // Fetch current student data
+    $stmt = $pdo->prepare("SELECT * FROM students WHERE student_id = :student_id");
+    $stmt->execute(['student_id' => $student_id]);
+    $student = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$student) {
+        echo "Student not found.";
+        exit();
+    }
+} else {
+    echo "No student ID provided.";
+    exit();
+}
+
+// Update student data if form is submitted
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $s_first_name = $_POST['firstName'];
+    $s_last_name = $_POST['lastName'];
+    $s_email = $_POST['email'];
+    $s_contact_number = $_POST['contactNumber'];
+    $s_year_level_id = $_POST['yearLevel'];
+
+    // Update student record in the database
+    $stmt = $pdo->prepare("UPDATE students SET first_name = :first_name, last_name = :last_name, email = :email, contact_number = :contact_number, year_level_id = :year_level_id WHERE student_id = :student_id");
+    $stmt->execute([
+        'first_name' => $s_first_name,
+        'last_name' => $s_last_name,
+        'email' => $s_email,
+        'contact_number' => $s_contact_number,
+        'year_level_id' => $s_year_level_id,
+        'student_id' => $student_id
+    ]);
+
+    // Redirect or notify after successful update
+    echo "Student record updated successfully.";
+    header("Location: manage_student.php");
+    exit();
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <title>Edit Announcement</title>
+    <title>Edit Student</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 
@@ -28,12 +65,10 @@ $department_id = $_SESSION['user']['department_id'];
     <link rel="stylesheet" href="../css/admin.css">
     <link rel="stylesheet" href="../css/create.css">
 </head>
-
 <body>
     <header>
         <?php include '../../cdn/navbar.php'; ?> 
     </header>
-
     <main>
         <div class="container-fluid pt-5">
             <div class="row g-4">
@@ -42,150 +77,37 @@ $department_id = $_SESSION['user']['department_id'];
 
                 <!-- Main content -->
                 <div class="col-md-6 pt-5 px-5">
-                    <h3 class="text-center"><b>Edit Student Record</b></h3>
-
-                    <?php
-                    require_once '../../login/dbh.inc.php';
-
-                    if (isset($_GET['id'])) {
-                        $student_id = $_GET['id'];
-
-                        // Fetch existing announcement data
-                        $query = "SELECT * FROM student WHERE student_id = :id";
-                        $stmt = $pdo->prepare($query);
-                        $stmt->bindParam(':id', $student_id, PDO::PARAM_INT);
-                        $stmt->execute();
-                        $student = $stmt->fetch(PDO::FETCH_ASSOC);
-
-                        if ($student) {
-                            $fname = $student['first_name'];
-                            $lname = $student['last_name'];
-                            $email = $student['email'];
-                            $contactNumber = $student['contactNumber'];
-                            $department_id = $student['department_id'];
-                            $year_level_id = $student['year_level_id'];
-                            $course_id = $student['course_id'];
-
-                            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                                $s_first_name = $_POST['firstName'];
-                                $s_last_name = $_POST['lastName'];
-                                $s_email = $_POST['email'];
-                                $s_contact_number = $_POST['contactNumber'];
-
-                                $s_year_level_id = $pdo->prepare("SELECT year_level_id FROM year_level WHERE year_level = :ylevel");
-                                $s_year_level_id->execute([':ylevel' => $_POST['yearLevel']]);
-                                $s_year = (int)$s_year_level_id->fetchColumn();
-
-                                $s_dept_id = $pdo->prepare("SELECT department_id FROM department WHERE department_name = :dname");
-                                $s_dept_id->execute([':dname' => $_POST['department']]);
-                                $s_dept = (int)$s_dept_id->fetchColumn();
-
-                                $s_course_id = $pdo->prepare("SELECT course_id FROM course WHERE course_name = :cname");
-                                $s_course_id->execute([':cname' => $_POST['course']]);
-                                $s_course = (int)$s_course_id->fetchColumn();
-
-                                if ($s_year && $s_dept && $s_course) {
-                                    addNewStudent($s_first_name, $s_last_name, $s_email, $s_contact_number, $s_year, $s_dept, $s_course);
-                                } else {
-                                    echo "<script>alert('Error: One or more of the selected values are invalid.');</script>";
-                                }
-
-                                // Update the announcement
-                                $update_query = "UPDATE student SET first_name = :fname, last_name = :lname, email = :email, contact_number = :cNumber, year_level_id = :year_level, department_id = :department, course_id = :course  WHERE student_id = :id";
-                                $stmt = $pdo->prepare($update_query);
-                                $stmt->bindParam(':fname', $s_first_name);
-                                $stmt->bindParam(':lname', $s_last_name);
-                                $stmt->bindParam(':email', $s_email);
-                                $stmt->bindParam(':cNumber', $s_contact_number);
-                                $stmt->bindParam(':department', $s_dept);
-                                $stmt->bindParam(':course', $s_course);
-                                $stmt->bindParam(':year_level', $s_year);
-                                $stmt->bindParam(':id', $student_id);
-
-                                if ($stmt->execute()) {
-                                    echo "<script>
-                                            alert('Student record was updated successfully!');
-                                            window.location.href = 'manage_student.php';
-                                          </script>";
-                                } else {
-                                    echo "<div class='alert alert-danger'>Error updating student record.</div>";
-                                }
-                            }
-                        } else {
-                            echo "<div class='alert alert-danger'>student not found.</div>";
-                        }
-                    } else {
-                        echo "<div class='alert alert-danger'>No student ID provided.</div>";
-                    }
-                    ?>
-
-                    <!-- Form to edit the student data -->
-                    <?php if ($student): ?>
-                        <form id="addStudentForm" method="POST" action="">
-                            <div class="form-group">
-                                <label for="firstName">First Name</label>
-                                <input type="text" class="form-control" id="firstName" name="firstName" placeholder="<?php echo $fname ?>" required>
+                    <h2 class="text-center">Edit Student Information</h2>
+                    <div class="form-container d-flex justify-content-center">
+                        <form method="POST">
+                            <div class="form-group mb-3">
+                                <label>First Name:</label>
+                                <input type="text" name="firstName" value="<?php echo htmlspecialchars($student['first_name']); ?>" placeholder="<?php echo htmlspecialchars($student['first_name']); ?>" required><br>
                             </div>
-                            <div class="form-group">
-                                <label for="lastName">Last Name</label>
-                                <input type="text" class="form-control" id="lastName" name="lastName" placeholder="<?php echo $lname ?>" required>
+                            <div class="form-group mb-3">
+                                <label>Last Name:</label>
+                                <input type="text" name="lastName" value="<?php echo htmlspecialchars($student['last_name']); ?>" placeholder="<?php echo htmlspecialchars($student['last_name']); ?>" required><br>
                             </div>
-                            <div class="form-group">
-                                <label for="email">Email address</label>
-                                <input type="email" class="form-control" id="email" name="email" placeholder="<?php echo $email ?>" required>
+                            <div class="form-group mb-3">
+                                <label>Email:</label>
+                                <input type="email" name="email" value="<?php echo htmlspecialchars($student['email']); ?>" placeholder="<?php echo htmlspecialchars($student['email']); ?>" required><br>
                             </div>
-                            <div class="form-group">
-                                <label for="contactNumber">Contact Number</label>
-                                <input type="text" class="form-control" id="contactNumber" name="contactNumber" placeholder="<?php echo $contactNumber ?>" required>
+                            <div class="form-group mb-3">
+                                <label>Contact Number:</label>
+                                <input type="text" name="contactNumber" value="<?php echo htmlspecialchars($student['contact_number']); ?>" placeholder="<?php echo htmlspecialchars($student['contact_number']); ?>" required><br>
                             </div>
-                            <div class="form-group">
-                                <label for="yearLevel">Year Level</label>
-                                <select id="yearLevel" name="yearLevel" class="form-select" required>
-                                    <option value="1st Year">1st Year</option>
-                                    <option value="2nd Year">2nd Year</option>
-                                    <option value="3rd Year">3rd Year</option>
-                                    <option value="4th Year">4th Year</option>
-                                </select>
+                            <div class="form-group mb-3">
+                                <label>Year Level:</label>
+                                <input type="text" name="yearLevel" value="<?php echo htmlspecialchars($student['year_level_id']); ?>" placeholder="<?php echo htmlspecialchars($student['year_level_id']); ?>" required><br>
                             </div>
-                            <div class="form-group">
-                                <label for="department">Department</label>
-                                <select id="department" name="department" class="form-select" required>
-                                    <option value="CECS">CECS</option>
-                                    <option value="CABE">CABE</option>
-                                    <option value="CAS">CAS</option>
-                                    <option value="CE">CE</option>
-                                    <option value="CIT">CIT</option>
-                                    <option value="CTE">CTE</option>
-                                </select>
+                            <div class="button-container d-flex justify-content-end">
+                                <button type="submit" class="btn btn-primary px-3">Update</button>
                             </div>
-                            <div class="form-group">
-                                <label for="course">Course</label>
-                                <select id="course" name="course" class="form-select" required>
-                                    <option value="BSBA">Bachelor of Science Business Administration</option>
-                                    <option value="BSMA">Bachelor of Science in Management Accounting</option>
-                                    <option value="BSP">Bachelor of Science in Psychology</option>
-                                    <option value="BAC">Bachelor of Arts in Communication</option>
-                                    <option value="BSIE">Bachelor of Science in Industrial Engineering</option>
-                                    <option value="BSIT-CE">Bachelor of Industrial Technology - Computer Technology</option>
-                                    <option value="BSIT-Electrical">Bachelor of Industrial Technology - Electrical Technology</option>
-                                    <option value="BSIT-Electronic">Bachelor of Industrial Technology - Electronics Technology</option>
-                                    <option value="BSIT-ICT">Bachelor of Industrial Technology - Instrumentation and Control Technology</option>
-                                    <option value="BSIT">Bachelor of Science in Information Technology</option>
-                                    <option value="BSE">Bachelor of Secondary Education</option>
-                                </select>
-                            </div>
-                            <button type="submit" class="btn btn-primary" form="addStudentForm">Update Student Record</button>
                         </form>
-                    <?php endif; ?>
+                    </div>
                 </div>
             </div>
         </div>
-        <script src="../js/create.js"></script>
-        <script src="../js/edit.js"></script>
     </main>
-
-    <!-- Body CDN links -->
-    <?php include '../cdn/body.html'; ?>
 </body>
-
 </html>
