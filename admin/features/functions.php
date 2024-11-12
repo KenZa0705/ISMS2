@@ -4,6 +4,36 @@ require '../../login/vendor/autoload.php';
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
+function sendEmail($to, $toName, $subject, $body, $altBody = '', $from = 'ismsbatstateu@gmail.com', $fromName = 'ISMS-Portal') {
+    $mail = new PHPMailer(true);
+
+    try {
+        // Server settings
+        $mail->isSMTP();                                            // Send using SMTP
+        $mail->Host       = 'smtp.gmail.com';                   // Set the SMTP server to send through
+        $mail->SMTPAuth   = true;                                   // Enable SMTP authentication
+        $mail->Username   = 'ismsbatstateu@gmail.com';             // SMTP username
+        $mail->Password   = 'vkfy htwr ldkd qoav';                      // SMTP password
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;       // Enable TLS encryption
+        $mail->Port       = 587;                                   // TCP port to connect to
+
+        // Recipients
+        $mail->setFrom($from, $fromName);                          // Set the sender's email and name
+        $mail->addAddress($to, $toName);                           // Add a recipient
+
+        // Content
+        $mail->isHTML(true);                                      // Set email format to HTML
+        $mail->Subject = $subject;
+        $mail->Body    = $body;
+        $mail->AltBody = $altBody ? $altBody : strip_tags($body); // Use provided alt body or strip HTML tags from body
+
+        $mail->send();
+        return true; // Return true if the email is sent successfully
+    } catch (Exception $e) {
+        return "Message could not be sent. Mailer Error: {$mail->ErrorInfo}"; // Return error message
+    }
+}
+
 // Function to get the corresponding ID from a table based on a name field
 function getIdByName($pdo, $table, $column, $value, $id) {
     $sql = "SELECT $id FROM $table WHERE $column = ?";
@@ -12,6 +42,27 @@ function getIdByName($pdo, $table, $column, $value, $id) {
     $result = $stmt->fetchColumn();
     error_log("getIdByName for $table: Column $column, Value $value, Result: $result");
     return (int) $result; 
+}
+
+
+function getIdByNameForStudentInfo($pdo, $table, $column1, $column2, $value, $id) {
+    $sql = "SELECT y.$column1 FROM $table y
+            JOIN student s ON y.$column1 = s.$column1
+            WHERE s.student_id = :student_id AND y.$column2 = :value;";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':student_id', $id);
+    $stmt->bindParam(':value', $value);
+    $stmt->execute();
+    $result = $stmt->fetchColumn();
+    error_log("getIdByName for $table: Column1 $column1, Column2 $column2, ID $id, Result: $result");
+    return (int) $result; 
+}
+
+function getNameById($pdo, $table, $id_column, $name_column, $id) {
+    $sql = "SELECT $name_column FROM $table WHERE $id_column = ?";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([$id]);
+    return $stmt->fetchColumn();
 }
 
 
@@ -161,13 +212,13 @@ function addNewStudent($s_first_name, $s_last_name, $s_email, $s_contact_number,
         $mail->isSMTP();                                 
         $mail->Host = 'smtp.gmail.com';                  
         $mail->SMTPAuth = true;                          
-        $mail->Username = 'ranonline1219@gmail.com';     
-        $mail->Password = 'cavv jhhh onzy rwiu';         
+        $mail->Username = 'ismsbatstateu@gmail.com';     
+        $mail->Password = 'vkfy htwr ldkd qoav';         
         $mail->SMTPSecure = 'tls';                       
         $mail->Port = 587;                               
 
         // Recipients
-        $mail->setFrom('ranonline1219@gmail.com', 'ISMS - BSU Announcement Portal');
+        $mail->setFrom('ismsbatstateu@gmail.com', 'ISMS - BSU Announcement Portal');
         $mail->addAddress($s_email);                     
 
         // Content

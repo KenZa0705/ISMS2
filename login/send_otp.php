@@ -97,13 +97,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $mail->isSMTP();
             $mail->Host = 'smtp.gmail.com';
             $mail->SMTPAuth = true;
-            $mail->Username = 'ranonline1219@gmail.com';
-            $mail->Password = 'cavv jhhh onzy rwiu';
+            $mail->Username = 'ismsbatstateu@gmail.com';
+            $mail->Password = 'vkfy htwr ldkd qoav';
             $mail->SMTPSecure = 'tls';
             $mail->Port = 587;
 
             //Recipients
-            $mail->setFrom('ranonline1219@gmail.com', 'ISMS - BSU Announcement Portal');
+            $mail->setFrom('ismsbatstateu@gmail.com', 'ISMS - BSU Announcement Portal');
             $mail->addAddress($email);
 
             //Content

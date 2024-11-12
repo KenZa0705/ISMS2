@@ -23,6 +23,83 @@ $email = $_SESSION['user']['email'];
 $contact_number = $_SESSION['user']['contact_number'];
 $department_id = $_SESSION['user']['department_id'];
 
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['student_id'])) {
+    $student_id = $_POST['student_id'];
+    $s_first_name = $_POST['firstName'];
+    $s_last_name = $_POST['lastName'];
+    $s_email = $_POST['email'];
+    $s_contact_number = $_POST['contactNumber'];
+
+    
+    $s_year_level_id = $pdo->prepare("SELECT year_level_id FROM year_level WHERE year_level = :ylevel");
+    $s_year_level_id->execute([':ylevel' => $_POST['yearLevel']]);
+    $s_year = (int)$s_year_level_id->fetchColumn();
+
+    $s_dept_id = $pdo->prepare("SELECT department_id FROM department WHERE department_name = :dname");
+    $s_dept_id->execute([':dname' => $_POST['department']]);
+    $s_dept = (int)$s_dept_id->fetchColumn();
+
+    $s_course_id = $pdo->prepare("SELECT course_id FROM course WHERE course_name = :cname");
+    $s_course_id->execute([':cname' => $_POST['course']]);
+    $s_course = (int)$s_course_id->fetchColumn();
+
+    // Fetch current student data
+    $currentStmt = $pdo->prepare("SELECT first_name, last_name, email, contact_number FROM student WHERE student_id = :student_id");
+    $currentStmt->execute([':student_id' => $student_id]);
+    $currentStudent = $currentStmt->fetch(PDO::FETCH_ASSOC);
+
+    // Compare new values with current values
+    $changes = 0;
+    $changeDetails = [];
+
+    if ($s_first_name !== $currentStudent['first_name']) {
+        $changes++;
+        $changeDetails[] = "First Name: From '{$currentStudent['first_name']}' to '{$s_first_name}'";
+    }
+    if ($s_last_name !== $currentStudent['last_name']) {
+        $changes++;
+        $changeDetails[] = "Last Name: From '{$currentStudent['last_name']}' to '{$s_last_name}'";
+    }
+    if ($s_email !== $currentStudent['email']) {
+        $changes++;
+        $changeDetails[] = "Email: From '{$currentStudent['email']}' to '{$s_email}'";
+    }
+    if ($s_contact_number !== $currentStudent['contact_number']) {
+        $changes++;
+        $changeDetails[] = "Contact Number: From '{$currentStudent['contact_number']}' to '{$s_contact_number}'";
+    }
+
+    // Update student information
+    $updateStmt = $pdo->prepare("UPDATE student SET first_name = :first_name, last_name = :last_name, email = :email, contact_number = :contact_number, year_level_id = :year_level_id, department_id = :department_id, course_id = :course_id WHERE student_id = :student_id");
+    $updateStmt->execute([
+        ':first_name' => $s_first_name,
+        ':last_name' => $s_last_name,
+        ':email' => $s_email,
+        ':contact_number' => $s_contact_number,
+        ':year_level_id' => $s_year,
+        ':department_id' => $s_dept,
+        ':course_id' => $s_course,
+        ':student_id' => $student_id
+    ]);
+
+    // Send email if at least 2 fields were modified
+    if ($changes >= 1) {
+        $subject = "Your Student Information has been Updated";
+        $body = "Dear $s_first_name $s_last_name,<br><br>";
+        $body .= " Your student information has been updated. The following changes were made:<br><br>";
+        $body .= implode("<br>", $changeDetails);
+        $body .= "<br><br>Best regards,<br>Your School Administration";
+        
+        $result = sendEmail($currentStudent['email'], "$s_first_name $s_last_name", $subject, $body);
+        
+        if ($result !== true) {
+            echo $result; // Output error message if sending failed
+        }
+    }
+
+    echo "<script>alert('Student information updated successfully.');</script>";
+}
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if (isset($_FILES['excelFile']) && $_FILES['excelFile']['error'] == UPLOAD_ERR_OK) {
@@ -249,7 +326,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                                             <i class='bi bi-three-dots'></i>
                                                         </span>
                                                         <ul class='dropdown-menu' aria-labelledby='dropdownMenuButton <?= $student_id ?>'>
-                                                            <li><a class='dropdown-item d-none' href='edit_student.php?id=<?= $student_id ?>'>Edit</a></li>
+                                                            <li>
+                                                            <button type="button" class="dropdown-item edit-student" 
+                                                                    data-bs-toggle="modal" 
+                                                                    data-bs-target="#editStudentModal"
+                                                                    data-student-id="<?= $student_id ?>"
+                                                                    data-first-name="<?= $fname ?>"
+                                                                    data-last-name="<?= $lname ?>"
+                                                                    data-email="<?= $email ?>"
+                                                                    data-contact="<?= $contact ?>"
+                                                                    data-year-level="<?= $year_level ?>"
+                                                                    data-department="<?= $department ?>"
+                                                                    data-course="<?= $course ?>">
+                                                                Edit
+                                                            </button>
+                                                            </li>
                                                             <li>
                                                                 <a class='dropdown-item text-danger' href='#'
                                                                     data-bs-toggle='modal'
@@ -352,6 +443,79 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     </div>
                 </div>
 
+                <!-- Edit Student Modal -->
+                <div class="modal fade" id="editStudentModal" tabindex="-1" aria-labelledby="editStudentModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="editStudentModalLabel">Edit Student</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="editStudentForm" method="POST" action="">
+                                    <input type="hidden" name="student_id" id="editStudentId">
+                                    <div class="form-group">
+                                        <label for="editFirstName">First Name</label>
+                                        <input type="text" class="form-control" id="editFirstName" name="firstName" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="editLastName">Last Name</label>
+                                        <input type="text" class="form-control" id="editLastName" name="lastName" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="editEmail">Email address</label>
+                                        <input type="email" class="form-control" id="editEmail" name="email" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="editContactNumber">Contact Number</label>
+                                        <input type="text" class="form-control" id="editContactNumber" name="contactNumber" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="editYearLevel">Year Level</label>
+                                        <select id="editYearLevel" name="yearLevel" class="form-select">
+                                            <option value="1st Year">1st Year</option>
+                                            <option value="2nd Year">2nd Year</option>
+                                            <option value="3rd Year">3rd Year</option>
+                                            <option value="4th Year">4th Year</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="editDepartment">Department</label>
+                                        <select id="editDepartment" name="department" class="form-select">
+                                            <option value="CICS">CICS</option>
+                                            <option value="CABE">CABE</option>
+                                            <option value="CAS">CAS</option>
+                                            <option value="CE">CE</option>
+                                            <option value="CIT">CIT</option>
+                                            <option value="CTE">CTE</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="editCourse">Course</label>
+                                        <select id="editCourse" name="course" class="form-select">
+                                            <option value="BSBA">Bachelor of Science Business Administration</option>
+                                            <option value="BSMA">Bachelor of Science in Management Accounting</option>
+                                            <option value="BSP">Bachelor of Science in Psychology</option>
+                                            <option value="BAC">Bachelor of Arts in Communication</option>
+                                            <option value="BSIE">Bachelor of Science in Industrial Engineering</option>
+                                            <option value="BSIT-CE">Bachelor of Industrial Technology - Computer Technology</option>
+                                            <option value="BSIT-Electrical">Bachelor of Industrial Technology - Electrical Technology</option>
+                                            <option value="BSIT-Electronic">Bachelor of Industrial Technology - Electronics Technology</option>
+                                            <option value="BSIT-ICT">Bachelor of Industrial Technology - Instrumentation and Control Technology</option>
+                                            <option value="BSIT">Bachelor of Science in Information Technology</option>
+                                            <option value="BSE">Bachelor of Secondary Education</option>
+                                        </select>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        <button type="submit" class="btn btn-primary">Update Student</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <script>
                     $(document).ready(function() {
                         $('#addStudentForm').on('submit', function(e) {
@@ -404,6 +568,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <!-- offcanvas  -->
 
                 <script src="../js/admin.js"></script>
+                <script>
+                    $(document).on('click', '.edit-student', function() {
+                        $('#editStudentId').val($(this).data('student-id'));
+                        $('#editFirstName').val($(this).data('first-name'));
+                        $('#editLastName').val($(this).data('last-name'));
+                        $('#editEmail').val($(this).data('email'));
+                        $('#editContactNumber').val($(this).data('contact'));
+                        $('#editYearLevel').val($(this).data('year-level'));
+                        $('#editDepartment').val($(this).data('department'));
+                        $('#editCourse').val($(this).data('course'));
+                    });
+                </script>
     </main>
     <!-- Body CDN links -->
     <?php include '../../cdn/body.html'; ?>
