@@ -59,7 +59,7 @@ $selected_courses = [];
                             <img class="img-fluid w-100" src="img/test pic.jpg" alt="">
                         </button>
                         <ul class="dropdown-menu mt-3" style="left: auto; right:1px;">
-                            <li><a class="dropdown-item text-center" href="#">Settings</a></li>
+                            <li><a class="dropdown-item text-center" href="password/changePass.html">Settings</a></li>
                             <li><a class="dropdown-item text-center" onclick="alert('Logged Out Successfully')" href="../login/logout.php">Logout</a></li>
                         </ul>
                     </div>

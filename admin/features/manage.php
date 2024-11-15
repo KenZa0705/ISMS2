@@ -14,6 +14,8 @@ $last_name = $_SESSION['user']['last_name'];
 $email = $_SESSION['user']['email'];
 $contact_number = $_SESSION['user']['contact_number'];
 $department_id = $_SESSION['user']['department_id'];
+$profile_picture = $_SESSION['user']['profile_picture'];
+
 
 // Database queries for analytics
 try {
@@ -80,7 +82,7 @@ try {
 
 <body>
     <header>
-        <?php include '../../cdn/navbar.php'; ?>
+        <?php require '../../cdn/navbar.php'; ?>
         <nav class="navbar nav-bottom fixed-bottom d-block d-md-none mt-5">
             <div class="container-fluid justify-content-around">
                 <a href="../admin.php" class="btn nav-bottom-btn">
@@ -188,7 +190,7 @@ try {
                                     <div class="card mb-3">
                                         <div class="profile-container d-flex px-3 pt-3">
                                             <div class="profile-pic">
-                                                <img class="img-fluid" src="img/test pic.jpg" alt="">
+                                                <img class="img-fluid w-100" src="<?php echo '../uploads/' . htmlspecialchars($profile_picture); ?>" alt="Profile Picture">
                                             </div>
                                             <p class="ms-1 mt-1"><?php echo htmlspecialchars($admin_name); ?></p>
                                             <?php if ($admin_id === $announcement_admin_id) : ?>
@@ -310,6 +312,7 @@ try {
                         </div>
                     </div>
                 </div>
+                <?php include 'changePassOtherPage.html'; ?>
     </main>
     <!-- Body CDN links -->
     <?php include '../../cdn/body.html'; ?>

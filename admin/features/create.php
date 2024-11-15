@@ -241,6 +241,7 @@ $department_id = $_SESSION['user']['department_id'];
                 
             </div>
         </div>
+        <?php include 'changePassOtherPage.html'; ?>
     </main>
     <!-- Body CDN links -->
     <?php include '../../cdn/body.html'; ?>

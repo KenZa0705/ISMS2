@@ -1,0 +1,110 @@
+<!-- Change Password Modal -->
+<div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="changePasswordModalLabel">Change Password</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="changePasswordForm">
+                    <div class="mb-3">
+                        <label for="currentPassword" class="form-label">Current Password</label>
+                        <input type="password" class="form-control" id="currentPassword" name="currentPassword" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="newPassword" class="form-label">New Password</label>
+                        <input type="password" class="form-control" id="newPassword" name="newPassword" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="confirmPassword" class="form-label">Confirm New Password</label>
+                        <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
+                    </div>
+                    <div class="text-danger" id="errorMessage"></div>
+                    <div class="text-success" id="successMessage"></div>
+                    <button type="submit" class="btn btn-primary">Change Password</button>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Change Profile-->
+<div class="modal fade" id="changeProfilePictureModal" tabindex="-1" aria-labelledby="changeProfilePictureModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="changeProfilePictureModalLabel">Change Profile Picture</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="upload_profile_picture.php" method="POST" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="profilePicture" class="form-label">Choose a new profile picture</label>
+                        <input type="file" class="form-control" id="profilePicture" name="profile_picture" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Upload</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('changePasswordForm').addEventListener('submit', function (event) {
+        event.preventDefault();
+    
+        const currentPassword = document.getElementById('currentPassword').value;
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+    
+        // Validate the new password
+        if (!isValidPassword(newPassword)) {
+            document.getElementById('errorMessage').textContent = "New password must be at least 6 characters long, contain at least one uppercase letter and one number.";
+            return;
+        }
+    
+        if (newPassword !== confirmPassword) {
+            document.getElementById('errorMessage').textContent = "New passwords do not match.";
+            return;
+        }
+    
+        // Send the data to the server
+        fetch('change_password.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                currentPassword: currentPassword,
+                newPassword: newPassword
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('successMessage').textContent = "Password changed successfully!";
+                document.getElementById('errorMessage').textContent = "";
+                document.getElementById('changePasswordForm').reset(); // Reset the form
+            } else {
+                document.getElementById('errorMessage').textContent = data.message;
+                document.getElementById('successMessage').textContent = "";
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('errorMessage').textContent = "An error occurred. Please try again.";
+        });
+    });
+
+    function isValidPassword(password) {
+        const minLength = 6;
+        const hasUpperCase = /[A-Z]/.test(password);
+        const hasNumber = /\d/.test(password);
+        const isLongEnough = password.length >= minLength;
+
+        return hasUpperCase && hasNumber && isLongEnough;
+    }
+</script>

@@ -4,7 +4,8 @@ require '../../login/vendor/autoload.php';
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-function sendEmail($to, $toName, $subject, $body, $altBody = '', $from = 'ismsbatstateu@gmail.com', $fromName = 'ISMS-Portal') {
+function sendEmail($to, $toName, $subject, $body, $altBody = '', $from = 'ismsbatstateu@gmail.com', $fromName = 'ISMS-Portal')
+{
     $mail = new PHPMailer(true);
 
     try {
@@ -35,17 +36,19 @@ function sendEmail($to, $toName, $subject, $body, $altBody = '', $from = 'ismsba
 }
 
 // Function to get the corresponding ID from a table based on a name field
-function getIdByName($pdo, $table, $column, $value, $id) {
+function getIdByName($pdo, $table, $column, $value, $id)
+{
     $sql = "SELECT $id FROM $table WHERE $column = ?";
     $stmt = $pdo->prepare($sql);
     $stmt->execute([$value]);
     $result = $stmt->fetchColumn();
     error_log("getIdByName for $table: Column $column, Value $value, Result: $result");
-    return (int) $result; 
+    return (int) $result;
 }
 
 
-function getIdByNameForStudentInfo($pdo, $table, $column1, $column2, $value, $id) {
+function getIdByNameForStudentInfo($pdo, $table, $column1, $column2, $value, $id)
+{
     $sql = "SELECT y.$column1 FROM $table y
             JOIN student s ON y.$column1 = s.$column1
             WHERE s.student_id = :student_id AND y.$column2 = :value;";
@@ -55,10 +58,11 @@ function getIdByNameForStudentInfo($pdo, $table, $column1, $column2, $value, $id
     $stmt->execute();
     $result = $stmt->fetchColumn();
     error_log("getIdByName for $table: Column1 $column1, Column2 $column2, ID $id, Result: $result");
-    return (int) $result; 
+    return (int) $result;
 }
 
-function getNameById($pdo, $table, $id_column, $name_column, $id) {
+function getNameById($pdo, $table, $id_column, $name_column, $id)
+{
     $sql = "SELECT $name_column FROM $table WHERE $id_column = ?";
     $stmt = $pdo->prepare($sql);
     $stmt->execute([$id]);
@@ -67,7 +71,8 @@ function getNameById($pdo, $table, $id_column, $name_column, $id) {
 
 
 //  Function to get student contact information for an announcement
-function getStudentsForAnnouncement($pdo, $year_levels, $departments, $courses) {
+function getStudentsForAnnouncement($pdo, $year_levels, $departments, $courses)
+{
     // Convert descriptive names to their corresponding IDs for filtering
     $year_level_ids = [];
     foreach ($year_levels as $year_level_name) {
@@ -109,13 +114,14 @@ function getStudentsForAnnouncement($pdo, $year_levels, $departments, $courses) 
 
     // Fetch and return the results
     $output = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    error_log('Result: ' . print_r($output, true)); 
+    error_log('Result: ' . print_r($output, true));
 
     return $output;
 }
 
 // Replaces sendSmsToStudents function, using a working sendMessage function
-function sendMessage($contact_number, $message) {
+function sendMessage($contact_number, $message)
+{
     $infobip_url = "https://wg43qy.api.infobip.com/sms/2/text/advanced";
     $api_key = INFOPB_API_KEY;
 
@@ -154,10 +160,10 @@ function sendMessage($contact_number, $message) {
     }
     error_log("Sent SMS to $contact_number: $result");
     return json_decode($result, true);
-
 }
 
-function addNewStudent($s_first_name, $s_last_name, $s_email, $s_contact_number, $s_year, $s_dept, $s_course) { 
+function addNewStudent($s_first_name, $s_last_name, $s_email, $s_contact_number, $s_year, $s_dept, $s_course)
+{
     global $pdo;
 
     // Check if email already exists in the student table
@@ -209,20 +215,20 @@ function addNewStudent($s_first_name, $s_last_name, $s_email, $s_contact_number,
         // Send email with password setup link
         $mail = new PHPMailer(true);
         // Server settings
-        $mail->isSMTP();                                 
-        $mail->Host = 'smtp.gmail.com';                  
-        $mail->SMTPAuth = true;                          
-        $mail->Username = 'ismsbatstateu@gmail.com';     
-        $mail->Password = 'vkfy htwr ldkd qoav';         
-        $mail->SMTPSecure = 'tls';                       
-        $mail->Port = 587;                               
+        $mail->isSMTP();
+        $mail->Host = 'smtp.gmail.com';
+        $mail->SMTPAuth = true;
+        $mail->Username = 'ismsbatstateu@gmail.com';
+        $mail->Password = 'vkfy htwr ldkd qoav';
+        $mail->SMTPSecure = 'tls';
+        $mail->Port = 587;
 
         // Recipients
         $mail->setFrom('ismsbatstateu@gmail.com', 'ISMS - BSU Announcement Portal');
-        $mail->addAddress($s_email);                     
+        $mail->addAddress($s_email);
 
         // Content
-        $mail->isHTML(true);                             
+        $mail->isHTML(true);
         $mail->Subject = 'Your Account for the ISMS Portal was created successfully';
         $setupLink = "localhost/I-SMS/login/login.php";
         $mail->Body = "Your account was created successfully. <br> 
@@ -235,12 +241,12 @@ function addNewStudent($s_first_name, $s_last_name, $s_email, $s_contact_number,
         $mail->send();
 
         // Send SMS notification
-        $smsMessage = "Welcome to ISMS Portal. Your account has been created. Login with your email and password: FirstName + last 4 digits of your contact number.";
-        sendMessage($s_contact_number, $smsMessage);
-
-        echo "<script>alert('New record created successfully.');</script>";
+        // $smsMessage = "Welcome to ISMS Portal. Your account has been created. Login with your email and password:" . $s_first_name  . "+ last 4 digits of your contact number.";
+        // sendMessage($s_contact_number, $smsMessage);
+        echo "<script>
+            window.location.href = 'manage_student.php';
+                </script>";
     } else {
         echo "<script>alert('Error: Could not add student.');</script>";
     }
 }
-

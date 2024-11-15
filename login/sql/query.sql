@@ -180,4 +180,6 @@ CREATE TABLE IF NOT EXISTS public.sms_log (
         ON DELETE CASCADE
 );
 
+ALTER TABLE admin ADD COLUMN profile_picture VARCHAR(255);
+
 END;

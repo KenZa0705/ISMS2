@@ -142,6 +142,8 @@ $department_id = $_SESSION['user']['department_id'];
                 <script src="../js/create.js"></script>
             </div>
         </div>
+        <?php include 'changePassOtherPage.html'; ?>
+
     </main>
     <!-- Body CDN links -->
     <?php include '../../cdn/body.html'; ?>

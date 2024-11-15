@@ -28,7 +28,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['student_id'])) {
     $s_first_name = $_POST['firstName'];
     $s_last_name = $_POST['lastName'];
     $s_email = $_POST['email'];
-    $s_contact_number = $_POST['contactNumber'];
+    $s_contact_number = "+63" . $_POST['contactNumber'];
 
     
     $s_year_level_id = $pdo->prepare("SELECT year_level_id FROM year_level WHERE year_level = :ylevel");
@@ -146,13 +146,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
         
         echo "<script>alert('Upload complete. Successful rows: " . implode(", ", $successfulRows) . ". Failed rows: " . implode(", ", $failedRows) . ".');</script>";
-        exit;
+        echo "<script>
+            window.location.href = 'manage_student.php';
+                </script>";
     }
 
     $s_first_name = $_POST['firstName'];
     $s_last_name = $_POST['lastName'];
     $s_email = $_POST['email'];
-    $s_contact_number = $_POST['contactNumber'];
+    $s_contact_number = "+63" . $_POST['contactNumber'];
 
     $s_year_level_id = $pdo->prepare("SELECT year_level_id FROM year_level WHERE year_level = :ylevel");
     $s_year_level_id->execute([':ylevel' => $_POST['yearLevel']]);
@@ -180,6 +182,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } else {
         if ($s_year && $s_dept && $s_course) {
             addNewStudent($s_first_name, $s_last_name, $s_email, $s_contact_number, $s_year, $s_dept, $s_course);
+            echo "<script>alert('Student record has been added successfully.');</script>";
         } else {
             echo "<script>alert('Error: One or more of the selected values are invalid.');</script>";
         }
@@ -392,9 +395,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                     </div>
                                     <div class="form-group">
                                         <label for="contactNumber">Contact Number</label>
-                                        <input type="text" class="form-control" id="contactNumber" name="contactNumber" placeholder="Enter contact number" required>
+                                        <div class="input-group">
+                                            <span class="input-group-text">+63</span>
+                                            <input type="text" class="form-control" id="contactNumber" name="contactNumber" placeholder="Enter remaining 10 digits" maxlength="10" required>
+                                        </div>
                                         <span id="errorMsg" style="color:red; display:none;">Invalid contact number</span>
-
                                     </div>
                                     <div class="form-group">
                                         <label for="yearLevel">Year Level</label>
@@ -468,7 +473,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                     </div>
                                     <div class="form-group">
                                         <label for="editContactNumber">Contact Number</label>
-                                        <input type="text" class="form-control" id="editContactNumber" name="contactNumber" required>
+                                        <div class="input-group">
+                                            <span class="input-group-text">+63</span>
+                                            <input type="text" class="form-control" id="editContactNumber" name="contactNumber" placeholder="Enter remaining 10 digits" maxlength="10" required>
+                                        </div>
+                                        <span id="errorMsg" style="color:red; display:none;">Invalid contact number</span>
                                     </div>
                                     <div class="form-group">
                                         <label for="editYearLevel">Year Level</label>
@@ -516,16 +525,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     </div>
                 </div>
 
+
                 <script>
                     $(document).ready(function() {
                         $('#addStudentForm').on('submit', function(e) {
                             var contactNumber = $('#contactNumber').val();
-                            // Regular expression for validating PH mobile numbers starting with 09 or +639
-                            var regex = /^(09|\+639)\d{9}$/;
+                            // Regular expression for validating the remaining 10 digits after +63
+                            var regex = /^\d{10}$/;
 
                             if (!regex.test(contactNumber)) {
                                 e.preventDefault(); // Prevent form submission
-                                $('#errorMsg').show().text('Invalid contact number');
+                                $('#errorMsg').show().text('Invalid contact number. Enter exactly 10 digits after +63.');
                             } else {
                                 $('#errorMsg').hide(); // Hide error if valid
                             }
@@ -574,12 +584,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         $('#editFirstName').val($(this).data('first-name'));
                         $('#editLastName').val($(this).data('last-name'));
                         $('#editEmail').val($(this).data('email'));
-                        $('#editContactNumber').val($(this).data('contact'));
+                        $('#editContactNumber').val($(this).data('contact').replace(/^\+63/, ''));
                         $('#editYearLevel').val($(this).data('year-level'));
                         $('#editDepartment').val($(this).data('department'));
                         $('#editCourse').val($(this).data('course'));
                     });
                 </script>
+                <?php require 'changePassOtherPage.html'; ?>
     </main>
     <!-- Body CDN links -->
     <?php include '../../cdn/body.html'; ?>

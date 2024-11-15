@@ -1,3 +1,17 @@
+<?php
+require_once '../../login/dbh.inc.php';
+
+//Get info from admin session
+$user = $_SESSION['user'];
+$admin_id = $_SESSION['user']['admin_id'];
+$first_name = $_SESSION['user']['first_name'];
+$last_name = $_SESSION['user']['last_name'];
+$email = $_SESSION['user']['email'];
+$contact_number = $_SESSION['user']['contact_number'];
+$department_id = $_SESSION['user']['department_id'];
+$profile_picture = $_SESSION['user']['profile_picture'];
+?>
+
 <nav class="navbar navbar-expand-lg bg-white text-black fixed-top mb-5">
     <div class="container-fluid">
         <div class="user-left d-flex">
@@ -15,10 +29,23 @@
             <div class="user-profile">
                 <div class="dropdown">
                     <button class="dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" style="border: none; background: none; padding: 0;">
-                        <img class="img-fluid w-100" src="../img/test pic.jpg" alt="">
+                        <img class="img-fluid w-100" src="<?php echo '../uploads/' . htmlspecialchars($profile_picture); ?>" alt="Profile Picture">
                     </button>
                     <ul class="dropdown-menu mt-3" style="left: auto; right:1px;">
-                        <li><a class="dropdown-item text-center" href="#">Settings</a></li>
+                        <li><!-- Button to Open Change Password Modal -->
+                            <div class="col-md-6 main-content pt-5 px-5 dropdown-item text-center">
+                                <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                                    Change Password
+                                </button>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="col-md-6 main-content pt-5 px-5 dropdown-item text-center">
+                                <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#changeProfilePictureModal">
+                                    Change Profile Picture
+                                </button>
+                            </div>
+                        </li>
                         <li><a class="dropdown-item text-center" onclick="alert('Logged Out Successfully')" href="../../login/logout.php">Logout</a></li>
                     </ul>
                 </div>
