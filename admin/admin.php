@@ -61,7 +61,7 @@ $selected_courses = [];
                     <div class="user-profile">
                         <div class="dropdown">
                             <button class="dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" style="border: none; background: none; padding: 0;">
-                            <img class="img-fluid w-100" src="<?php echo 'uploads/' . htmlspecialchars($profile_picture); ?>" alt="Profile Picture">
+                                <img class="img-fluid w-100" src="<?php echo 'uploads/' . htmlspecialchars($profile_picture); ?>" alt="Profile Picture">
                             </button>
                             <ul class="dropdown-menu mt-3" style="left: auto; right:1px;">
                                 <li>

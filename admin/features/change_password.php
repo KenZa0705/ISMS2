@@ -25,9 +25,11 @@ if ($user && password_verify($currentPassword, $user['password'])) {
     $updateStmt = $pdo->prepare("UPDATE admin SET password = :password WHERE admin_id = :admin_id");
     $updateStmt->execute(['password' => $hashedPassword, 'admin_id' => $user_id]);
     logAction($pdo, $user_id, 'admin', 'UPDATE', 'admin', $user_id, 'Password Change Attempt Success');
-    echo json_encode(['success' => true, 'message' => 'Password changed successfully.']);
+    
+    // Return success response with countdown
+    echo json_encode(['success' => true, 'message' => 'Password changed successfully.', 'countdown' => 5]);
+    
 } else {
     logAction($pdo, $user_id, 'admin', 'UPDATE', 'admin', $user_id, 'Password Change Attempt Failed');
     echo json_encode(['success' => false, 'message' => 'Current password is incorrect.']);
 }
-?>

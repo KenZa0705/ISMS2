@@ -22,6 +22,7 @@
                     </div>
                     <div class="text-danger" id="errorMessage"></div>
                     <div class="text-success" id="successMessage"></div>
+                    <div id="countdownMessage" class="text-success" style="display: none;"></div> <!-- Countdown message -->
                     <button type="submit" class="btn btn-primary">Change Password</button>
                 </form>
             </div>
@@ -40,11 +41,13 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form action="features/upload_profile_picture.php" method="POST" enctype="multipart/form-data">
+                <form id="changeProfilePictureForm" enctype="multipart/form-data">
                     <div class="mb-3">
                         <label for="profilePicture" class="form-label">Choose a new profile picture</label>
                         <input type="file" class="form-control" id="profilePicture" name="profile_picture" required>
+                        <small class="form-text text-muted">Allowed formats: JPG, PNG, GIF. Max size: 2MB.</small>
                     </div>
+                    <div class="text-danger" id="profileErrorMessage"></div>
                     <button type="submit" class="btn btn-primary">Upload</button>
                 </form>
             </div>
@@ -84,13 +87,20 @@
         })
         .then(response => response.json())
         .then(data => {
+            const errorMessage = document.getElementById('errorMessage');
+            const successMessage = document.getElementById('successMessage');
+            const countdownMessage = document.getElementById('countdownMessage');
+    
             if (data.success) {
-                document.getElementById('successMessage').textContent = "Password changed successfully!";
-                document.getElementById('errorMessage').textContent = "";
+                successMessage.textContent = "Password changed successfully!";
+                errorMessage.textContent = "";
+                countdownMessage.style.display = 'block'; // Show countdown message
+                startCountdown(5); // Start countdown for 5 seconds
                 document.getElementById('changePasswordForm').reset(); // Reset the form
             } else {
-                document.getElementById('errorMessage').textContent = data.message;
-                document.getElementById('successMessage').textContent = "";
+                errorMessage.textContent = data.message;
+                successMessage.textContent = "";
+                countdownMessage.style.display = 'none'; // Hide countdown message
             }
         })
         .catch(error => {
@@ -98,13 +108,59 @@
             document.getElementById('errorMessage').textContent = "An error occurred. Please try again.";
         });
     });
-
+    
     function isValidPassword(password) {
         const minLength = 6;
-        const hasUpperCase = /[A-Z]/.test(password);
+        const hasUpperCase = /[A-Z]/ .test(password);
         const hasNumber = /\d/.test(password);
         const isLongEnough = password.length >= minLength;
-
+    
         return hasUpperCase && hasNumber && isLongEnough;
     }
+    
+    function startCountdown(seconds) {
+        let countdown = seconds;
+        const countdownMessage = document.getElementById('countdownMessage');
+        countdownMessage.innerText = `You will be logged out in ${countdown} seconds.`;
+    
+        const interval = setInterval(() => {
+            countdown--;
+            countdownMessage.innerText = `You will be logged out in ${countdown} seconds.`;
+    
+            if (countdown <= 0) {
+                clearInterval(interval);
+                // Log out the user (this can be a redirect or an API call)
+                window.location.href = '../login/logout.php'; // Redirect to logout script
+            }
+        }, 1000);
+    }
+
+    //For Changing Profile Pic
+    document.getElementById('changeProfilePictureForm').addEventListener('submit', function (event) {
+        event.preventDefault(); // Prevent the default form submission
+
+        const formData = new FormData(this); // Create a FormData object from the form
+
+        // Send the data to the server using fetch
+        fetch('features/upload_profile_picture.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            const errorMessage = document.getElementById('profileErrorMessage');
+
+            if (data.success) {
+                // Show success alert and reload the page after confirmation
+                alert("Profile picture changed successfully!");
+                location.reload(); // Reload the page
+            } else {
+                errorMessage.textContent = data.message;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('profileErrorMessage').textContent = "An error occurred. Please try again.";
+        });
+    });
 </script>
