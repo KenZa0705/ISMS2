@@ -17,24 +17,24 @@ if (isset($_GET['id'])) {
         if ($stmt->execute()) {
             logAction($pdo, $admin_id, 'admin', 'delete', 'announcements', $announcement_id, 'Deleted an announcement');
             echo "<script>
-            window.location.href = '../admin.php?deleted=true';
+            window.location.href = 'manage.php?deleted=true';
                 </script>";
         } else {
             logAction($pdo, $admin_id, 'admin', 'delete', 'announcements', $announcement_id, 'Failed to delete an announcement');
             echo "<script>
                 alert('There was an error in deleting the announcement.');
-                window.location.href = '../admin.php';
+                window.location.href = 'manage.php';
                 </script>";
         }
     } catch (PDOException $e) {
         echo "<script>
             alert('Error: " . $e->getMessage() . "');
-            window.location.href = '../admin.php';
+            window.location.href = 'manage.php';
             </script>";
     }
 } else {
     echo "<script>
         alert('No announcement ID provided.');
-        window.location.href = '../admin.php';
+        window.location.href = 'manage.php';
         </script>";
 }

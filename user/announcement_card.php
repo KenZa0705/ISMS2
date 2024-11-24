@@ -1,14 +1,20 @@
+<?php 
+require_once '../login/dbh.inc.php';
+
+?>
 <div class="card mb-3">
     <div class="profile-container d-flex px-3 pt-3">
         <div class="profile-pic">
-            <img class="img-fluid" src="img/test pic.jpg" alt="">
+            <img class="img-fluid w-100" src="<?php echo '../admin/uploads/' . htmlspecialchars($row['profile_picture']); ?>" alt="Profile Picture">
         </div>
         <p class="ms-1 mt-1"><?php echo htmlspecialchars($row['first_name'] . ' ' . $row['last_name']); ?></p>
     </div>
 
-    <div class="image-container mx-3">
-        <a href="uploads/<?php echo htmlspecialchars($row['image']); ?>" data-lightbox="image-<?php echo $row['announcement_id']; ?>" data-title="<?php echo htmlspecialchars($row['title']); ?>">
-            <img src="uploads/<?php echo htmlspecialchars($row['image']); ?>" alt="Post Image" class="img-fluid">
+    <div class="image-container mx-3" style="position: relative; overflow: hidden;">
+        <div class="blur-background"></div>
+        <a href="../admin/uploads/<?php echo htmlspecialchars($row['image']); ?>" data-lightbox="image-<?php echo $row['announcement_id']; ?>" data-title="<?php echo htmlspecialchars($row['title']); ?>">
+            <img src="../admin/uploads/<?php echo htmlspecialchars($row['image']); ?>" alt="Post Image" class="img-fluid">
+            <script src="../admin/js/blur.js"></script>
         </a>
     </div>
 

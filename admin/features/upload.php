@@ -53,7 +53,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         $stmt->bindParam(':filename', $filename);
                         $stmt->bindParam(':description', $description);
                         $stmt->bindParam(':title', $title);
-                        $stmt->bindParam(':admin_id', $admin_id, PDO::PARAM_INT); 
+                        $stmt->bindParam(':admin_id', $admin_id, PDO::PARAM_INT);
 
                         if ($stmt->execute()) {
                             // Get the ID of the last inserted announcement
@@ -114,10 +114,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             }
                             $pdo->commit();
                             echo "<script>
-                                    alert('Announcement posted successfully!');
                                     setTimeout(function() {
                                         window.location.href = '../admin.php';
                                     }, 2000);
+
+                                    alert('Announcement posted successfully!');
                                 </script>";
                         } else {
                             $pdo->rollBack();

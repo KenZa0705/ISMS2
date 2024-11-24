@@ -1,3 +1,17 @@
+<?php
+require_once 'dbh.inc.php'; 
+session_start();
+if (isset($_SESSION['user'])) {
+    if ($_SESSION['user_type'] === 'admin'){
+        header("Location: ../admin/admin.php");
+    exit();
+    } else {
+        header("Location: ../user/user.php");
+        exit();
+    }
+} 
+?>
+
 <!doctype html>
 <html lang="en">
 

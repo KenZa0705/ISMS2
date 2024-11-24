@@ -52,7 +52,7 @@ if (!empty($selected_courses)) {
 $whereClause = count($filters) > 0 ? "WHERE " . implode(" AND ", $filters) : '';
 
 $query = "
-    SELECT DISTINCT a.*, ad.first_name, ad.last_name,
+    SELECT DISTINCT a.*, ad.first_name, ad.last_name, ad.profile_picture,
         STRING_AGG(DISTINCT yl.year_level, ', ') AS year_levels,
         STRING_AGG(DISTINCT d.department_name, ', ') AS departments,
         STRING_AGG(DISTINCT c.course_name, ', ') AS courses
@@ -65,7 +65,7 @@ $query = "
     LEFT JOIN announcement_course ac ON a.announcement_id = ac.announcement_id
     LEFT JOIN course c ON ac.course_id = c.course_id
     $whereClause
-    GROUP BY a.announcement_id, ad.first_name, ad.last_name
+    GROUP BY a.announcement_id, ad.first_name, ad.last_name, ad.profile_picture
     ORDER BY a.updated_at DESC";
 
 $stmt = $pdo->prepare($query);

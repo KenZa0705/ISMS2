@@ -79,7 +79,7 @@
 
 .profile-container img{
     max-height: 30px !important;
-    border-radius: 15px;
+    border-radius: 50%;
 }
 
 @media (max-width: 1400px) {

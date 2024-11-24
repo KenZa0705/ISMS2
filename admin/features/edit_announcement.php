@@ -29,7 +29,7 @@ $department_id = $_SESSION['user']['department_id'];
     <link rel="stylesheet" href="../css/create.css">
     <link rel="stylesheet" href="../css/tags-modal.css">
     <link rel="stylesheet" href="../css/sidebar.css">
-    <link rel="stylesheet" href="../css/bsu-bg.css">
+    <link rel="stylesheet" href="../css/nav-bottom.css">
 </head>
 
 <body>
@@ -44,8 +44,7 @@ $department_id = $_SESSION['user']['department_id'];
                 <?php include '../../cdn/sidebar.php'; ?>
 
                 <!-- Main content -->
-                <div class="col-md-8 pt-5 px-5">
-                    <h3 class="text-center"><b>Edit Announcement</b></h3>
+                <div class="col-lg-6 pt-5 px-5 main-content" style="margin: 0 auto;">
 
                     <?php
                     require_once '../../login/dbh.inc.php';
@@ -207,123 +206,99 @@ $department_id = $_SESSION['user']['department_id'];
 
                     <!-- Form to edit the announcement -->
                     <?php if ($announcement): ?>
-                        <div class="form-container d-flex justify-content-center">
-                            <form action="" method="POST" enctype="multipart/form-data">
-                                <div class="form-floating mb-3">
-                                    <input type="text" class="form-control" id="title" name="title" value="<?php echo htmlspecialchars($title); ?>" placeholder="Enter title" required>
-                                    <label for="title">Title</label>
+                        <div class="form-container d-flex align-items-center" style="min-height: 85vh;">
+                            <form class="card shadow p-3" action="" method="POST" enctype="multipart/form-data" data-action='update'>
+                                <!-- Title input -->
+                                <div class="form-floating mb-4">
+                                    <input type="text" class="form-control form-control-lg border-0 border-bottom rounded-0"
+                                        id="title" name="title" value="<?php echo htmlspecialchars($title); ?>"
+                                        placeholder="Enter title">
+                                    <label for="title" class="text-muted">Title</label>
                                 </div>
 
-                                <div class="form-floating mb-3">
-                                    <textarea class="form-control" id="description" name="description" placeholder="Enter description" style="height: 150px" required><?php echo htmlspecialchars($description); ?></textarea>
-                                    <label for="description">Description</label>
-                                </div>
-                                <!-- Button to trigger the modal -->
-                                <button type="button" class="btn btn-primary rounded-pill px-3 mb-3" data-bs-toggle="modal" data-bs-target="#tagsModal">
-                                    <i class="bi bi-tags me-2"></i>Select Tags
-                                </button>
-
-                                <!-- Modal -->
-                                <div class="modal fade" id="tagsModal" tabindex="-1" aria-labelledby="tagsModalLabel" aria-hidden="true">
-                                    <div class="modal-dialog modal-dialog-centered">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title" id="tagsModalLabel">
-                                                    <i class="bi bi-tags-fill me-2"></i>Select Tags
-                                                </h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <!-- Year Levels -->
-                                                <div class="filter-section">
-                                                    <h6 class="filter-title">
-                                                        <i class="bi bi-mortarboard me-2"></i>Year Levels
-                                                    </h6>
-                                                    <div class="filter-options">
-                                                        <?php foreach ($year_levels as $year_level): ?>
-                                                            <label class="filter-chip" title="<?php echo htmlspecialchars($year_level['year_level']); ?>">
-                                                                <input type="checkbox"
-                                                                    name="year_level[]"
-                                                                    value="<?php echo $year_level['year_level_id']; ?>"
-                                                                    <?php if (in_array($year_level['year_level_id'], explode(',', $announcement['selected_year_levels']))) echo 'checked'; ?>>
-                                                                <span><?php echo htmlspecialchars($year_level['year_level']); ?></span>
-                                                            </label>
-                                                        <?php endforeach; ?>
-                                                    </div>
-                                                </div>
-
-                                                <!-- Departments -->
-                                                <div class="filter-section">
-                                                    <h6 class="filter-title">
-                                                        <i class="bi bi-building me-2"></i>Departments
-                                                    </h6>
-                                                    <div class="filter-options">
-                                                        <?php foreach ($departments as $department): ?>
-                                                            <label class="filter-chip" title="<?php echo htmlspecialchars($department['department_name']); ?>">
-                                                                <input type="checkbox"
-                                                                    name="department[]"
-                                                                    value="<?php echo $department['department_id']; ?>"
-                                                                    <?php if (in_array($department['department_id'], explode(',', $announcement['selected_departments']))) echo 'checked'; ?>>
-                                                                <span><?php echo htmlspecialchars($department['department_name']); ?></span>
-                                                            </label>
-                                                        <?php endforeach; ?>
-                                                    </div>
-                                                </div>
-
-                                                <!-- Courses -->
-                                                <div class="filter-section">
-                                                    <h6 class="filter-title">
-                                                        <i class="bi bi-book me-2"></i>Courses
-                                                    </h6>
-                                                    <div class="filter-options">
-                                                        <?php foreach ($courses as $course): ?>
-                                                            <label class="filter-chip" title="<?php echo htmlspecialchars($course['course_name']); ?>">
-                                                                <input type="checkbox"
-                                                                    name="course[]"
-                                                                    value="<?php echo $course['course_id']; ?>"
-                                                                    <?php if (in_array($course['course_id'], explode(',', $announcement['selected_courses']))) echo 'checked'; ?>>
-                                                                <span><?php echo htmlspecialchars($course['course_name']); ?></span>
-                                                            </label>
-                                                        <?php endforeach; ?>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                                    <i class="bi bi-x me-2"></i>Close
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
+                                <!-- Description textarea -->
+                                <div class="form-floating mb-4">
+                                    <textarea class="form-control border-0 border-bottom rounded-0"
+                                        id="description" name="description"
+                                        placeholder="Enter description"
+                                        style="min-height: 100px;"><?php echo htmlspecialchars($description); ?></textarea>
+                                    <label for="description" class="text-muted">Description</label>
                                 </div>
 
-                                <div class="form-group mb-3">
-                                    <div class="upload-image-container d-flex flex-column align-items-center justify-content-center bg-white">
+                                <!-- Tags button -->
+                                <div class="modal-container d-flex justify-content-between">
+                                    <!-- Button to trigger Tags modal -->
+                                    <button type="button" class="btn btn-danger rounded-pill px-3 mb-3" data-bs-toggle="modal" data-bs-target="#tagsModal">
+                                        <i class="bi bi-tags me-2"></i>Tags
+                                    </button>
+
+                                    <?php include "edit_announcement_modal.php" ?>
+                                </div>
+
+
+
+                                <!-- Upload image container -->
+                                <div class="form-group mb-4">
+                                    <div class="upload-image-container d-flex flex-column align-items-center justify-content-center bg-light border rounded-3 p-4"
+                                        style="min-height: 200px;">
                                         <div class="d-flex">
                                             <p id="upload-text" class="mt-3">Upload Photo</p>
-                                            <input type="file" class="form-control-file" id="image" name="image" style="display: none;" onchange="imagePreview()">
-                                            <button class="btn btn-light" id="file-upload-btn">
+                                            <input type="file" class="form-control-file" id="image" name="image"
+                                                style="display: none;" onchange="imagePreview()">
+                                            <button class="btn btn-light ms-2" id="file-upload-btn">
                                                 <i class="bi bi-upload"></i>
                                             </button>
-                                            <img id="image-preview" src="../uploads/<?php echo htmlspecialchars($image); ?>" alt="Image Preview" style="display: block; max-width: 100%; margin:0;">
+                                            <img class="img-fluid rounded-3" id="image-preview"
+                                                src="../uploads/<?php echo htmlspecialchars($image); ?>"
+                                                alt="Image Preview" style="display: block; max-width: 100%; position: relative; z-index: 1;">
                                         </div>
                                         <div class="blur-background" style="display: none;"></div>
-                                        <i id="delete-icon" class="bi bi-trash" style="position: absolute; top: 5px; right: 5px; display: none; cursor: pointer;" onclick="deleteImage()"></i>
+                                        <i id="delete-icon" class="bi bi-trash"
+                                            style="position: absolute; top: 10px; right: 10px; display: none; cursor: pointer;"
+                                            onclick="deleteImage()"></i>
                                     </div>
                                 </div>
 
+                                <!-- Submit button -->
                                 <div class="button-container d-flex justify-content-end">
-                                    <button type="submit" class="btn btn-primary rounded-pill px-4 py-2">
+                                    <button type="submit" class="btn btn-danger px-4 py-2 rounded-pill" id="submitBtn" data-action="update">
                                         <i class="bi bi-arrow-clockwise me-2"></i>Update
                                     </button>
                                 </div>
                             </form>
                         </div>
-
                     <?php endif; ?>
                 </div>
             </div>
+            <nav class="navbar nav-bottom fixed-bottom d-block d-lg-none mt-5">
+                <div class="container-fluid d-flex justify-content-around">
+                    <a href="dashboard.php" class="btn nav-bottom-btn">
+                        <i class="fas fa-chart-line"></i>
+                    </a>
+
+                    <a href="../admin.php" class="btn nav-bottom-btn">
+                        <i class="fas fa-newspaper"></i>
+                    </a>
+
+                    <a href="create.php" class="btn nav-bottom-btn active-btn">
+                        <i class="fas fa-bullhorn"></i>
+                    </a>
+
+                    <a href="logPage.php" class="btn nav-bottom-btn">
+                        <i class="fas fa-clipboard-list"></i>
+                    </a>
+
+                    <a href="manage_student.php" class="btn nav-bottom-btn">
+                        <i class="fas fa-users-cog"></i>
+                    </a>
+
+                    <a href="manage.php" class="btn nav-bottom-btn">
+                        <i class="fas fa-user"></i>
+                    </a>
+                </div>
+            </nav>
         </div>
+        <script src="../js/create-post-validation.js"></script>
         <script src="../js/create.js"></script>
         <script src="../js/edit.js"></script>
     </main>

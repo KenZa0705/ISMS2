@@ -1,10 +1,12 @@
 <?php
-require_once '../../login/dbh.inc.php'; // DATABASE CONNECTION
+require_once '../../login/dbh.inc.php'; 
 session_start();
-if (!isset($_SESSION['user'])) {
+if (!isset($_SESSION['user']) || $_SESSION['user_type'] !== 'admin') {
+    $_SESSION = [];
+    session_destroy();
     header("Location: ../../login/login.php");
     exit();
-}
+} 
 
 //Get info from admin session
 $user = $_SESSION['user'];
@@ -23,53 +25,8 @@ $adminPhotos = $stmt->fetch(PDO::FETCH_ASSOC);
 
 $cover_photo = $adminPhotos['cover_photo'] ?? 'default_cover.jpg';
 
-// Database queries for analytics
-try {
-    // Posts by department
-    $departmentQuery = $pdo->query("SELECT d.department_name, COUNT(ad.announcement_id) AS post_count
-                                    FROM department d
-                                    LEFT JOIN announcement_department ad ON d.department_id = ad.department_id
-                                    GROUP BY d.department_name");
-    $departments = $departmentQuery->fetchAll(PDO::FETCH_ASSOC);
-
-    // Posts by course
-    $courseQuery = $pdo->query("SELECT c.course_name, COUNT(ac.announcement_id) AS post_count
-                                FROM course c
-                                LEFT JOIN announcement_course ac ON c.course_id = ac.course_id
-                                GROUP BY c.course_name");
-    $courses = $courseQuery->fetchAll(PDO::FETCH_ASSOC);
-
-    // Posts by year level
-    $yearLevelQuery = $pdo->query("SELECT yl.year_level, COUNT(ay.announcement_id) AS post_count
-                                   FROM year_level yl
-                                   LEFT JOIN announcement_year_level ay ON yl.year_level_id = ay.year_level_id
-                                   GROUP BY yl.year_level");
-    $yearLevels = $yearLevelQuery->fetchAll(PDO::FETCH_ASSOC);
-
-    // Posts by admin
-    $adminQuery = $pdo->query("SELECT CONCAT(a.first_name, ' ', a.last_name) AS admin_name, COUNT(ann.announcement_id) AS post_count
-                               FROM admin a
-                               LEFT JOIN announcement ann ON a.admin_id = ann.admin_id
-                               GROUP BY a.admin_id, a.first_name, a.last_name");
-    $admins = $adminQuery->fetchAll(PDO::FETCH_ASSOC);
-
-    // Active student and admin counts
-    $activeStudents = $pdo->query("SELECT COUNT(*) AS active_students FROM student")->fetch(PDO::FETCH_ASSOC)['active_students'];
-    $activeAdmins = $pdo->query("SELECT COUNT(*) AS active_admins FROM admin")->fetch(PDO::FETCH_ASSOC)['active_admins'];
-} catch (PDOException $e) {
-    echo 'Database error: ' . $e->getMessage();
-}
 ?>
-<script>
-    const analyticsData = {
-        departments: <?php echo json_encode($departments); ?>,
-        courses: <?php echo json_encode($courses); ?>,
-        yearLevels: <?php echo json_encode($yearLevels); ?>,
-        admins: <?php echo json_encode($admins); ?>,
-        activeStudents: <?php echo json_encode($activeStudents); ?>,
-        activeAdmins: <?php echo json_encode($activeAdmins); ?>
-    };
-</script>
+
 <!doctype html>
 <html lang="en">
 
@@ -88,40 +45,12 @@ try {
     <link rel="stylesheet" href="../css/feeds-card.css">
     <link rel="stylesheet" href="../css/bsu-bg.css">
     <link rel="stylesheet" href="../css/cover-photo.css">
+    <link rel="stylesheet" href="../css/nav-bottom.css">
 </head>
 
 <body>
     <header>
         <?php include '../../cdn/navbar.php'; ?>
-        <nav class="navbar nav-bottom fixed-bottom d-block d-md-none mt-5">
-            <div class="container-fluid justify-content-around">
-                <a href="../admin.php" class="btn nav-bottom-btn">
-                    <i class="bi bi-house"></i>
-                    <span class="icon-label">Home</span>
-                </a>
-
-                <a class="btn nav-bottom-btn active" href="manage.php">
-                    <i class="bi bi-kanban"></i>
-                    <span class="icon-label">Manage</span>
-                </a>
-
-                <a class="btn nav-bottom-btn" href="create.php">
-                    <i class="bi bi-megaphone"></i>
-                    <span class="icon-label">Create</span>
-                </a>
-
-                <a class="btn nav-bottom-btn" href="logPage.php">
-                    <i class="bi bi-clipboard"></i>
-                    <span class="icon-label">Logs</span>
-                </a>
-
-                <a class="btn nav-bottom-btn" href="manage_student.php">
-                    <i class="bi bi-person-plus"></i>
-                    <span class="icon-label">Students</span>
-                </a>
-
-            </div>
-        </nav>
     </header>
     <main>
         <div class="container-fluid pt-5">
@@ -162,28 +91,36 @@ try {
                     <div class="row g-0">
                         <?php
                         try {
-                            $query = "SELECT a.*, ad.first_name, ad.last_name 
-                                  FROM announcement a 
-                                  JOIN admin ad ON a.admin_id = ad.admin_id";
+                            // Query to fetch admin data
+                            $query = "SELECT first_name, last_name FROM admin WHERE admin_id = :admin_id";
 
+                            // Prepare and execute the query
                             $stmt = $pdo->prepare($query);
+                            $stmt->bindParam(':admin_id', $_SESSION['user']['admin_id'], PDO::PARAM_INT);
                             $stmt->execute();
-                            $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-                            if ($row) {
-                                $admin_first_name = $row['first_name'];
-                                $admin_last_name = $row['last_name'];
-                                $admin_name = $admin_first_name . ' ' . $admin_last_name;
+                            // Fetch the admin data
+                            $admin = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                            // Display the admin name if found
+                            if ($admin) {
+                                $admin_name = $admin['first_name'] . " " . $admin['last_name'];
+                            } else {
+                                echo "<p>Admin not found.</p>";
                             }
                         } catch (PDOException $e) {
+                            // Handle database errors
                             echo "Error: " . $e->getMessage();
                         }
                         ?>
 
+
                         <!-- Desktop Layout -->
                         <div class="col-12 col-xxl-12 cover desktop-layout">
                             <div class="cover-photo-container" style="position: relative;">
-                                <img src="<?php echo '../uploads/' . htmlspecialchars($cover_photo); ?>" alt="Cover Photo">
+                                <a href="<?php echo '../uploads/' . htmlspecialchars($cover_photo); ?>" data-lightbox="cover" data-title="Cover Photo">
+                                    <img src="<?php echo '../uploads/' . htmlspecialchars($cover_photo); ?>" alt="Cover Photo">
+                                </a>
                                 <!-- Button to change cover photo -->
                                 <form action="upload_photo.php" method="post" enctype="multipart/form-data" style="position: absolute; bottom: 10px; right: 10px;">
                                     <input type="file" name="coverPhoto" id="coverPhotoInput" style="display: none;" onchange="this.form.submit()">
@@ -192,7 +129,9 @@ try {
                             </div>
                             <div class="profile-section">
                                 <div class="profile-photo-container" style="position: relative;">
-                                    <img src="<?php echo '../uploads/' . htmlspecialchars($profile_picture); ?>" alt="Profile Photo">
+                                    <a href="<?php echo '../uploads/' . htmlspecialchars($profile_picture); ?>" data-lightbox="profile" data-title="Profile Photo">
+                                        <img src="<?php echo '../uploads/' . htmlspecialchars($profile_picture); ?>" alt="Profile Photo">
+                                    </a>
                                 </div>
                                 <div class="username-container">
                                     <h5 class="name"><?php echo htmlspecialchars($admin_name); ?></h5>
@@ -203,11 +142,11 @@ try {
                         <!-- Mobile Layout -->
                         <div class="col-12 mobile-layout">
                             <div class="cover-photo-container">
-                                <img src="../img/cover.jpg" alt="">
+                                <img src="<?php echo '../uploads/' . htmlspecialchars($cover_photo); ?>" alt="">
                             </div>
                             <div class="profile-section">
                                 <div class="profile-photo-container">
-                                    <img src="../img/profile.jpg" alt="">
+                                    <img src="<?php echo '../uploads/' . htmlspecialchars($profile_picture); ?>" alt="">
                                 </div>
                                 <div class="username-container">
                                     <h5 class="name"><?php echo htmlspecialchars($admin_name); ?></h5>
@@ -265,7 +204,7 @@ try {
                                                     <img class="img-fluid" src="<?php echo '../uploads/' . htmlspecialchars($profile_picture); ?>" alt="Profile Picture">
                                                 </div>
                                                 <p class="ms-1 mt-1"><?php echo htmlspecialchars($admin_name); ?></p>
-                                                <?php if ($admin_id === $announcement_admin_id) : ?>
+                                                <?php if (isset($admin_id) && isset($announcement_admin_id) && (string)$admin_id === (string)$announcement_admin_id) : ?>
                                                     <div class="dropdown ms-auto">
                                                         <span id="dropdownMenuButton<?php echo $announcement_id; ?>" data-bs-toggle="dropdown" aria-expanded="false">
                                                             <i class="bi bi-three-dots"></i>
@@ -360,49 +299,49 @@ try {
         </div>
 
         <!-- after deletion modal -->
-        <div class="modal fade" id="postDelete" tabindex="-1" aria-labelledby="post-deleted" aria-hidden="true">
-            <div class="modal-dialog modal-md">
-                <div class="modal-content delete-message">
-                    <div class="modal-header" style="border: none;">
-                        <p class="modal-title" id="exampleModalLabel">Announcement deleted succesfully.</p>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Analytics Modal -->
-        <div class="modal fade" id="analyticsModal" tabindex="-1" aria-labelledby="analyticsModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="analyticsModalLabel">Analytics</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <!-- Analytics Section -->
-                        <div class="analytics-section">
-                            <!-- Counters for Active Users -->
-                            <div>
-                                <p>Active Students: <span id="activeStudents"></span></p>
-                                <p>Active Admins: <span id="activeAdmins"></span></p>
-                            </div>
-
-                            <!-- Bar Charts -->
-                            <canvas id="departmentChart"></canvas>
-                            <canvas id="courseChart"></canvas>
-                            <canvas id="yearLevelChart"></canvas>
-
-                            <!-- Pie Chart for Admins -->
-                            <canvas id="adminChart"></canvas>
+        <div class="modal fade" id="postDelete" tabindex="-1" aria-labelledby="deleteConfirmationModal" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-sm">
+                <div class="modal-content text-center">
+                    <div class="modal-body p-4">
+                        <div class="mb-2">
+                            <i class="bi bi-check-circle-fill text-success" style="font-size: 2rem;"></i>
                         </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <h6 class="modal-title mb-1" id="deleteConfirmationModal">Success</h6>
+                        <p class="small mb-3">The announcement has been successfully deleted.</p>
+                        <button type="button" class="btn btn-success btn-sm w-100" data-bs-dismiss="modal">OK</button>
                     </div>
                 </div>
             </div>
         </div>
+
+        <nav class="navbar nav-bottom fixed-bottom d-block d-lg-none mt-5">
+            <div class="container-fluid d-flex justify-content-around">
+                <a href="dashboard.php" class="btn nav-bottom-btn">
+                    <i class="fas fa-chart-line"></i>
+                </a>
+
+                <a href="../admin.php" class="btn nav-bottom-btn">
+                    <i class="fas fa-newspaper"></i>
+                </a>
+
+                <a href="create.php" class="btn nav-bottom-btn">
+                    <i class="fas fa-bullhorn"></i>
+                </a>
+
+                <a href="logPage.php" class="btn nav-bottom-btn">
+                    <i class="fas fa-clipboard-list"></i>
+                </a>
+
+                <a href="manage_student.php" class="btn nav-bottom-btn">
+                    <i class="fas fa-users-cog"></i>
+                </a>
+
+                <a href="manage.php" class="btn nav-bottom-btn active-btn">
+                    <i class="fas fa-user"></i>
+                </a>
+            </div>
+        </nav>
+
         <?php include 'changePassOtherPage.html'; ?>
     </main>
     <!-- Body CDN links -->
@@ -411,81 +350,13 @@ try {
     <script src="../js/manage.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            // Set up data for each chart using analyticsData object
-
-            // Department Chart
-            const departmentLabels = analyticsData.departments.map(dept => dept.department_name);
-            const departmentCounts = analyticsData.departments.map(dept => dept.post_count);
-            new Chart(document.getElementById('departmentChart'), {
-                type: 'bar',
-                data: {
-                    labels: departmentLabels,
-                    datasets: [{
-                        label: 'Posts per Department',
-                        data: departmentCounts,
-                        backgroundColor: 'rgba(75, 192, 192, 0.6)'
-                    }]
-                }
-            });
-
-            // Course Chart
-            const courseLabels = analyticsData.courses.map(course => course.course_name);
-            const courseCounts = analyticsData.courses.map(course => course.post_count);
-            new Chart(document.getElementById('courseChart'), {
-                type: 'bar',
-                data: {
-                    labels: courseLabels,
-                    datasets: [{
-                        label: 'Posts per Course',
-                        data: courseCounts,
-                        backgroundColor: 'rgba(54, 162, 235, 0.6)'
-                    }]
-                }
-            });
-
-            // Year Level Chart
-            const yearLevelLabels = analyticsData.yearLevels.map(level => level.year_level);
-            const yearLevelCounts = analyticsData.yearLevels.map(level => level.post_count);
-            new Chart(document.getElementById('yearLevelChart'), {
-                type: 'bar',
-                data: {
-                    labels: yearLevelLabels,
-                    datasets: [{
-                        label: 'Posts per Year Level',
-                        data: yearLevelCounts,
-                        backgroundColor: 'rgba(255, 206, 86, 0.6)'
-                    }]
-                }
-            });
-
-            // Admin Chart
-            const adminLabels = analyticsData.admins.map(admin => admin.admin_name);
-            const adminCounts = analyticsData.admins.map(admin => admin.post_count);
-            new Chart(document.getElementById('adminChart'), {
-                type: 'pie',
-                data: {
-                    labels: adminLabels,
-                    datasets: [{
-                        label: 'Posts per Admin',
-                        data: adminCounts,
-                        backgroundColor: [
-                            'rgba(255, 99, 132, 0.6)',
-                            'rgba(54, 162, 235, 0.6)',
-                            'rgba(255, 206, 86, 0.6)',
-                            'rgba(75, 192, 192, 0.6)',
-                            'rgba(153, 102, 255, 0.6)'
-                        ]
-                    }]
-                }
-            });
-
-            // Display active user counts
-            document.getElementById('activeStudents').textContent = analyticsData.activeStudents;
-            document.getElementById('activeAdmins').textContent = analyticsData.activeAdmins;
-        });
+        function confirmLogout() {
+            if (confirm('Are you sure you want to sign out?')) {
+                window.location.href = '../../login/logout.php';
+            }
+            return false;
+        }
     </script>
-
 
 </body>
 

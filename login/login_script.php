@@ -47,14 +47,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 // Store user info and user type in session
                 $_SESSION['user'] = $user;
                 $_SESSION['user_type'] = $user_type;
-                if($user_type === 'admin'){
+                if ($user_type === 'admin') {
                     header("Location: ../admin/admin.php");
                     exit();
                 } else {
                     header("Location: ../user/user.php");
                     exit();
                 }
-                
             } else {
                 error_log("Invalid password for user: $email");
                 echo "<script>alert('Invalid password for user: " . $email . "');</script>";

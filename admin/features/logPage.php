@@ -31,40 +31,12 @@ $department_id = $_SESSION['user']['department_id'];
     <link rel="stylesheet" href="../css/admin.css">
     <link rel="stylesheet" href="../css/tables.css">
     <link rel="stylesheet" href="../css/sidebar.css">
+    <link rel="stylesheet" href="../css/nav-bottom.css">
 </head>
 
 <body>
     <header>
         <?php include '../../cdn/navbar.php'; ?>
-        <nav class="navbar nav-bottom fixed-bottom d-block d-md-none mt-5">
-            <div class="container-fluid justify-content-around">
-                <a href="../admin.php" class="btn nav-bottom-btn">
-                    <i class="bi bi-house"></i>
-                    <span class="icon-label">Home</span>
-                </a>
-
-                <a class="btn nav-bottom-btn" href="manage.php">
-                    <i class="bi bi-kanban"></i>
-                    <span class="icon-label">Manage</span>
-                </a>
-
-                <a class="btn nav-bottom-btn" href="create.php">
-                    <i class="bi bi-megaphone"></i>
-                    <span class="icon-label">Create</span>
-                </a>
-
-                <a class="btn nav-bottom-btn active" href="logPage.php">
-                    <i class="bi bi-clipboard"></i>
-                    <span class="icon-label">Logs</span>
-                </a>
-
-                <a class="btn nav-bottom-btn" href="manage_student.php">
-                    <i class="bi bi-person-plus"></i>
-                    <span class="icon-label">Students</span>
-                </a>
-
-            </div>
-        </nav>
     </header>
     <main>
         <div class="container-fluid">
@@ -141,8 +113,10 @@ $department_id = $_SESSION['user']['department_id'];
                                         require_once '../../login/dbh.inc.php';
 
                                         try {
-                                            $query = "SELECT * FROM logs ORDER BY timestamp DESC";
-                                            $stmt = $pdo->query($query);
+                                            $query = "SELECT * FROM logs WHERE user_id = :admin_id ORDER BY timestamp DESC";
+                                            $stmt = $pdo->prepare($query);
+                                            $stmt->bindParam(':admin_id', $admin_id, PDO::PARAM_INT);
+                                            $stmt->execute();
 
                                             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                                                 $log_id = htmlspecialchars($row['log_id'] ?? '');
@@ -199,18 +173,52 @@ $department_id = $_SESSION['user']['department_id'];
                 </div>
             </div>
         </div>
+        <nav class="navbar nav-bottom fixed-bottom d-block d-xl-none mt-5">
+            <div class="container-fluid d-flex justify-content-around">
+                <a href="dashboard.php" class="btn nav-bottom-btn">
+                    <i class="fas fa-chart-line"></i>
+                </a>
+
+                <a href="../admin.php" class="btn nav-bottom-btn">
+                    <i class="fas fa-newspaper"></i>
+                </a>
+
+                <a href="create.php" class="btn nav-bottom-btn">
+                    <i class="fas fa-bullhorn"></i>
+                </a>
+
+                <a href="logPage.php" class="btn nav-bottom-btn active-btn">
+                    <i class="fas fa-clipboard-list"></i>
+                </a>
+
+                <a href="manage_student.php" class="btn nav-bottom-btn">
+                    <i class="fas fa-users-cog"></i>
+                </a>
+
+                <a href="manage.php" class="btn nav-bottom-btn">
+                    <i class="fas fa-user"></i>
+                </a>
+            </div>
+        </nav>
         <?php include 'changePassOtherPage.html'; ?>
     </main>
     <!-- Body CDN links -->
     <?php include '../../cdn/body.html'; ?>
     <script>
+        function confirmLogout() {
+            if (confirm('Are you sure you want to sign out?')) {
+                window.location.href = '../../login/logout.php';
+            }
+            return false;
+        }
+
         $(document).ready(function() {
             $('.table').DataTable({
                 responsive: false,
                 order: [
-                    [5, 'desc']
-                ], // Sort by timestamp (column index 5) by default
-                pageLength: 15, // Show 17 entries per page
+                    [5, 'desc'] // Sort by timestamp (column index 5) by default
+                ],
+                pageLength: 15, // Show 15 entries per page
                 lengthChange: false, // Remove "Show entries" dropdown
                 language: {
                     search: "Search logs:",
@@ -229,17 +237,24 @@ $department_id = $_SESSION['user']['department_id'];
                         targets: [4] // Disable sorting for description column
                     },
                     {
-                        width: "20%",
-                        targets: 4 // Make description column wider
+                        width: "15%",
+                        targets: [4, 5] // Make description column wider
+                    },
+                    {
+                        width: "5%",
+                        targets: [0, 1, 2, 3]
                     },
                     {
                         className: "text-nowrap",
                         targets: [0, 1, 2, 3, 5] // Prevent text wrapping in other columns
+                    },
+                    {
+                        targets: [5],
+                        type: 'date',
                     }
                 ],
                 dom: '<"top"f>rt<"bottom"ip><"clear">', // Removed 'l' for length menu
                 initComplete: function() {
-                    // Add custom styling to search
                     $('.dataTables_filter input').addClass('form-control form-control-sm');
                 }
             });

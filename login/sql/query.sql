@@ -180,6 +180,8 @@ CREATE TABLE IF NOT EXISTS public.sms_log (
         ON DELETE CASCADE
 );
 
+END;
+
 ALTER TABLE admin ADD COLUMN profile_picture VARCHAR(255);
 CREATE TABLE announcement_views (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -189,7 +191,14 @@ CREATE TABLE announcement_views (
     FOREIGN KEY (announcement_id) REFERENCES announcement(announcement_id),
     FOREIGN KEY (student_id) REFERENCES student(student_id)
 );
-
+ALTER TABLE student ADD COLUMN profile_picture VARCHAR(255);
 ALTER TABLE admin
 ADD COLUMN cover_photo VARCHAR(255);
+CREATE TABLE feedback (
+    feedback_id SERIAL PRIMARY KEY ,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    message TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 END;

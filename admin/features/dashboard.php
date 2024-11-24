@@ -2,11 +2,12 @@
 require_once '../../login/dbh.inc.php';
 session_start();
 
-// Check authentication
-if (!isset($_SESSION['user'])) {
+if (!isset($_SESSION['user']) || $_SESSION['user_type'] !== 'admin') {
+    $_SESSION = [];
+    session_destroy();
     header("Location: ../../login/login.php");
     exit();
-}
+} 
 
 date_default_timezone_set('Asia/Manila');
 
@@ -90,181 +91,16 @@ try {
     <?php include '../../cdn/head.html'; ?>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f5f6fa;
-            color: #2d3436;
-        }
-
-        .dashboard-wrapper {
-            padding: 2rem;
-            animation: fadeIn 0.5s ease-in-out;
-        }
-
-        .dashboard-header {
-            margin-bottom: 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .dashboard-title {
-            font-weight: 600;
-            color: #2d3436;
-            font-size: 1.75rem;
-            margin: 0;
-        }
-
-        .date-info {
-            color: #636e72;
-            font-size: 0.9rem;
-        }
-
-        .stats-card {
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
-            padding: 1.5rem;
-            height: 100%;
-            transition: all 0.3s ease;
-            border: none;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .stats-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .stats-card::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 100px;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            animation: shine 3s infinite;
-        }
-
-        @keyframes shine {
-            0% {
-                transform: translateX(-100%);
-            }
-
-            100% {
-                transform: translateX(100%);
-            }
-        }
-
-        .stats-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 1rem;
-        }
-
-        .stats-icon i {
-            font-size: 1.5rem;
-            color: white;
-        }
-
-        .stats-info h3 {
-            font-size: 1.75rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-
-        .stats-info p {
-            color: #636e72;
-            margin: 0;
-            font-size: 0.9rem;
-        }
-
-        .chart-card {
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            border: none;
-            transition: all 0.3s ease;
-        }
-
-        .chart-card:hover {
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .chart-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .chart-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #2d3436;
-            margin: 0;
-        }
-
-        .chart-container {
-            position: relative;
-            height: 300px;
-        }
-
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.9);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .bg-purple {
-            background-color: #6c5ce7;
-        }
-
-        .bg-blue {
-            background-color: #0984e3;
-        }
-
-        .bg-green {
-            background-color: #00b894;
-        }
-
-        .bg-orange {
-            background-color: #e17055;
-        }
-
-        @media (max-width: 768px) {
-            .dashboard-wrapper {
-                padding: 1rem;
-            }
-
-            .stats-card {
-                margin-bottom: 1rem;
-            }
-
-            .chart-container {
-                height: 250px;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <link rel="stylesheet" href="../css/admin.css">
+    <link rel="stylesheet" href="../css/sidebar.css">
+    <link rel="stylesheet" href="../css/nav-bottom.css">
 </head>
 
 <body>
+    <header>
+        <?php include '../../cdn/navbar.php'; ?>
+    </header>
     <!-- Loading Overlay -->
     <div class="loading-overlay">
         <div class="spinner-border text-primary" role="status">
@@ -272,336 +108,188 @@ try {
         </div>
     </div>
 
-    <div class="dashboard-wrapper">
-        <div class="dashboard-header">
-            <div>
-                <h1 class="dashboard-title">Analytics Overview</h1>
-                <p class="date-info">Last updated: <?php echo date('F d, Y h:i A'); ?>&nbsp;(PHT)</p>
-                <a href="../admin.php">Go back to Feed</a>
-            </div>
-            <div class="refresh-button">
-                <button class="btn btn-outline-primary btn-sm" onclick="refreshDashboard()">
-                    <i class="bi bi-arrow-clockwise"></i> Refresh Data
-                </button>
-            </div>
-        </div>
+    <main>
+        <div class="container-fluid pt-5 parent">
+            <div class="row g-4">
+                <!-- Left sidebar -->
+                <div class="col-lg-3 sidebar sidebar-left d-none d-xxl-block">
+                    <div class="sticky-sidebar">
+                        <ul class="nav flex-column">
+                            <li class="nav-item">
+                                <a class="active" href="dashboard.php"><i class="fas fa-chart-line me-2"></i>Dashboard</a>
+                            </li>
 
-        <!-- Summary Stats Cards -->
-        <div class="row g-4 mb-4">
-            <div class="col-md-3 col-sm-6">
-                <div class="stats-card animate__animated animate__fadeIn">
-                    <div class="stats-icon bg-purple">
-                        <i class="bi bi-people-fill"></i>
-                    </div>
-                    <div class="stats-info">
-                        <h3><?php echo number_format($total_students); ?></h3>
-                        <p>Total Students</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3 col-sm-6">
-                <div class="stats-card animate__animated animate__fadeIn" style="animation-delay: 0.1s">
-                    <div class="stats-icon bg-blue">
-                        <i class="bi bi-megaphone-fill"></i>
-                    </div>
-                    <div class="stats-info">
-                        <h3><?php echo number_format($total_announcements); ?></h3>
-                        <p>Total Announcements</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3 col-sm-6">
-                <div class="stats-card animate__animated animate__fadeIn" style="animation-delay: 0.2s">
-                    <div class="stats-icon bg-green">
-                        <i class="bi bi-building"></i>
-                    </div>
-                    <div class="stats-info">
-                        <h3><?php echo number_format($total_departments); ?></h3>
-                        <p>Departments</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3 col-sm-6">
-                <div class="stats-card animate__animated animate__fadeIn" style="animation-delay: 0.3s">
-                    <div class="stats-icon bg-orange">
-                        <i class="bi bi-send-fill"></i>
-                    </div>
-                    <div class="stats-info">
-                        <h3><?php echo number_format($total_sms); ?></h3>
-                        <p>SMS Sent</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+                            <li class="nav-item">
+                                <a href="../admin.php"><i class="fas fa-newspaper me-2"></i>Feed</a>
+                            </li>
 
-        <!-- Main Charts Row -->
-        <div class="row mb-4">
-            <div class="col-md-8">
-                <div class="chart-card animate__animated animate__fadeIn" style="animation-delay: 0.4s">
-                    <div class="chart-header">
-                        <h2 class="chart-title">Announcement Trends</h2>
-                        <div class="btn-group btn-group-sm">
-                            <button class="btn btn-outline-secondary active" data-period="month" onclick="updateTrendChart('month')">Monthly</button>
-                            <button class="btn btn-outline-secondary" data-period="week" onclick="updateTrendChart('week')">Weekly</button>
+                            <li class="nav-item">
+                                <a href="manage.php"><i class="fas fa-user me-2"></i>My Profile</a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a href="create.php"><i class="fas fa-bullhorn me-2"></i>Create Announcement</a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a href="logPage.php"><i class="fas fa-clipboard-list me-2"></i>Logs</a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a href="manage_student.php"><i class="fas fa-users-cog me-2"></i>Manage Accounts</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="dashboard-wrapper col-xxl-9 main-content" style="margin: 0 auto;">
+                    <div class="dashboard-header">
+                        <div>
+                            <h1 class="dashboard-title mt-5">Analytics Overview</h1>
+                            <p class="date-info">Last updated: <?php echo date('F d, Y h:i A'); ?>&nbsp;(PHT)</p>
+                        </div>
+                        <div class="refresh-button">
+                            <button class="btn btn-outline-primary btn-sm" onclick="refreshDashboard()">
+                                <i class="bi bi-arrow-clockwise"></i> Refresh Data
+                            </button>
                         </div>
                     </div>
-                    <div class="chart-container">
-                        <canvas id="trendChart"></canvas>
+
+                    <!-- Summary Stats Cards -->
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-4 col-sm-6">
+                            <div class="stats-card animate__animated animate__fadeIn">
+                                <div class="stats-icon bg-purple">
+                                    <i class="bi bi-people-fill"></i>
+                                </div>
+                                <div class="stats-info">
+                                    <h3><?php echo number_format($total_students); ?></h3>
+                                    <p>Total Students</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <div class="stats-card animate__animated animate__fadeIn" style="animation-delay: 0.1s">
+                                <div class="stats-icon bg-blue">
+                                    <i class="bi bi-megaphone-fill"></i>
+                                </div>
+                                <div class="stats-info">
+                                    <h3><?php echo number_format($total_announcements); ?></h3>
+                                    <p>Total Announcements</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <div class="stats-card animate__animated animate__fadeIn" style="animation-delay: 0.2s">
+                                <div class="stats-icon bg-green">
+                                    <i class="bi bi-building"></i>
+                                </div>
+                                <div class="stats-info">
+                                    <h3><?php echo number_format($total_departments); ?></h3>
+                                    <p>Departments</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Main Charts Row -->
+                    <div class="row mb-4">
+                        <div class="col-md-8">
+                            <div class="chart-card animate__animated animate__fadeIn" style="animation-delay: 0.4s">
+                                <div class="chart-header">
+                                    <h2 class="chart-title">Announcement Trends</h2>
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-outline-secondary active" data-period="month" onclick="updateTrendChart('month')">Monthly</button>
+                                        <button class="btn btn-outline-secondary" data-period="week" onclick="updateTrendChart('week')">Weekly</button>
+                                    </div>
+                                </div>
+                                <div class="chart-container">
+                                    <canvas id="trendChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="chart-card animate__animated animate__fadeIn" style="animation-delay: 0.5s">
+                                <div class="chart-header">
+                                    <h2 class="chart-title">SMS Delivery Status</h2>
+                                </div>
+                                <div class="chart-container">
+                                    <canvas id="smsChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Secondary Charts Row -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="chart-card animate__animated animate__fadeIn" style="animation-delay: 0.6s">
+                                <div class="chart-header">
+                                    <h2 class="chart-title">Department Distribution</h2>
+                                </div>
+                                <div class="chart-container">
+                                    <canvas id="deptChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="chart-card animate__animated animate__fadeIn" style="animation-delay: 0.7s">
+                                <div class="chart-header">
+                                    <h2 class="chart-title">Year Level Distribution</h2>
+                                </div>
+                                <div class="chart-container">
+                                    <canvas id="yearLevelChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="chart-card animate__animated animate__fadeIn" style="animation-delay: 0.5s">
-                    <div class="chart-header">
-                        <h2 class="chart-title">SMS Delivery Status</h2>
-                    </div>
-                    <div class="chart-container">
-                        <canvas id="smsChart"></canvas>
-                    </div>
-                </div>
+
             </div>
         </div>
 
-        <!-- Secondary Charts Row -->
-        <div class="row">
-            <div class="col-md-6">
-                <div class="chart-card animate__animated animate__fadeIn" style="animation-delay: 0.6s">
-                    <div class="chart-header">
-                        <h2 class="chart-title">Department Distribution</h2>
-                    </div>
-                    <div class="chart-container">
-                        <canvas id="deptChart"></canvas>
-                    </div>
-                </div>
+        <nav class="navbar nav-bottom fixed-bottom d-block d-xxl-none mt-5">
+            <div class="container-fluid d-flex justify-content-around">
+                <a href="dashboard.php" class="btn nav-bottom-btn active-btn">
+                    <i class="fas fa-chart-line"></i>
+                </a>
+
+                <a href="../admin.php" class="btn nav-bottom-btn">
+                    <i class="fas fa-newspaper"></i>
+                </a>
+
+                <a href="create.php" class="btn nav-bottom-btn">
+                    <i class="fas fa-bullhorn"></i>
+                </a>
+
+                <a href="logPage.php" class="btn nav-bottom-btn">
+                    <i class="fas fa-clipboard-list"></i>
+                </a>
+
+                <a href="manage_student.php" class="btn nav-bottom-btn">
+                    <i class="fas fa-users-cog"></i>
+                </a>
+
+                <a href="manage.php" class="btn nav-bottom-btn">
+                    <i class="fas fa-user"></i>
+                </a>
             </div>
-            <div class="col-md-6">
-                <div class="chart-card animate__animated animate__fadeIn" style="animation-delay: 0.7s">
-                    <div class="chart-header">
-                        <h2 class="chart-title">Year Level Distribution</h2>
-                    </div>
-                    <div class="chart-container">
-                        <canvas id="yearLevelChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+        </nav>
+
+    </main>
+
 
     <?php include '../../cdn/body.html'; ?>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/moment"></script>
-
+    <?php include 'get_dashboard.php'; ?>
     <script>
-        // Global chart instances
-        let trendChart, smsChart, deptChart, yearLevelChart;
-
-        // Chart color scheme
-        const chartColors = {
-            purple: '#6c5ce7',
-            blue: '#0984e3',
-            green: '#00b894',
-            orange: '#e17055',
-            red: '#d63031',
-            yellow: '#fdcb6e'
-        };
-
-        // Common chart options
-        const commonOptions = {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        padding: 20,
-                        font: {
-                            size: 12
-                        }
-                    }
-                },
-                tooltip: {
-                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                    titleColor: '#2d3436',
-                    bodyColor: '#2d3436',
-                    borderColor: '#dfe6e9',
-                    borderWidth: 1,
-                    padding: 12,
-                    displayColors: true,
-                    callbacks: {
-                        label: function(context) {
-                            return ` ${context.parsed}`;
-                        }
-                    }
-                }
+        function confirmLogout() {
+            if (confirm('Are you sure you want to sign out?')) {
+                window.location.href = '../../login/logout.php';
             }
-        };
-
-        // Initialize all charts
-        function initializeCharts() {
-            // Trend Chart
-            const trendCtx = document.getElementById('trendChart').getContext('2d');
-            trendChart = new Chart(trendCtx, {
-                type: 'line',
-                data: {
-                    labels: <?php echo json_encode(array_map(function ($item) {
-                                return date('M Y', strtotime($item['month']));
-                            }, $monthly_stats)); ?>,
-                    datasets: [{
-                        label: 'Announcements',
-                        data: <?php echo json_encode(array_map(function ($item) {
-                                    return $item['count'];
-                                }, $monthly_stats)); ?>,
-                        borderColor: chartColors.green,
-                        backgroundColor: `${chartColors.green}20`,
-                        tension: 0.4,
-                        fill: true
-                    }]
-                },
-                options: {
-                    ...commonOptions,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                drawBorder: false,
-                                color: '#f0f0f0'
-                            }
-                        },
-                        x: {
-                            grid: {
-                                display: false
-                            }
-                        }
-                    }
-                }
-            });
-
-            // SMS Chart
-            const smsCtx = document.getElementById('smsChart').getContext('2d');
-            smsChart = new Chart(smsCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: <?php echo json_encode(array_map(function ($item) {
-                                return ucfirst($item['status']) . ' (' . $item['percentage'] . '%)';
-                            }, $sms_stats)); ?>,
-                    datasets: [{
-                        data: <?php echo json_encode(array_map(function ($item) {
-                                    return $item['count'];
-                                }, $sms_stats)); ?>,
-                        backgroundColor: [chartColors.green, chartColors.red]
-                    }]
-                },
-                options: commonOptions
-            });
-
-            // Department Chart
-            const deptCtx = document.getElementById('deptChart').getContext('2d');
-            deptChart = new Chart(deptCtx, {
-                type: 'bar',
-                data: {
-                    labels: <?php echo json_encode(array_map(function ($item) {
-                                return $item['department_name'];
-                            }, $dept_stats)); ?>,
-                    datasets: [{
-                        label: 'Announcements',
-                        data: <?php echo json_encode(array_map(function ($item) {
-                                    return $item['count'];
-                                }, $dept_stats)); ?>,
-                        backgroundColor: chartColors.blue,
-                        borderRadius: 6
-                    }]
-                },
-                options: {
-                    ...commonOptions,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                drawBorder: false,
-                                color: '#f0f0f0'
-                            }
-                        },
-                        x: {
-                            grid: {
-                                display: false
-                            }
-                        }
-                    }
-                }
-            });
-
-            // Year Level Chart
-            const yearLevelCtx = document.getElementById('yearLevelChart').getContext('2d');
-            yearLevelChart = new Chart(yearLevelCtx, {
-                type: 'pie',
-                data: {
-                    labels: <?php echo json_encode(array_map(function ($item) {
-                                return $item['year_level'];
-                            }, $year_level_stats)); ?>,
-                    datasets: [{
-                        data: <?php echo json_encode(array_map(function ($item) {
-                                    return $item['count'];
-                                }, $year_level_stats)); ?>,
-                        backgroundColor: Object.values(chartColors)
-                    }]
-                },
-                options: commonOptions
-            });
+            return false;
         }
-
-        // Refresh dashboard data
-        function refreshDashboard() {
-            const refreshBtn = document.querySelector('.refresh-button button');
-            refreshBtn.disabled = true;
-            refreshBtn.innerHTML = '<i class="bi bi-arrow-clockwise animate-spin"></i> Refreshing...';
-
-            fetch('dashboard_data.php')
-                .then(response => response.json())
-                .then(data => {
-                    updateCharts(data);
-                    refreshBtn.disabled = false;
-                    refreshBtn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Refresh Data';
-                })
-                .catch(error => {
-                    console.error('Error refreshing dashboard:', error);
-                    refreshBtn.disabled = false;
-                    refreshBtn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Refresh Data';
-                });
-        }
-
-        // Update trend chart period
-        function updateTrendChart(period) {
-            const buttons = document.querySelectorAll('[data-period]');
-            buttons.forEach(btn => btn.classList.remove('active'));
-            document.querySelector(`[data-period="${period}"]`).classList.add('active');
-
-            fetch(`dashboard_data.php?period=${period}`)
-                .then(response => response.json())
-                .then(data => {
-                    trendChart.data.labels = data.labels;
-                    trendChart.data.datasets[0].data = data.values;
-                    trendChart.update();
-                });
-        }
-
-        // Initialize everything when the page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeCharts();
-            document.querySelector('.loading-overlay').style.display = 'none';
-        });
-
-        // Add resize handler for responsive charts
-        window.addEventListener('resize', function() {
-            if (trendChart) trendChart.resize();
-            if (smsChart) smsChart.resize();
-            if (deptChart) deptChart.resize();
-            if (yearLevelChart) yearLevelChart.resize();
-        });
     </script>
 </body>
 

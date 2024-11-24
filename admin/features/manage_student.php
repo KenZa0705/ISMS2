@@ -10,10 +10,12 @@ require 'vendor/autoload.php';
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
 session_start();
-if (!isset($_SESSION['user'])) {
+if (!isset($_SESSION['user']) || $_SESSION['user_type'] !== 'admin') {
+    $_SESSION = [];
+    session_destroy();
     header("Location: ../../login/login.php");
     exit();
-}
+} 
 
 //Get info from admin session
 $user = $_SESSION['user'];
@@ -41,9 +43,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['student_id'])) {
 
     if ($duplicateCheck->rowCount() > 0) {
         $duplicateData = $duplicateCheck->fetch(PDO::FETCH_ASSOC);
-        $duplicateField = ($duplicateData['email'] === $s_email) ? "email" : "contact number";
-        echo "<script>alert('Update failed: The " . $duplicateField . " is already in use by another student.');</script>";
-        echo "<script>window.location.href = 'manage_student.php';</script>";
+        if ($duplicateData['email'] === $s_email && $duplicateData['contact_number'] === $s_contact_number) {
+            $message = "Both email and contact number are already in use by another student.";
+        } else {
+            $duplicateField = ($duplicateData['email'] === $s_email) ? "email" : "contact number";
+            $message = "The " . $duplicateField . " is already in use by another student.";
+        }
+        echo "<script>
+            alert('Update failed: " . $message . "');
+            window.location.href = 'manage_student.php';
+        </script>";
         exit;
     }
 
@@ -101,8 +110,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['student_id'])) {
     // Add logging for the update
     if ($changes >= 1) {
         $changeLog = implode(", ", $changeDetails);
-        logAction($pdo, $admin_id, 'admin', 'UPDATE', 'student', $student_id, 
-            "Updated student information: $changeLog");
+        logAction(
+            $pdo,
+            $admin_id,
+            'admin',
+            'UPDATE',
+            'student',
+            $student_id,
+            "Updated student information: $changeLog"
+        );
     }
 
     // Send email if at least 2 fields were modified
@@ -154,9 +170,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         try {
             $spreadsheet = IOFactory::load($fileTmpPath);
             $sheetData = $spreadsheet->getActiveSheet()->toArray();
-            
+
             // Check if file is empty
-            if (count($sheetData) <= 1) { // Assuming first row is headers
+            if (count($sheetData) <= 1) {
                 echo "<script>alert('The Excel file is empty or contains only headers.');</script>";
                 echo "<script>window.location.href = 'manage_student.php';</script>";
                 exit;
@@ -168,18 +184,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             // Skip header row if it exists
             $startRow = 1;
-            
+
             for ($i = $startRow; $i < count($sheetData); $i++) {
                 $row = $sheetData[$i];
-                
+
                 // Check if row is empty
                 if (empty(array_filter($row))) {
                     continue;
                 }
 
                 // Validate required fields
-                if (empty($row[0]) || empty($row[1]) || empty($row[2]) || empty($row[3]) || 
-                    empty($row[4]) || empty($row[5]) || empty($row[6])) {
+                if (
+                    empty($row[0]) || empty($row[1]) || empty($row[2]) || empty($row[3]) ||
+                    empty($row[4]) || empty($row[5]) || empty($row[6])
+                ) {
                     $failedRows[] = $i + 1;
                     $errorDetails[$i + 1] = "Missing required fields";
                     continue;
@@ -227,15 +245,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 addNewStudent($s_first_name, $s_last_name, $s_email, $s_contact_number, $s_year, $s_dept, $s_course);
                 $successfulRows[] = $i + 1;
                 // Add logging for each successful addition
-                logAction($pdo, $admin_id, 'admin', 'ADD', 'student', null, 
-                    "Added student via Excel import: $s_first_name $s_last_name");
+                logAction(
+                    $pdo,
+                    $admin_id,
+                    'admin',
+                    'ADD',
+                    'student',
+                    null,
+                    "Added student via Excel import: $s_first_name $s_last_name"
+                );
             }
 
             // Prepare detailed error message
             $errorMessage = "Upload complete.\n\n";
             $errorMessage .= "Successful rows: " . implode(", ", $successfulRows) . "\n";
             $errorMessage .= "Failed rows: " . implode(", ", $failedRows) . "\n\n";
-            
+
             if (!empty($errorDetails)) {
                 $errorMessage .= "Error details:\n";
                 foreach ($errorDetails as $row => $error) {
@@ -246,7 +271,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             echo "<script>alert(`$errorMessage`);</script>";
             echo "<script>window.location.href = 'manage_student.php';</script>";
             exit;
-
         } catch (\PhpOffice\PhpSpreadsheet\Reader\Exception $e) {
             echo "<script>alert('Error reading Excel file: " . addslashes($e->getMessage()) . "');</script>";
             echo "<script>window.location.href = 'manage_student.php';</script>";
@@ -287,8 +311,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($s_year && $s_dept && $s_course) {
             addNewStudent($s_first_name, $s_last_name, $s_email, $s_contact_number, $s_year, $s_dept, $s_course);
             // Add logging
-            logAction($pdo, $admin_id, 'admin', 'ADD', 'student', null, 
-                "Added new student: $s_first_name $s_last_name");
+            logAction(
+                $pdo,
+                $admin_id,
+                'admin',
+                'ADD',
+                'student',
+                null,
+                "Added new student: $s_first_name $s_last_name"
+            );
             echo "<script>alert('Student added successfully.');</script>";
             echo "<script>window.location.href = 'manage_student.php';</script>";
         } else {
@@ -316,42 +347,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <link rel="stylesheet" href="../css/modals.css">
     <link rel="stylesheet" href="../css/sidebar.css">
     <link rel="stylesheet" href="../css/tables.css">
+    <link rel="stylesheet" href="../css/nav-bottom.css">
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css">
 </head>
 
 <body>
     <header>
         <?php include '../../cdn/navbar.php' ?>
-
-        <nav class="navbar nav-bottom fixed-bottom d-block d-md-none mt-5">
-            <div class="container-fluid justify-content-around">
-                <a href="../admin.php" class="btn nav-bottom-btn">
-                    <i class="bi bi-house"></i>
-                    <span class="icon-label">Home</span>
-                </a>
-
-                <a class="btn nav-bottom-btn" href="manage.php">
-                    <i class="bi bi-kanban"></i>
-                    <span class="icon-label">Manage</span>
-                </a>
-
-                <a class="btn nav-bottom-btn" href="create.php">
-                    <i class="bi bi-megaphone"></i>
-                    <span class="icon-label">Create</span>
-                </a>
-
-                <a class="btn nav-bottom-btn" href="logPage.php">
-                    <i class="bi bi-clipboard"></i>
-                    <span class="icon-label">Logs</span>
-                </a>
-
-                <a class="btn nav-bottom-btn active" href="manage_student.php">
-                    <i class="bi bi-person-plus"></i>
-                    <span class="icon-label">Students</span>
-                </a>
-
-            </div>
-        </nav>
     </header>
     <main>
         <div class="container-fluid pt-5">
@@ -404,6 +406,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                     </button>
                                 </div>
                             </form>
+
                         </div>
                     </div>
                     <div class="card shadow">
@@ -515,7 +518,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         $('#addStudentForm').on('submit', function(e) {
                             var contactNumber = $('#contactNumber').val();
                             // Regular expression for validating PH mobile numbers starting with 09 or +639
-                            var regex = /^9\d{10}$/;
+                            var regex = /^9\d{9}$/;
 
                             if (!regex.test(contactNumber)) {
                                 e.preventDefault(); // Prevent form submission
@@ -547,13 +550,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     </div>
                 </div>
 
+
+
                 <!-- after deletion modal -->
                 <div class="modal fade" id="studentDelete" tabindex="-1" aria-labelledby="student-deleted" aria-hidden="true">
-                    <div class="modal-dialog modal-md">
-                        <div class="modal-content delete-message">
-                            <div class="modal-header" style="border: none;">
-                                <p class="modal-title" id="exampleModalLabel">Student record was deleted succesfully.</p>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <div class="modal-dialog modal-dialog-centered modal-sm">
+                        <div class="modal-content text-center">
+                            <div class="modal-body p-4">
+                                <div class="mb-2">
+                                    <i class="bi bi-check-circle-fill text-success" style="font-size: 2rem;"></i>
+                                </div>
+                                <h6 class="modal-title mb-1" id="student-deleted">Success</h6>
+                                <p class="small mb-3">Student record was deleted successfully.</p>
+                                <button type="button" class="btn btn-success btn-sm w-100" data-bs-dismiss="modal">OK</button>
                             </div>
                         </div>
                     </div>
@@ -575,15 +584,45 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     });
                 </script>
                 <?php include 'changePassOtherPage.html'; ?>
+
+                <nav class="navbar nav-bottom fixed-bottom d-block d-lg-none mt-5">
+                    <div class="container-fluid d-flex justify-content-around">
+                        <a href="dashboard.php" class="btn nav-bottom-btn">
+                            <i class="fas fa-chart-line"></i>
+                        </a>
+
+                        <a href="../admin.php" class="btn nav-bottom-btn">
+                            <i class="fas fa-newspaper"></i>
+                        </a>
+
+                        <a href="create.php" class="btn nav-bottom-btn">
+                            <i class="fas fa-bullhorn"></i>
+                        </a>
+
+                        <a href="logPage.php" class="btn nav-bottom-btn">
+                            <i class="fas fa-clipboard-list"></i>
+                        </a>
+
+                        <a href="manage_student.php" class="btn nav-bottom-btn active-btn">
+                            <i class="fas fa-users-cog"></i>
+                        </a>
+
+                        <a href="manage.php" class="btn nav-bottom-btn">
+                            <i class="fas fa-user"></i>
+                        </a>
+                    </div>
+                </nav>
     </main>
     <!-- Body CDN links -->
     <?php include '../../cdn/body.html'; ?>
-    <!-- Add this before the closing </body> tag -->
+
     <script>
         $(document).ready(function() {
             $('.table').DataTable({
                 responsive: false,
-                order: [[1, 'asc']], // Sort by Full Name column by default
+                order: [
+                    [1, 'asc']
+                ], // Sort by Full Name column by default
                 pageLength: 15, // Show 15 entries per page
                 lengthChange: false, // Remove "Show entries" dropdown
                 language: {
@@ -598,8 +637,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         previous: "Previous"
                     }
                 },
-                columnDefs: [
-                    {
+                columnDefs: [{
                         orderable: false,
                         targets: [7] // Disable sorting for Action column
                     },
@@ -615,6 +653,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 }
             });
         });
+        function confirmLogout() {
+            if (confirm('Are you sure you want to sign out?')) {
+                window.location.href = '../../login/logout.php';
+            }
+            return false;
+        }
     </script>
     <script type="text/javascript" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>

@@ -223,11 +223,11 @@ function addNewStudent($s_first_name, $s_last_name, $s_email, $s_contact_number,
     $formattedFirstName = ucfirst(strtolower($s_first_name));
     $lastFourDigits = substr($s_contact_number, -4); // Extract last four digits
     $password = $formattedFirstName . $lastFourDigits;
-    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-
+    $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
+    $default_pp = "img/test pic.jpg";
     // Prepare the SQL statement with the generated password
-    $sql = "INSERT INTO student (password, first_name, last_name, email, contact_number, year_level_id, department_id, course_id) 
-            VALUES (:password, :first_name, :last_name, :email, :contact_number, :ylevel, :dept, :course)";
+    $sql = "INSERT INTO student (password, first_name, last_name, email, contact_number, year_level_id, department_id, course_id, profile_picture) 
+            VALUES (:password, :first_name, :last_name, :email, :contact_number, :ylevel, :dept, :course, :profile_picture)";
 
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':password', $hashedPassword);
@@ -238,6 +238,7 @@ function addNewStudent($s_first_name, $s_last_name, $s_email, $s_contact_number,
     $stmt->bindParam(':ylevel', $s_year);
     $stmt->bindParam(':dept', $s_dept);
     $stmt->bindParam(':course', $s_course);
+    $stmt->bindParam('profile_picture', $default_pp);
 
     if ($stmt->execute()) {
         // Send email with password setup link

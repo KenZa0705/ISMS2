@@ -1,265 +1,514 @@
 <?php
-require_once '../login/dbh.inc.php'; // DATABASE CONNECTION
+require_once '../login/dbh.inc.php';
 session_start();
 if (!isset($_SESSION['user'])) {
     header("Location: ../login/login.php");
     exit();
 }
 
-//Get info from student session
+//Get info from admin session
 $user = $_SESSION['user'];
 $student_id = $_SESSION['user']['student_id'];
+$user_id = $_SESSION['user']['student_id'];
 $first_name = $_SESSION['user']['first_name'];
 $last_name = $_SESSION['user']['last_name'];
 $email = $_SESSION['user']['email'];
 $contact_number = $_SESSION['user']['contact_number'];
 $department_id = $_SESSION['user']['department_id'];
-$year = $_SESSION['user']['year_level_id'];
-$course = $_SESSION['user']['course_id'];
+$profile_picture = $_SESSION['user']['profile_picture'];
+// Initialize filter arrays
+$selected_departments = [];
+$selected_year_levels = [];
+$selected_courses = [];
 ?>
 
-
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
-    <title>Title</title>
-    <!-- Required meta tags -->
+    <title>ISMS Portal</title>
     <meta charset="utf-8" />
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <?php include '../cdn/head.html'; ?>
-
-    <link rel="stylesheet" href="user.css">
-
+    <link rel="stylesheet" href="../admin/css/admin.css">
+    <link rel="stylesheet" href="../admin/css/modals.css">
+    <link rel="stylesheet" href="../admin/css/sidebar.css">
+    <link rel="stylesheet" href="../admin/css/feeds-card.css">
+    <link rel="stylesheet" href="../admin/css/bsu-bg.css">
+    <link rel="stylesheet" href="../admin/css/filter-modal.css">
 </head>
 
 <body>
     <header>
-        <?php include '../cdn/navbar.php' ?>
+        <nav class="navbar navbar-expand-lg bg-white text-black fixed-top mb-5" style="border-bottom: 1px solid #e9ecef; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);">
+            <div class="container-fluid">
+                <div class="user-left d-flex">
+                    <div class="d-md-none ms-0 mt-2 me-3">
+                        <button type="button" class="btn btn-filter" data-bs-toggle="modal" data-bs-target="#filterModal"
+                            style="border-radius: 50%; outline: none !important; box-shadow: none !important; border: none !important;"
+                            onmousedown="this.style.outline='none'"
+                            onfocus="this.style.outline='none'">
+                            <i class="bi bi-funnel"></i>
+                        </button>
+                    </div>
+
+                    <a class="navbar-brand d-flex align-items-center" href="#"><img src="img/brand.png" class="img-fluid branding" alt=""></a>
+                </div>
+
+                <div class="search-container">
+                    <form id="searchForm" class="d-flex align-items-center gap-2">
+                        <!-- Filter Button -->
+                        <button type="button" class="btn btn-light filter-btn" data-bs-toggle="modal" data-bs-target="#filterModal">
+                            <i class="bi bi-funnel"></i>
+                        </button>
+
+                        <!-- Search Input Group -->
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0">
+                                <i class="bi bi-search text-muted"></i>
+                            </span>
+                            <input type="text"
+                                name="search"
+                                class="form-control border-start-0 ps-0"
+                                placeholder="Search announcements..."
+                                aria-label="Search announcements">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-search me-2 d-none d-md-inline"></i>Search
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="user-right d-flex align-items-center justify-content-center">
+                    <p class="username d-flex align-items-center m-0"><?php echo $first_name ?></p>
+                    <div class="user-profile">
+                        <div class="dropdown">
+                            <button class="dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" style="border: none; background: none; padding: 0;">
+                                <img class="img-fluid w-100" src="<?php echo "uploads/" . htmlspecialchars($profile_picture); ?>" alt="Profile Picture">
+                            </button>
+                            <ul class="dropdown-menu mt-3" style="left: auto; right:1px;">
+                                <li>
+                                    <div class="dropdown-item text-center">
+                                        <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                                            Change Password
+                                        </button>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="dropdown-item text-center">
+                                        <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#changeProfilePictureModal">
+                                            Change Profile Picture
+                                        </button>
+                                    </div>
+                                </li>
+                                <li><a class="dropdown-item text-center" onclick="alert('Logged Out Successfully')" href="../login/logout.php">Logout</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+        </nav>
+        
     </header>
+
     <main>
-        <div class="container-fluid pt-5">
+        <div class="container-fluid pt-5 parent">
             <div class="row g-4">
-                <!-- left sidebar -->
-                <div class="col-md-3 d-none d-md-block">
-                    <div class="sticky-sidebar pt-5">
-                        <div class="filter">
-                            <div class="card">
-                                <div class="card-body">
-                                    <div class="posts">
-                                        <h5 class="text-center card-title">Announcements Filter</h5>
-                                        <form class="filtered_option d-flex flex-column" action="">
-                                            <label>Choose Department</label>
-                                            <div class="checkbox-group mb-3">
-                                                <label><input type="checkbox" name="department_filter" value="1"> CECS</label><br>
-                                                <label><input type="checkbox" name="department_filter" value="2"> CABE</label><br>
-                                                <label><input type="checkbox" name="department_filter" value="3"> CAS</label><br>
-                                            </div>
+                <!-- Left sidebar -->
+                <div class="col-lg-3 sidebar sidebar-left d-none d-lg-block">
+                    <div class="sticky-sidebar">
+                        <ul class="nav flex-column">
 
-                                            <label>Select Year Level</label>
-                                            <div class="checkbox-group">
-                                                <label><input type="checkbox" name="year_level" value="1"> 1st Year</label><br>
-                                                <label><input type="checkbox" name="year_level" value="2"> 2nd Year</label><br>
-                                                <label><input type="checkbox" name="year_level" value="3"> 3rd Year</label><br>
-                                                <label><input type="checkbox" name="year_level" value="4"> 4th Year</label><br>
+                            <li class="nav-item">
+                                <a class="active" href="user.php"><i class="fas fa-newspaper me-2"></i>Feed</a>
+                            </li>
 
-                                            </div>
-                                            <button type="button" class="btn btn-primary mt-3">Filter</button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                            <li class="nav-item">
+                                <a href="features/logPage.php"><i class="fas fa-clipboard-list me-2"></i>Logs</a>
+                            </li>
+                            
+                        </ul>
                     </div>
                 </div>
+                <!-- Main content -->
+                <div class="col-12 col-xxl-9 col-lg-8 main-content pt-4 px-5">
+                    <div class="row g-0">
+                        <div class="col-xxl-7 col-lg-12 feed-container mt-4">
+                            <div id="loading" style="display: none;" class="text-center">
+                                <div class="spinner-border" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                            <?php include 'filter_announcements.php'; ?>
+                        </div>
 
-                <div class="col-md-6 main-content pt-5 px-5">
-                    <div class="feed-container">
-                        <?php
-                        require_once '../login/dbh.inc.php';
+                        <div class="col-lg-5 announcement-card d-none d-xxl-block">
+                            <?php
+                            require_once '../login/dbh.inc.php';
 
-                        try {
-                            // Query to get the announcements along with the year level, department, and course
-                            $query = "
-                            SELECT a.*, ad.first_name, ad.last_name,
-                                STRING_AGG(DISTINCT yl.year_level, ', ') AS year_levels,
-                                STRING_AGG(DISTINCT d.department_name, ', ') AS departments,
-                                STRING_AGG(DISTINCT c.course_name, ', ') AS courses
-                            FROM announcement a
-                            JOIN admin ad ON a.admin_id = ad.admin_id
-                            LEFT JOIN announcement_year_level ayl ON a.announcement_id = ayl.announcement_id
-                            LEFT JOIN year_level yl ON ayl.year_level_id = yl.year_level_id
-                            LEFT JOIN announcement_department adp ON a.announcement_id = adp.announcement_id
-                            LEFT JOIN department d ON adp.department_id = d.department_id
-                            LEFT JOIN announcement_course ac ON a.announcement_id = ac.announcement_id
-                            LEFT JOIN course c ON ac.course_id = c.course_id
-                            GROUP BY a.announcement_id, ad.first_name, ad.last_name
-                            ORDER BY a.updated_at DESC";
+                            try {
+                                $query = "SELECT a.*, b.first_name, b.last_name, b.profile_picture 
+                                FROM announcement a 
+                                JOIN admin b ON a.admin_id = b.admin_id 
+                                ORDER BY a.updated_at DESC 
+                                LIMIT 3";
 
-                            $stmt = $pdo->prepare($query);
-                            $stmt->execute();
 
-                            $announcements = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                                $stmt = $pdo->prepare($query);
+                                $stmt->execute();
 
-                            if ($announcements) {
-                                foreach ($announcements as $row) {
-                                    $announcement_id = $row['announcement_id'];
-                                    $title = $row['title'];
-                                    $description = $row['description'];
-                                    $image = $row['image'];
-                                    $announcement_admin_id = $row['admin_id'];
-                                    $admin_first_name = $row['first_name'];
-                                    $admin_last_name = $row['last_name'];
-                                    $admin_name =  $admin_first_name . ' ' . $admin_last_name;
-                                    $updated_at = date('F d, Y', strtotime($row['updated_at']));
-                                    $year_levels = !empty($row['year_levels']) ? explode(',', $row['year_levels']) : [''];
-                                    $departments = !empty($row['departments']) ? explode(',', $row['departments']) : [''];
-                                    $courses = !empty($row['courses']) ? explode(',', $row['courses']) : [''];
-                        ?>
-
-                                    <div class="card mb-3">
-                                        <div class="profile-container d-flex px-3 pt-3">
-                                            <div class="profile-pic">
-                                                <img class="img-fluid" src="img/test pic.jpg" alt="">
+                                $announcements = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                            ?>
+                                <div class="sticky-recent-post mt-3">
+                                    <div class="filter">
+                                        <div class="card latest-card p-2">
+                                            <div class="card-body">
+                                                <p class="card-title mb-3">RECENT POSTS</p>
+                                                <div class="posts">
+                                                    <?php
+                                                    if ($announcements) {
+                                                        $announcementCount = count($announcements);
+                                                        foreach ($announcements as $index => $row) {
+                                                            $id = $row['announcement_id'];
+                                                            $title = $row['title'];
+                                                            $image = $row['image'];
+                                                            $admin_first_name = $row['first_name'];
+                                                            $admin_last_name = $row['last_name'];
+                                                            $admin_name =  $admin_first_name . ' ' . $admin_last_name;
+                                                            $admin_pp = $row['profile_picture'];
+                                                    ?>
+                                                            <div class="d-flex flex-column recent mb-2">
+                                                                <div class="row">
+                                                                    <div class="col-md-8 recent-profile-container">
+                                                                        <div class="recent-container d-flex">
+                                                                            <img class="profile-picture" src="<?php echo "../admin/uploads/" . htmlspecialchars($admin_pp); ?>" alt="Profile Picture">
+                                                                            <p class="mt-1 ms-2"><?php echo htmlspecialchars($admin_name) ?></p>
+                                                                        </div>
+                                                                        <div class="title-container mt-0">
+                                                                            <a style="color:black; text-decoration: none;" href="try.php?id=<?php echo $id; ?>"><?php echo htmlspecialchars($title); ?></a>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-md-4 post-img">
+                                                                        <div class="post-img-container">
+                                                                            <img class="post-image" src="../admin/uploads/<?php echo htmlspecialchars($image); ?>" alt="Post Image" class="img-fluid">
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                    <?php
+                                                            // Only display <hr> if it's not the last announcement
+                                                            if ($index < $announcementCount - 1) {
+                                                                echo '<hr>';
+                                                            }
+                                                        }
+                                                    } else {
+                                                        echo '<p class="text-center">No announcements found.</p>';
+                                                    }
+                                                    ?>
+                                                </div>
                                             </div>
-                                            <p class="ms-1 mt-1"><?php echo htmlspecialchars($admin_name); ?></p>
-                                            <div class="dropdown ms-auto">
-                                                <span id="dropdownMenuButton<?php echo $announcement_id; ?>" data-bs-toggle="dropdown" aria-expanded="false">
-                                                    <i class="bi bi-three-dots"></i>
-                                                </span>
-                                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton<?php echo $announcement_id; ?>">
-                                                    <li><a class="dropdown-item" href="edit_announcement.php?id=<?php echo $announcement_id; ?>">Edit</a></li>
-                                                    <li>
-                                                        <a class="dropdown-item text-danger" href="#"
-                                                            data-bs-toggle="modal"
-                                                            data-bs-target="#deletePost"
-                                                            data-announcement-id="<?php echo $announcement_id; ?>">Delete</a>
-                                                    </li>
-                                                </ul>
-                                            </div>
-                                        </div>
-
-                                        <div class="image-container mx-3">
-                                            <a href="uploads/<?php echo htmlspecialchars($image); ?>" data-lightbox="image-<?php echo $announcement_id; ?>" data-title="<?php echo htmlspecialchars($title); ?>">
-                                                <img src="../admin/uploads/<?php echo htmlspecialchars($image); ?>" alt="Post Image" class="img-fluid">
-                                            </a>
-                                        </div>
-
-                                        <div class="card-body">
-                                            <h5 class="card-title"><?php echo htmlspecialchars($title); ?></h5>
-                                            <div class="card-text">
-                                                <p class="mb-2"><?php echo htmlspecialchars($description); ?></p>
-
-                                                Tags:
-                                                <?php
-
-                                                $all_tags = array_merge($year_levels, $departments, $courses);
-
-
-                                                foreach ($all_tags as $tag) : ?>
-                                                    <span class="badge rounded-pill bg-danger mb-2"><?php echo htmlspecialchars(trim($tag)); ?></span>
-                                                <?php endforeach; ?>
-                                            </div>
-
-                                            <small>Updated at <?php echo htmlspecialchars($updated_at); ?></small>
                                         </div>
                                     </div>
-
-                        <?php
-                                }
-                            } else {
-                                echo '<p class="text-center">No announcements found.</p>';
+                                </div>
+                            <?php
+                            } catch (PDOException $e) {
+                                // Handle any errors that occur during query execution
+                                echo "Error: " . htmlspecialchars($e->getMessage());
                             }
-                        } catch (PDOException $e) {
-                            // Handle any errors that occur during query execution
-                            echo "Error: " . $e->getMessage();
-                        }
-                        ?>
+                            ?>
 
-                    </div>
-                </div>
+                        </div>
 
-                <!-- right sidebar -->
-                <div class="col-md-3 d-none d-md-block">
-                    <div class="sticky-sidebar pt-5">
-                        <div class="card w-100">
-                            <div class="card-body">
-                                <h5 class="card-title text-center mb-2">Recent Posts</h5>
-                                <div class="posts px-4">
-                                    <div class="d-flex">
-                                        <i class="bi bi-star me-2"></i> <span>JPCS Membership Fee</span>
-                                    </div>
-                                </div>
+                        <div class="col-xxl-12 w-100 d-flex justify-content-end send-feedback">
+                            <div class="img-container">
+                                <img class="customer-icon" src="img/headset.png" alt="" onclick="toggleFeedbackForm()">
                             </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- offcanvas sidebar -->
-        <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasSidebarsLabel">
-            <div class="offcanvas-header d-flex">
-                <img class="img-fluid w-100" src="img/brand.png" alt="">
-                <h5 class="offcanvas-title" id="offcanvasSidebarsLabel">ISMS</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-            </div>
-            <div class="offcanvas-body mx-2">
-                <form class="d-flex mx-2 mb-3" role="search">
-                    <!-- <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-                    <button style="border: none; background: none;"><i class="bi bi-search"></i></i></button> -->
-                </form>
+                            <div class="card shadow feedback-form" id="feedbackForm">
+                                <div class="form-header mb-4">
+                                    <h5 class="fw-bold">Send Feedback</h5>
+                                    <button type="button" class="btn-close" onclick="toggleFeedbackForm()"></button>
+                                </div>
 
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <h5 class="card-title text-center mb-2">Recent Posts</h5>
-                    </div>
-                    <div class="posts px-4">
-                        <div class="d-flex">
-                            <i class="bi bi-star me-2"></i> <span>JPCS Membership Fee</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="filter">
-                    <div class="card">
-                        <div class="card-body">
-                            <p class="text-center card-title">Announcements Filter</p>
-                            <div class="d-flex justify-content-center">
-                                <form class="filtered_option d-flex flex-column" action="">
-                                    <label>Choose Department</label>
-                                    <div class="checkbox-group mb-3">
-                                        <label><input type="checkbox" name="department_filter" value="1"> CECS</label><br>
-                                        <label><input type="checkbox" name="department_filter" value="2"> CABE</label><br>
-                                        <label><input type="checkbox" name="department_filter" value="3"> CAS</label><br>
+                                <form id="customerFeedback">
+                                    <div class="form-floating mb-3">
+                                        <input type="text" class="form-control" id="name" placeholder="Name" required>
+                                        <label for="name">Name</label>
                                     </div>
 
-                                    <label>Select Year Level</label>
-                                    <div class="checkbox-group">
-                                        <label><input type="checkbox" name="year_level" value="1"> 1st Year</label><br>
-                                        <label><input type="checkbox" name="year_level" value="2"> 2nd Year</label><br>
-                                        <label><input type="checkbox" name="year_level" value="3"> 3rd Year</label><br>
-                                        <label><input type="checkbox" name="year_level" value="4"> 4th Year</label><br>
-
+                                    <div class="form-floating mb-3">
+                                        <input type="email" class="form-control" id="email" placeholder="name@example.com" required>
+                                        <label for="email">Email address</label>
                                     </div>
-                                    <button class="btn btn-primary mt-3">Filter</button>
+
+                                    <div class="form-floating mb-3">
+                                        <textarea class="form-control" id="message" placeholder="Leave a message here" style="height: 100px" required></textarea>
+                                        <label for="message">Message</label>
+                                    </div>
+
+                                    <div class="d-flex justify-content-end">
+                                        <button type="submit" class="btn btn-danger">Send Message</button>
+                                    </div>
                                 </form>
                             </div>
                         </div>
+
+                        <script>
+                            function toggleFeedbackForm() {
+                                const form = document.getElementById('feedbackForm');
+                                const feedbackIcon = document.querySelector('.customer-icon');
+
+                                form.classList.toggle('active');
+                                feedbackIcon.style.display = form.classList.contains('active') ? 'none' : 'block';
+                            }
+
+                            function closeFeedbackForm() {
+                                const form = document.getElementById('feedbackForm');
+                                const feedbackIcon = document.querySelector('.customer-icon');
+
+                                form.classList.remove('active');
+                                feedbackIcon.style.display = 'block';
+                            }
+
+                            // Event listener for ESC key
+                            document.addEventListener('keydown', function(event) {
+                                if (event.key === 'Escape') {
+                                    closeFeedbackForm();
+                                }
+                            });
+                        </script>
+
+                    </div>
+
+
+                </div>
+
+
+            </div>
+        </div>
+
+
+        <!-- The Modal -->
+        <div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="filterModalLabel">
+                            <i class="bi bi-funnel-fill me-2"></i>Announcements Filter
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form class="filtered_option" id="filterForm">
+                            <!-- Department Section -->
+                            <div class="filter-section">
+                                <h6 class="filter-title">Choose Department</h6>
+                                <div class="filter-options">
+                                    <label class="filter-chip">
+                                        <input type="checkbox" name="department_filter[]" value="CICS">
+                                        <span>CICS</span>
+                                    </label>
+                                    <label class="filter-chip">
+                                        <input type="checkbox" name="department_filter[]" value="CABE">
+                                        <span>CABE</span>
+                                    </label>
+                                    <label class="filter-chip">
+                                        <input type="checkbox" name="department_filter[]" value="CAS">
+                                        <span>CAS</span>
+                                    </label>
+                                    <label class="filter-chip">
+                                        <input type="checkbox" name="department_filter[]" value="CIT">
+                                        <span>CIT</span>
+                                    </label>
+                                    <label class="filter-chip">
+                                        <input type="checkbox" name="department_filter[]" value="CTE">
+                                        <span>CTE</span>
+                                    </label>
+                                    <label class="filter-chip">
+                                        <input type="checkbox" name="department_filter[]" value="CE">
+                                        <span>CE</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Year Level Section -->
+                            <div class="filter-section">
+                                <h6 class="filter-title"> Select Year Level</h6>
+                                <div class="filter-options">
+                                    <label class="filter-chip">
+                                        <input type="checkbox" name="year_level[]" value="1st Year">
+                                        <span>1st Year</span>
+                                    </label>
+                                    <label class="filter-chip">
+                                        <input type="checkbox" name="year_level[]" value="2nd Year">
+                                        <span>2nd Year</span>
+                                    </label>
+                                    <label class="filter-chip">
+                                        <input type="checkbox" name="year_level[]" value="3rd Year">
+                                        <span>3rd Year</span>
+                                    </label>
+                                    <label class="filter-chip">
+                                        <input type="checkbox" name="year_level[]" value="4th Year">
+                                        <span>4th Year</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Courses Section -->
+                            <div class="filter-section">
+                                <h6 class="filter-title">Courses</h6>
+                                <div class="filter-options">
+                                    <label class="filter-chip" title="Bachelor of Science in Business Accounting">
+                                        <input type="checkbox" name="course[]" value="BSBA" <?php if (in_array('BSBA', $selected_courses)) echo 'checked'; ?>>
+                                        <span>BSBA</span>
+                                    </label>
+                                    <label class="filter-chip" title="Bachelor of Science in Management Accounting">
+                                        <input type="checkbox" name="course[]" value="BSMA" <?php if (in_array('BSMA', $selected_courses)) echo 'checked'; ?>>
+                                        <span>BSMA</span>
+                                    </label>
+                                    <label class="filter-chip" title="Bachelor of Science in Psychology">
+                                        <input type="checkbox" name="course[]" value="BSP" <?php if (in_array('BSP', $selected_courses)) echo 'checked'; ?>>
+                                        <span>BSP</span>
+                                    </label>
+                                    <label class="filter-chip" title="Bachelor of Arts in Communication">
+                                        <input type="checkbox" name="course[]" value="BAC" <?php if (in_array('BAC', $selected_courses)) echo 'checked'; ?>>
+                                        <span>BAC</span>
+                                    </label>
+                                    <label class="filter-chip" title="Bachelor of Science in Industrial Engineering">
+                                        <input type="checkbox" name="course[]" value="BSIE" <?php if (in_array('BSIE', $selected_courses)) echo 'checked'; ?>>
+                                        <span>BSIE</span>
+                                    </label>
+                                    <label class="filter-chip" title="Bachelor of Industrial Technology - Computer Technology">
+                                        <input type="checkbox" name="course[]" value="BSIT-CE" <?php if (in_array('BSIT-CE', $selected_courses)) echo 'checked'; ?>>
+                                        <span>BSIT-CE</span>
+                                    </label>
+                                    <label class="filter-chip" title="Bachelor of Industrial Technology - Electrical Technology">
+                                        <input type="checkbox" name="course[]" value="BSIT-Electrical" <?php if (in_array('BSIT-Electrical', $selected_courses)) echo 'checked'; ?>>
+                                        <span>BSIT-E</span>
+                                    </label>
+                                    <label class="filter-chip" title="Bachelor of Industrial Technology - Electronics Technology">
+                                        <input type="checkbox" name="course[]" value="BSIT-Electronic" <?php if (in_array('BSIT-Electronic', $selected_courses)) echo 'checked'; ?>>
+                                        <span>BSIT-ET</span>
+                                    </label>
+                                    <label class="filter-chip" title="Bachelor of Industrial Technology - Instrumentation and Control Technology">
+                                        <input type="checkbox" name="course[]" value="BSIT-ICT" <?php if (in_array('BSIT-ICT', $selected_courses)) echo 'checked'; ?>>
+                                        <span>BSIT-ICT</span>
+                                    </label>
+                                    <label class="filter-chip" title="Bachelor of Science in Information Technology">
+                                        <input type="checkbox" name="course[]" value="BSIT" <?php if (in_array('BSIT', $selected_courses)) echo 'checked'; ?>>
+                                        <span>BSIT</span>
+                                    </label>
+                                    <label class="filter-chip" title="Bachelor of Secondary Education">
+                                        <input type="checkbox" name="course[]" value="BSE" <?php if (in_array('BSE', $selected_courses)) echo 'checked'; ?>>
+                                        <span>BSE</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="reset" class="btn btn-secondary" form="filterForm">
+                            <i class="bi bi-x-circle me-2"></i>Clear Filters
+                        </button>
+                        <button type="submit" class="btn btn-primary" form="filterForm">
+                            <i class="bi bi-check2-circle me-2"></i>Apply Filters
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
-
+        <?php require 'features/changePassMainPage.html'; ?>
     </main>
-    <script src="user.js"></script>
-    <footer>
 
-    </footer>
-    <!-- Bootstrap JavaScript Libraries -->
+    <script src="../admin/js/blur.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const filterForm = document.querySelector('#filterForm');
+            const searchForm = document.querySelector('#searchForm');
+            const searchInput = searchForm.querySelector('input[name="search"]');
+            const loadingIndicator = document.getElementById('loading');
+            const feedContainer = document.querySelector('.feed-container');
+
+            function fetchAnnouncements(form) {
+                loadingIndicator.style.display = 'block';
+                feedContainer.style.opacity = '0.5';
+
+                const formData = new FormData(form);
+
+                fetch('filter_announcements.php', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.text())
+                    .then(data => {
+                        feedContainer.innerHTML = data;
+                        feedContainer.style.opacity = '1';
+                        loadingIndicator.style.display = 'none';
+
+                        applyBlurBackground();
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        loadingIndicator.style.display = 'none';
+                        feedContainer.style.opacity = '1';
+                    });
+            }
+
+            // Handle filter form submit
+            filterForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                fetchAnnouncements(this);
+            });
+
+            // Handle search form submit
+            searchForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                fetchAnnouncements(this);
+            });
+
+            // Handle reset button on filter form
+            filterForm.addEventListener('reset', function(e) {
+                setTimeout(() => {
+                    searchInput.value = ''; // Clear the search input
+                    fetchAnnouncements(filterForm);
+                }, 10);
+            });
+        });
+
+        document.getElementById('customerFeedback').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                message: document.getElementById('message').value
+            };
+
+            fetch('features/handle_feedback.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('Thank you for your feedback!');
+                    document.getElementById('customerFeedback').reset();
+                    closeFeedbackForm();
+                } else {
+                    alert(data.message || 'An error occurred');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while submitting feedback');
+            });
+        });
+    </script>
+    <script src="../admin/js/admin.js"></script>
+
     <?php include '../cdn/body.html'; ?>
 </body>
 

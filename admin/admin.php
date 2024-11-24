@@ -1,10 +1,12 @@
 <?php
 require_once '../login/dbh.inc.php';
 session_start();
-if (!isset($_SESSION['user'])) {
+if (!isset($_SESSION['user']) || $_SESSION['user_type'] !== 'admin') {
+    $_SESSION = [];
+    session_destroy();
     header("Location: ../login/login.php");
     exit();
-}
+} 
 
 //Get info from admin session
 $user = $_SESSION['user'];
@@ -24,6 +26,7 @@ $selected_courses = [];
 <!DOCTYPE html>
 <html lang="en">
 
+
 <head>
     <title>ISMS Portal</title>
     <meta charset="utf-8" />
@@ -33,8 +36,9 @@ $selected_courses = [];
     <link rel="stylesheet" href="css/modals.css">
     <link rel="stylesheet" href="css/sidebar.css">
     <link rel="stylesheet" href="css/feeds-card.css">
-    <link rel="stylesheet" href="../admin/css/bsu-bg.css">
+    <link rel="stylesheet" href="css/bsu-bg.css">
     <link rel="stylesheet" href="css/filter-modal.css">
+    <link rel="stylesheet" href="css/nav-bottom.css">
 </head>
 
 <body>
@@ -42,19 +46,10 @@ $selected_courses = [];
         <nav class="navbar navbar-expand-lg bg-white text-black fixed-top mb-5" style="border-bottom: 1px solid #e9ecef; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);">
             <div class="container-fluid">
                 <div class="user-left d-flex">
-                    <div class="d-md-none ms-0 mt-2 me-3">
-                        <button type="button" class="btn btn-filter" data-bs-toggle="modal" data-bs-target="#filterModal"
-                            style="border-radius: 50%; outline: none !important; box-shadow: none !important; border: none !important;"
-                            onmousedown="this.style.outline='none'"
-                            onfocus="this.style.outline='none'">
-                            <i class="bi bi-funnel"></i>
-                        </button>
-                    </div>
-
                     <a class="navbar-brand d-flex align-items-center" href="#"><img src="img/brand.png" class="img-fluid branding" alt=""></a>
                 </div>
 
-                <div class="search-container">
+                <div class="search-container d-none d-lg-block">
                     <form id="searchForm" class="d-flex align-items-center gap-2">
                         <!-- Filter Button -->
                         <button type="button" class="btn btn-light filter-btn" data-bs-toggle="modal" data-bs-target="#filterModal">
@@ -79,62 +74,56 @@ $selected_courses = [];
                 </div>
 
                 <div class="user-right d-flex align-items-center justify-content-center">
-                    <p class="username d-flex align-items-center m-0"><?php echo $first_name ?></p>
+                    <p class="username d-flex align-items-center m-0 me-2"><?php echo $first_name ?></p>
                     <div class="user-profile">
                         <div class="dropdown">
+
                             <button class="dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" style="border: none; background: none; padding: 0;">
-                                <img class="img-fluid w-100" src="<?php echo "uploads/" . htmlspecialchars($profile_picture); ?>" alt="Profile Picture">
+                                <img src="<?php echo "uploads/" . htmlspecialchars($profile_picture); ?>" alt="Profile Picture" style="height: 40px; width: 40px; border-radius; 50%;">
                             </button>
-                            <ul class="dropdown-menu mt-3" style="left: auto; right:1px;">
+                            <ul class="dropdown-menu dropdown-menu-end mt-2 py-2 shadow-sm">
+
                                 <li>
-                                    <div class="dropdown-item text-center">
-                                        <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
-                                            Change Password
-                                        </button>
+                                    <div class="px-2 py-2 d-flex align-items-center">
+                                        <img class="rounded-circle me-2" src="<?php echo 'uploads/' . htmlspecialchars($profile_picture); ?>" alt="Profile Picture" style="width: 40px; height: 40px; object-fit: cover;">
+                                        <div>
+                                            <p class="mb-0 small"><?php echo htmlspecialchars($first_name . " " . $last_name); ?></p>
+                                            <p class="mb-0 small text-muted"><?php echo htmlspecialchars($email); ?></p>
+                                        </div>
                                     </div>
                                 </li>
+
                                 <li>
-                                    <div class="dropdown-item text-center">
-                                        <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#changeProfilePictureModal">
-                                            Change Profile Picture
-                                        </button>
-                                    </div>
+                                    <hr class="dropdown-divider">
                                 </li>
-                                <li><a class="dropdown-item text-center" onclick="alert('Logged Out Successfully')" href="../login/logout.php">Logout</a></li>
+
+                                <li>
+                                    <a class="dropdown-item d-flex align-items-center py-2" href="#" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                                        <i class="bi bi-key me-2"></i>
+                                        Change Password
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item d-flex align-items-center py-2" href="#" data-bs-toggle="modal" data-bs-target="#changeProfilePictureModal">
+                                        <i class="bi bi-person-circle me-2"></i>
+                                        Change Profile Picture
+                                    </a>
+                                </li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li>
+                                    <a class="dropdown-item d-flex align-items-center py-2 text-danger" href="#" onclick="return confirmLogout()">
+                                        <i class="bi bi-box-arrow-right me-2"></i>
+                                        Logout
+                                    </a>
+                                </li>
                             </ul>
                         </div>
                     </div>
                 </div>
         </nav>
-        <nav class="navbar nav-bottom fixed-bottom d-block d-md-none mt-5">
-            <div class="container-fluid justify-content-around">
-                <a href="admin.php" class="btn nav-bottom-btn active">
-                    <i class="bi bi-house"></i>
-                    <span class="icon-label">Home</span>
-                </a>
 
-                <a class="btn nav-bottom-btn" href="features/manage.php">
-                    <i class="bi bi-kanban"></i>
-                    <span class="icon-label">Manage</span>
-                </a>
-
-                <a class="btn nav-bottom-btn" href="features/create.php">
-                    <i class="bi bi-megaphone"></i>
-                    <span class="icon-label">Create</span>
-                </a>
-
-                <a class="btn nav-bottom-btn" href="features/logPage.php">
-                    <i class="bi bi-clipboard"></i>
-                    <span class="icon-label">Logs</span>
-                </a>
-
-                <a class="btn nav-bottom-btn" href="features/manage_student.php">
-                    <i class="bi bi-person-plus"></i>
-                    <span class="icon-label">Students</span>
-                </a>
-
-            </div>
-        </nav>
         <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
             <div class="offcanvas-header">
                 <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Menu</h5>
@@ -177,7 +166,7 @@ $selected_courses = [];
                     </div>
                 </div>
                 <!-- Main content -->
-                <div class="col-12 col-xxl-9 col-lg-8 main-content pt-4 px-5">
+                <div class="col-12 col-xxl-9 col-lg-8 main-content pt-4">
                     <div class="row g-0">
                         <div class="col-xxl-7 col-lg-12 feed-container mt-4">
                             <div id="loading" style="display: none;" class="text-center">
@@ -241,7 +230,6 @@ $selected_courses = [];
                                                                 </div>
                                                             </div>
                                                     <?php
-                                                            // Only display <hr> if it's not the last announcement
                                                             if ($index < $announcementCount - 1) {
                                                                 echo '<hr>';
                                                             }
@@ -463,10 +451,94 @@ $selected_courses = [];
             </div>
         </div>
         <?php require 'features/changePassMainPage.html'; ?>
+
+        <nav class="navbar nav-bottom fixed-bottom d-block d-lg-none mt-5">
+            <div class="container-fluid d-flex justify-content-around">
+                <a href="../admin/features/dashboard.php" class="btn nav-bottom-btn">
+                    <i class="fas fa-chart-line"></i>
+                </a>
+
+                <a href="admin.php" class="btn nav-bottom-btn active-btn">
+                    <i class="fas fa-newspaper"></i>
+                </a>
+
+                <a href="../admin/features/create.php" class="btn nav-bottom-btn">
+                    <i class="fas fa-bullhorn"></i>
+                </a>
+
+                <a href="../admin/features/logPage.php" class="btn nav-bottom-btn">
+                    <i class="fas fa-clipboard-list"></i>
+                </a>
+
+                <a href="../admin/features/manage_student.php" class="btn nav-bottom-btn">
+                    <i class="fas fa-users-cog"></i>
+                </a>
+
+                <a href="../admin/features/manage.php" class="btn nav-bottom-btn">
+                    <i class="fas fa-user"></i>
+                </a>
+            </div>
+        </nav>
     </main>
 
-    <script src="js/blur.js"></script>
+    <div class="modal recaptcha-modal fade" id="recaptchaModal" tabindex="-1" aria-labelledby="recaptchaModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content text-center">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <span class="text-danger fs-1">&#10060;</span>
+                    </div>
+                    <h5 class="modal-title mb-2" id="recaptchaModalLabel">Error</h5>
+                    <p>Please Complete the Recaptcha First.</p>
+                    <button type="button" class="btn btn-danger w-100" data-bs-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
+
+
+    <script src="js/success.js"></script>
+
+    <!-- <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('status') === 'success' || urlParams.get('status') === 'update') {
+                const isUpdate = urlParams.get('status') === 'update';
+
+                const successMessage = isUpdate ? 'Announcement updated successfully!' : 'Announcement posted successfully!';
+
+                const modalHtml = `
+            <div class="modal success-modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-sm">
+                    <div class="modal-content text-center">
+                        <div class="modal-body p-4">
+                            <div class="mb-2">
+                                <i class="bi bi-check-circle-fill text-success" style="font-size: 2rem;"></i>
+                            </div>
+                            <h6 class="modal-title mb-1" id="successModalLabel">Success</h6>
+                            <p class="small mb-3">${successMessage}</p>
+                            <button type="button" class="btn btn-success btn-sm w-100" data-bs-dismiss="modal">OK</button>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+
+                document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+                const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+                successModal.show();
+
+                setTimeout(() => {
+                    successModal.hide();
+                }, 2000);
+
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        });
+    </script> -->
+    <script src="js/blur.js"></script>
+    <script src="js/edit-profile.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const filterForm = document.querySelector('#filterForm');
@@ -520,7 +592,48 @@ $selected_courses = [];
                 }, 10);
             });
         });
+        
+        document.getElementById('customerFeedback').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                message: document.getElementById('message').value
+            };
+
+            fetch('features/handle_feedback.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('Thank you for your feedback!');
+                    document.getElementById('customerFeedback').reset();
+                    closeFeedbackForm();
+                } else {
+                    alert(data.message || 'An error occurred');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while submitting feedback');
+            });
+        });
+
+        function confirmLogout() {
+            if (confirm('Are you sure you want to sign out?')) {
+                window.location.href = '../login/logout.php';
+            }
+            return false;
+        }
     </script>
+
+
     <script src="js/admin.js"></script>
 
     <?php include '../cdn/body.html'; ?>

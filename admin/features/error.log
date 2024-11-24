@@ -550,3 +550,121 @@
 [20-Nov-2024 12:14:05 Europe/Berlin] getIdByName for department: Column department_name, Value CABE, Result: 2
 [20-Nov-2024 12:14:05 Europe/Berlin] getIdByName for course: Column course_name, Value BSE, Result: 11
 [20-Nov-2024 12:33:01 Europe/Berlin] sendSms not set in POST.
+[21-Nov-2024 13:35:07 Europe/Berlin] sendSms not set in POST.
+[21-Nov-2024 16:25:55 Europe/Berlin] sendSms not set in POST.
+[21-Nov-2024 16:25:55 Europe/Berlin] getIdByName for year_level: Column year_level, Value 1st Year, Result: 1
+[21-Nov-2024 16:25:55 Europe/Berlin] getIdByName for department: Column department_name, Value CICS, Result: 
+[21-Nov-2024 16:25:55 Europe/Berlin] getIdByName for course: Column course_name, Value BSBA, Result: 1
+[21-Nov-2024 16:27:32 Europe/Berlin] sendSms not set in POST.
+[21-Nov-2024 16:27:32 Europe/Berlin] getIdByName for year_level: Column year_level, Value 1st Year, Result: 1
+[21-Nov-2024 16:27:32 Europe/Berlin] getIdByName for department: Column department_name, Value CABE, Result: 2
+[21-Nov-2024 16:27:32 Europe/Berlin] getIdByName for course: Column course_name, Value BSBA, Result: 1
+[22-Nov-2024 04:02:24 Europe/Berlin] PHP Warning:  Undefined variable $stmt in C:\xampp\htdocs\cursors\ISMS2-cursor\admin\features\upload.php on line 72
+[22-Nov-2024 04:02:24 Europe/Berlin] PHP Fatal error:  Uncaught Error: Call to a member function execute() on null in C:\xampp\htdocs\cursors\ISMS2-cursor\admin\features\upload.php:72
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\cursors\ISMS2-cursor\admin\features\upload.php on line 72
+[22-Nov-2024 04:04:26 Europe/Berlin] sendSms not set in POST.
+[22-Nov-2024 05:27:01 Europe/Berlin] sendSms not set in POST.
+[22-Nov-2024 05:29:31 Europe/Berlin] sendSms not set in POST.
+[22-Nov-2024 05:33:37 Europe/Berlin] sendSms not set in POST.
+[22-Nov-2024 05:35:40 Europe/Berlin] sendSms not set in POST.
+[22-Nov-2024 05:36:42 Europe/Berlin] sendSms not set in POST.
+[22-Nov-2024 05:38:49 Europe/Berlin] sendSms not set in POST.
+[22-Nov-2024 05:41:23 Europe/Berlin] sendSms not set in POST.
+[22-Nov-2024 05:42:54 Europe/Berlin] sendSms not set in POST.
+[22-Nov-2024 05:43:13 Europe/Berlin] sendSms not set in POST.
+[22-Nov-2024 05:44:10 Europe/Berlin] sendSms not set in POST.
+[22-Nov-2024 05:45:18 Europe/Berlin] sendSms not set in POST.
+[22-Nov-2024 05:46:51 Europe/Berlin] sendSms not set in POST.
+[22-Nov-2024 05:48:05 Europe/Berlin] sendSms not set in POST.
+[22-Nov-2024 05:48:47 Europe/Berlin] sendSms not set in POST.
+[22-Nov-2024 07:11:39 Europe/Berlin] sendSms not set in POST.
+[22-Nov-2024 07:18:39 Europe/Berlin] sendSms not set in POST.
+[22-Nov-2024 07:18:39 Europe/Berlin] getIdByName for year_level: Column year_level, Value 1st Year, Result: 1
+[22-Nov-2024 07:21:04 Europe/Berlin] sendSms not set in POST.
+[22-Nov-2024 07:21:04 Europe/Berlin] getIdByName for year_level: Column year_level, Value 1st Year, Result: 1
+[22-Nov-2024 07:21:04 Europe/Berlin] getIdByName for department: Column department_name, Value CICS, Result: 
+[22-Nov-2024 07:21:04 Europe/Berlin] getIdByName for course: Column course_name, Value BSBA, Result: 1
+[22-Nov-2024 07:26:24 Europe/Berlin] sendSms not set in POST.
+[22-Nov-2024 07:26:24 Europe/Berlin] getIdByName for year_level: Column year_level, Value 1st Year, Result: 1
+[22-Nov-2024 07:26:24 Europe/Berlin] getIdByName for department: Column department_name, Value CICS, Result: 
+[22-Nov-2024 07:26:24 Europe/Berlin] getIdByName for course: Column course_name, Value BSBA, Result: 1
+[22-Nov-2024 07:41:46 Europe/Berlin] sendSms not set in POST.
+[22-Nov-2024 07:41:46 Europe/Berlin] getIdByName for year_level: Column year_level, Value 1st Year, Result: 1
+[22-Nov-2024 07:41:46 Europe/Berlin] getIdByName for department: Column department_name, Value CICS, Result: 
+[22-Nov-2024 07:41:46 Europe/Berlin] getIdByName for course: Column course_name, Value BSBA, Result: 1
+[22-Nov-2024 07:43:57 Europe/Berlin] sendSms not set in POST.
+[22-Nov-2024 07:43:57 Europe/Berlin] getIdByName for year_level: Column year_level, Value 1st Year, Result: 1
+[22-Nov-2024 07:43:57 Europe/Berlin] getIdByName for department: Column department_name, Value CICS, Result: 
+[22-Nov-2024 07:43:57 Europe/Berlin] getIdByName for course: Column course_name, Value BSBA, Result: 1
+[22-Nov-2024 07:45:03 Europe/Berlin] sendSms not set in POST.
+[22-Nov-2024 07:45:03 Europe/Berlin] getIdByName for year_level: Column year_level, Value 1st Year, Result: 1
+[22-Nov-2024 07:45:03 Europe/Berlin] getIdByName for department: Column department_name, Value CICS, Result: 
+[22-Nov-2024 07:45:03 Europe/Berlin] getIdByName for course: Column course_name, Value BSBA, Result: 1
+[22-Nov-2024 07:46:01 Europe/Berlin] sendSms not set in POST.
+[22-Nov-2024 07:46:01 Europe/Berlin] getIdByName for year_level: Column year_level, Value 1st Year, Result: 1
+[22-Nov-2024 07:46:01 Europe/Berlin] getIdByName for year_level: Column year_level, Value 2nd Year, Result: 2
+[22-Nov-2024 07:46:01 Europe/Berlin] getIdByName for department: Column department_name, Value CABE, Result: 2
+[22-Nov-2024 07:46:01 Europe/Berlin] getIdByName for course: Column course_name, Value BSBA, Result: 1
+[22-Nov-2024 08:20:14 Europe/Berlin] sendSms not set in POST.
+[22-Nov-2024 08:20:14 Europe/Berlin] getIdByName for year_level: Column year_level, Value 1st Year, Result: 1
+[22-Nov-2024 08:21:17 Europe/Berlin] sendSms not set in POST.
+[22-Nov-2024 08:21:17 Europe/Berlin] getIdByName for year_level: Column year_level, Value 1st Year, Result: 1
+[22-Nov-2024 08:21:17 Europe/Berlin] getIdByName for department: Column department_name, Value CICS, Result: 
+[22-Nov-2024 08:21:17 Europe/Berlin] getIdByName for course: Column course_name, Value BSBA, Result: 1
+[22-Nov-2024 08:26:12 Europe/Berlin] sendSms not set in POST.
+[22-Nov-2024 08:26:12 Europe/Berlin] getIdByName for year_level: Column year_level, Value 1st Year, Result: 1
+[22-Nov-2024 08:26:12 Europe/Berlin] getIdByName for department: Column department_name, Value CICS, Result: 
+[22-Nov-2024 10:06:54 Europe/Berlin] sendSms not set in POST.
+[22-Nov-2024 10:06:54 Europe/Berlin] getIdByName for department: Column department_name, Value CICS, Result: 
+[22-Nov-2024 10:06:54 Europe/Berlin] getIdByName for course: Column course_name, Value BSBA, Result: 1
+[22-Nov-2024 10:08:18 Europe/Berlin] sendSms not set in POST.
+[22-Nov-2024 10:08:18 Europe/Berlin] getIdByName for year_level: Column year_level, Value 2nd Year, Result: 2
+[22-Nov-2024 10:12:29 Europe/Berlin] sendSms not set in POST.
+[22-Nov-2024 10:12:29 Europe/Berlin] getIdByName for year_level: Column year_level, Value 1st Year, Result: 1
+[22-Nov-2024 10:12:29 Europe/Berlin] getIdByName for department: Column department_name, Value CICS, Result: 1
+[22-Nov-2024 10:12:29 Europe/Berlin] getIdByName for course: Column course_name, Value BSBA, Result: 1
+[22-Nov-2024 11:09:35 Europe/Berlin] getIdByName for year_level: Column year_level, Value 1st Year, Result: 1
+[22-Nov-2024 11:10:05 Europe/Berlin] sendSms not set in POST.
+[22-Nov-2024 11:10:05 Europe/Berlin] getIdByName for year_level: Column year_level, Value 1st Year, Result: 1
+[22-Nov-2024 11:10:05 Europe/Berlin] getIdByName for department: Column department_name, Value CICS, Result: 1
+[22-Nov-2024 11:10:05 Europe/Berlin] getIdByName for course: Column course_name, Value BSBA, Result: 1
+[22-Nov-2024 11:10:28 Europe/Berlin] sendSms not set in POST.
+[22-Nov-2024 11:10:28 Europe/Berlin] getIdByName for year_level: Column year_level, Value 1st Year, Result: 1
+[22-Nov-2024 15:07:26 Europe/Berlin] sendSms not set in POST.
+[22-Nov-2024 15:07:26 Europe/Berlin] getIdByName for year_level: Column year_level, Value 1st Year, Result: 1
+[22-Nov-2024 15:47:16 Europe/Berlin] sendSms not set in POST.
+[22-Nov-2024 15:47:16 Europe/Berlin] getIdByName for year_level: Column year_level, Value 1st Year, Result: 1
+[22-Nov-2024 16:58:51 Europe/Berlin] sendSms not set in POST.
+[22-Nov-2024 16:58:51 Europe/Berlin] getIdByName for year_level: Column year_level, Value 2nd Year, Result: 2
+[22-Nov-2024 16:58:51 Europe/Berlin] getIdByName for department: Column department_name, Value CABE, Result: 2
+[22-Nov-2024 16:58:51 Europe/Berlin] getIdByName for course: Column course_name, Value BSMA, Result: 2
+[22-Nov-2024 16:59:56 Europe/Berlin] sendSms not set in POST.
+[22-Nov-2024 16:59:56 Europe/Berlin] getIdByName for year_level: Column year_level, Value 2nd Year, Result: 2
+[22-Nov-2024 16:59:56 Europe/Berlin] getIdByName for year_level: Column year_level, Value 3rd Year, Result: 3
+[22-Nov-2024 16:59:56 Europe/Berlin] getIdByName for year_level: Column year_level, Value 4th Year, Result: 4
+[22-Nov-2024 17:01:35 Europe/Berlin] sendSms not set in POST.
+[22-Nov-2024 17:01:35 Europe/Berlin] getIdByName for year_level: Column year_level, Value 2nd Year, Result: 2
+[23-Nov-2024 06:58:16 Europe/Berlin] sendSms not set in POST.
+[23-Nov-2024 06:58:16 Europe/Berlin] getIdByName for year_level: Column year_level, Value 3rd Year, Result: 3
+[23-Nov-2024 06:58:16 Europe/Berlin] getIdByName for department: Column department_name, Value CICS, Result: 1
+[23-Nov-2024 06:58:16 Europe/Berlin] getIdByName for department: Column department_name, Value CABE, Result: 2
+[23-Nov-2024 06:58:16 Europe/Berlin] getIdByName for department: Column department_name, Value CAS, Result: 3
+[23-Nov-2024 06:58:16 Europe/Berlin] getIdByName for department: Column department_name, Value CIT, Result: 5
+[23-Nov-2024 06:58:16 Europe/Berlin] getIdByName for department: Column department_name, Value CTE, Result: 6
+[23-Nov-2024 06:58:16 Europe/Berlin] getIdByName for department: Column department_name, Value CE, Result: 4
+[23-Nov-2024 06:58:16 Europe/Berlin] getIdByName for course: Column course_name, Value BSIT, Result: 10
+[23-Nov-2024 07:00:46 Europe/Berlin] sendSms not set in POST.
+[23-Nov-2024 07:00:46 Europe/Berlin] getIdByName for year_level: Column year_level, Value 1st Year, Result: 1
+[23-Nov-2024 07:00:46 Europe/Berlin] getIdByName for department: Column department_name, Value CICS, Result: 1
+[23-Nov-2024 07:00:46 Europe/Berlin] getIdByName for course: Column course_name, Value BSBA, Result: 1
+[23-Nov-2024 12:10:09 Europe/Berlin] sendSms not set in POST.
+[23-Nov-2024 12:10:09 Europe/Berlin] getIdByName for year_level: Column year_level, Value 1st Year, Result: 1
+[23-Nov-2024 12:10:09 Europe/Berlin] getIdByName for department: Column department_name, Value CICS, Result: 1
+[23-Nov-2024 12:10:09 Europe/Berlin] getIdByName for course: Column course_name, Value BSBA, Result: 1
+[23-Nov-2024 12:17:18 Europe/Berlin] getIdByName for department: Column department_name, Value CABE, Result: 2
+[23-Nov-2024 15:15:39 Europe/Berlin] sendSms not set in POST.
+[23-Nov-2024 15:15:39 Europe/Berlin] getIdByName for year_level: Column year_level, Value 1st Year, Result: 1
+[23-Nov-2024 15:15:39 Europe/Berlin] getIdByName for department: Column department_name, Value CICS, Result: 1
+[23-Nov-2024 15:15:39 Europe/Berlin] getIdByName for course: Column course_name, Value BSBA, Result: 1
