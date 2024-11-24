@@ -178,6 +178,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 exit;
             }
 
+            // Check if number of rows exceeds limit (21 rows + 1 header row = 22)
+            if (count($sheetData) > 21) {
+                echo "<script>alert('Excel file contains more than 20 student records. Please limit the number of students to 20 per upload.');</script>";
+                echo "<script>window.location.href = 'manage_student.php';</script>";
+                exit;
+            }
+
             $successfulRows = [];
             $failedRows = [];
             $errorDetails = [];
