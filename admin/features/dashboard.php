@@ -68,10 +68,10 @@ try {
     $stmt = $pdo->prepare("
         SELECT 
             status,
-            COUNT(*) as count,
-            ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM sms_log), 1) as percentage
+            COUNT(*) as count
         FROM sms_log
         GROUP BY status
+        ORDER BY status DESC
     ");
     $stmt->execute();
     $sms_stats = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -138,6 +138,18 @@ try {
                             <li class="nav-item">
                                 <a href="manage_student.php"><i class="fas fa-users-cog me-2"></i>Manage Accounts</a>
                             </li>
+                                            
+                            <?php if (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'superadmin'): ?>
+                                <li class="nav-item">
+                                    <a href="manage_admin.php"><i class="fas fa-user-shield me-2"></i>Manage Admins</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="feedbackPage.php">
+                                        <i class="fas fa-comments me-2"></i>
+                                        <span class="menu-text">Feedback</span>
+                                    </a>
+                                </li>
+                            <?php endif; ?>
                         </ul>
                     </div>
                 </div>

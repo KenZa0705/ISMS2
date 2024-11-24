@@ -66,8 +66,10 @@ if (isset($_SESSION['user'])) {
                             </div>
 
                             <form id="login_form" action="login_script.php" method="POST">
-                                <?php if (isset($_GET['message'])): ?>
-                                    <div class="alert alert-danger py-2"><?php echo $_GET['message']; ?></div>
+                                <?php if (isset($_GET['error'])): ?>
+                                    <div class="alert alert-danger py-2">
+                                        <?php echo htmlspecialchars($_GET['error']); ?>
+                                    </div>
                                     <script>
                                         $(document).ready(function() {
                                             setTimeout(function() {

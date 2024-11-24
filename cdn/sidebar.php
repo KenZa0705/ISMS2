@@ -24,6 +24,19 @@
             <li class="nav-item">
                 <a href="manage_student.php"><i class="fas fa-users-cog me-2"></i>Manage Accounts</a>
             </li>
+
+            <?php if (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'superadmin'): ?>
+                <li class="nav-item">
+                    <a href="manage_admin.php"><i class="fas fa-user-shield me-2"></i>Manage Admins</a>
+                </li>
+            <?php endif; ?>
+
+            <li class="nav-item">
+                <a href="feedbackPage.php">
+                    <i class="fas fa-comments me-2"></i>
+                    <span class="menu-text">Feedback</span>
+                </a>
+            </li>
         </ul>
     </div>
 </div>

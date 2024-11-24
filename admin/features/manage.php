@@ -60,7 +60,7 @@ $cover_photo = $adminPhotos['cover_photo'] ?? 'default_cover.jpg';
                     <div class="sticky-sidebar">
                         <ul class="nav flex-column">
                             <li class="nav-item">
-                                <a href=""><i class="fas fa-chart-line me-2"></i>Dashboard</a>
+                                <a href="dashboard.php"><i class="fas fa-chart-line me-2"></i>Dashboard</a>
                             </li>
 
                             <li class="nav-item">
@@ -82,6 +82,18 @@ $cover_photo = $adminPhotos['cover_photo'] ?? 'default_cover.jpg';
                             <li class="nav-item">
                                 <a href="manage_student.php"><i class="fas fa-users-cog me-2"></i>Manage Accounts</a>
                             </li>
+                            
+                            <?php if (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'superadmin'): ?>
+                                <li class="nav-item">
+                                    <a href="manage_admin.php"><i class="fas fa-user-shield me-2"></i>Manage Admins</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="feedbackPage.php">
+                                        <i class="fas fa-comments me-2"></i>
+                                        <span class="menu-text">Feedback</span>
+                                    </a>
+                                </li>
+                            <?php endif; ?>
                         </ul>
                     </div>
                 </div>

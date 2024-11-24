@@ -668,3 +668,8 @@ Stack trace:
 [23-Nov-2024 15:15:39 Europe/Berlin] getIdByName for year_level: Column year_level, Value 1st Year, Result: 1
 [23-Nov-2024 15:15:39 Europe/Berlin] getIdByName for department: Column department_name, Value CICS, Result: 1
 [23-Nov-2024 15:15:39 Europe/Berlin] getIdByName for course: Column course_name, Value BSBA, Result: 1
+[24-Nov-2024 08:10:04 Europe/Berlin] sendSms not set in POST.
+[24-Nov-2024 08:10:04 Europe/Berlin] getIdByName for year_level: Column year_level, Value 1st Year, Result: 1
+[24-Nov-2024 08:10:04 Europe/Berlin] getIdByName for department: Column department_name, Value CAS, Result: 3
+[24-Nov-2024 08:10:04 Europe/Berlin] getIdByName for course: Column course_name, Value BSMA, Result: 2
+[24-Nov-2024 08:10:04 Europe/Berlin] getIdByName for course: Column course_name, Value BSP, Result: 3

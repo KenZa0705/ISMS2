@@ -1,8 +1,21 @@
 <?php
-require_once '../../login/dbh.inc.php'; // DATABASE CONNECTION
+require_once '../../login/dbh.inc.php';
 session_start();
 if (!isset($_SESSION['user'])) {
     header("Location: ../../login/login.php");
+    exit();
+} else if ($_SESSION['user']['role'] !== 'superadmin'){
+    echo '<script>
+        alert("You are not a superadmin. Logging out in 3 seconds...");
+        let count = 3;
+        const countdown = setInterval(() => {
+            count--;
+            if (count === 0) {
+                clearInterval(countdown);
+                window.location.href = "../../login/logout.php";
+            }
+        }, 1000);
+    </script>';
     exit();
 }
 
@@ -20,13 +33,10 @@ $department_id = $_SESSION['user']['department_id'];
 <html lang="en">
 
 <head>
-    <title>Title</title>
+    <title>Feedback</title>
     <meta charset="utf-8" />
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 
-    <!-- head CDN links -->
     <?php include '../../cdn/head.html'; ?>
     <link rel="stylesheet" href="../css/admin.css">
     <link rel="stylesheet" href="../css/tables.css">
@@ -74,7 +84,7 @@ $department_id = $_SESSION['user']['department_id'];
                             </li>
 
                             <li class="nav-item">
-                                <a class="active" href="logPage.php">
+                                <a href="logPage.php">
                                     <i class="fas fa-clipboard-list me-2"></i>
                                     <span class="menu-text">Logs</span>
                                 </a>
@@ -86,7 +96,7 @@ $department_id = $_SESSION['user']['department_id'];
                                     <span class="menu-text">Manage Accounts</span>
                                 </a>
                             </li>
-                                            
+
                             <?php if (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'superadmin'): ?>
                                 <li class="nav-item">
                                     <a href="manage_admin.php"><i class="fas fa-user-shield me-2"></i>Manage Admins</a>
@@ -104,75 +114,47 @@ $department_id = $_SESSION['user']['department_id'];
 
                 <!-- main content -->
                 <div class="col-12 col-lg-9 main-content px-5 mt-5" style="margin: 0 auto;">
-
                     <div class="card shadow mt-5">
                         <div class="card-body">
-                            <div class="table-responsive log-table">
+                            <div class="table-responsive feedback-table">
                                 <table class="table table-bordered table-hover display nowrap">
                                     <thead>
                                         <tr class="bg-primary text-white">
-                                            <th class="align-middle">Log ID</th>
-                                            <th class="align-middle">User ID</th>
-                                            <th class="align-middle">User Type</th>
-                                            <th class="align-middle">Action</th>
-                                            <th class="align-middle">Description</th>
-                                            <th class="align-middle">Timestamp</th>
+                                            <th class="align-middle">Feedback ID</th>
+                                            <th class="align-middle">Name</th>
+                                            <th class="align-middle">Email</th>
+                                            <th class="align-middle">Message</th>
+                                            <th class="align-middle">Date Submitted</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <?php
-                                        require_once '../../login/dbh.inc.php';
-
                                         try {
-                                            $query = "SELECT * FROM logs WHERE user_id = :admin_id ORDER BY timestamp DESC";
+                                            $query = "SELECT * FROM feedback ORDER BY created_at DESC";
                                             $stmt = $pdo->prepare($query);
-                                            $stmt->bindParam(':admin_id', $admin_id, PDO::PARAM_INT);
                                             $stmt->execute();
 
                                             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                                                $log_id = htmlspecialchars($row['log_id'] ?? '');
-                                                $user_id = htmlspecialchars($row['user_id'] ?? '');
-                                                $user_type = strtoupper(htmlspecialchars($row['user_type'] ?? ''));
-                                                $action = strtoupper(htmlspecialchars($row['action'] ?? ''));
-                                                $affected_table = htmlspecialchars($row['affected_table'] ?? '');
-                                                $affected_record_id = htmlspecialchars($row['affected_record_id'] ?? '');
-                                                $description = htmlspecialchars($row['description'] ?? '');
-                                                $timestamp = htmlspecialchars($row['timestamp'] ?? '');
+                                                $feedback_id = htmlspecialchars($row['feedback_id']);
+                                                $name = htmlspecialchars($row['name']);
+                                                $email = htmlspecialchars($row['email']);
+                                                $message = htmlspecialchars($row['message']);
+                                                $created_at = htmlspecialchars($row['created_at']);
                                         ?>
                                                 <tr>
-                                                    <td class="align-middle"><?= $log_id ?></td>
-                                                    <td class="align-middle"><?= $user_id ?></td>
-                                                    <td class="align-middle">
-                                                        <span class="badge bg-info text-dark"><?= $user_type ?></span>
-                                                    </td>
-                                                    <td class="align-middle">
-                                                        <span class="badge <?= getActionBadgeClass($action) ?>"><?= $action ?></span>
-                                                    </td>
-                                                    <td class="align-middle"><?= $description ?></td>
-                                                    <td class="align-middle"><?= formatTimestamp($timestamp) ?></td>
+                                                    <td class="align-middle"><?= $feedback_id ?></td>
+                                                    <td class="align-middle"><?= $name ?></td>
+                                                    <td class="align-middle"><?= $email ?></td>
+                                                    <td class="align-middle"><?= $message ?></td>
+                                                    <td class="align-middle"><?= formatTimestamp($created_at) ?></td>
                                                 </tr>
                                         <?php
                                             }
                                         } catch (PDOException $e) {
-                                            echo '<tr><td colspan="8" class="text-center text-danger">Error fetching logs: ' . $e->getMessage() . '</td></tr>';
+                                            echo '<tr><td colspan="5" class="text-center text-danger">Error fetching feedback: ' . $e->getMessage() . '</td></tr>';
                                         }
 
-                                        function getActionBadgeClass($action)
-                                        {
-                                            switch (strtolower($action)) {
-                                                case 'create':
-                                                    return 'bg-success';
-                                                case 'update':
-                                                    return 'bg-warning text-dark';
-                                                case 'delete':
-                                                    return 'bg-danger';
-                                                default:
-                                                    return 'bg-secondary';
-                                            }
-                                        }
-
-                                        function formatTimestamp($timestamp)
-                                        {
+                                        function formatTimestamp($timestamp) {
                                             return date('M d, Y h:i A', strtotime($timestamp));
                                         }
                                         ?>
@@ -184,6 +166,7 @@ $department_id = $_SESSION['user']['department_id'];
                 </div>
             </div>
         </div>
+
         <nav class="navbar nav-bottom fixed-bottom d-block d-xl-none mt-5">
             <div class="container-fluid d-flex justify-content-around">
                 <a href="dashboard.php" class="btn nav-bottom-btn">
@@ -198,7 +181,7 @@ $department_id = $_SESSION['user']['department_id'];
                     <i class="fas fa-bullhorn"></i>
                 </a>
 
-                <a href="logPage.php" class="btn nav-bottom-btn active-btn">
+                <a href="logPage.php" class="btn nav-bottom-btn">
                     <i class="fas fa-clipboard-list"></i>
                 </a>
 
@@ -209,11 +192,15 @@ $department_id = $_SESSION['user']['department_id'];
                 <a href="manage.php" class="btn nav-bottom-btn">
                     <i class="fas fa-user"></i>
                 </a>
+
+                <a href="feedbackPage.php" class="btn nav-bottom-btn active-btn">
+                    <i class="fas fa-comments"></i>
+                </a>
             </div>
         </nav>
         <?php include 'changePassOtherPage.html'; ?>
     </main>
-    <!-- Body CDN links -->
+
     <?php include '../../cdn/body.html'; ?>
     <script>
         function confirmLogout() {
@@ -226,16 +213,14 @@ $department_id = $_SESSION['user']['department_id'];
         $(document).ready(function() {
             $('.table').DataTable({
                 responsive: false,
-                order: [
-                    [5, 'desc'] // Sort by timestamp (column index 5) by default
-                ],
-                pageLength: 15, // Show 15 entries per page
-                lengthChange: false, // Remove "Show entries" dropdown
+                order: [[4, 'desc']], // Sort by date submitted by default
+                pageLength: 15,
+                lengthChange: false,
                 language: {
-                    search: "Search logs:",
-                    info: "Showing _START_ to _END_ of _TOTAL_ logs",
-                    infoEmpty: "Showing 0 to 0 of 0 logs",
-                    infoFiltered: "(filtered from _MAX_ total logs)",
+                    search: "Search feedback:",
+                    info: "Showing _START_ to _END_ of _TOTAL_ feedback entries",
+                    infoEmpty: "Showing 0 to 0 of 0 feedback entries",
+                    infoFiltered: "(filtered from _MAX_ total entries)",
                     paginate: {
                         first: "First",
                         last: "Last",
@@ -245,26 +230,30 @@ $department_id = $_SESSION['user']['department_id'];
                 },
                 columnDefs: [{
                         orderable: false,
-                        targets: [4] // Disable sorting for description column
+                        targets: [3] // Disable sorting for message column
                     },
                     {
-                        width: "15%",
-                        targets: [4, 5] // Make description column wider
+                        width: "30%",
+                        targets: [3] // Make message column wider
                     },
                     {
                         width: "5%",
-                        targets: [0, 1, 2, 3]
+                        targets: [0]
+                    },
+                    {
+                        width: "15%",
+                        targets: [1, 2, 4]
                     },
                     {
                         className: "text-nowrap",
-                        targets: [0, 1, 2, 3, 5] // Prevent text wrapping in other columns
+                        targets: [0, 1, 2, 4]
                     },
                     {
-                        targets: [5],
-                        type: 'date',
+                        targets: [4],
+                        type: 'date'
                     }
                 ],
-                dom: '<"top"f>rt<"bottom"ip><"clear">', // Removed 'l' for length menu
+                dom: '<"top"f>rt<"bottom"ip><"clear">',
                 initComplete: function() {
                     $('.dataTables_filter input').addClass('form-control form-control-sm');
                 }
@@ -273,4 +262,4 @@ $department_id = $_SESSION['user']['department_id'];
     </script>
 </body>
 
-</html>
+</html> 

@@ -66,7 +66,7 @@ $selected_courses = [];
                                 class="form-control border-start-0 ps-0"
                                 placeholder="Search announcements..."
                                 aria-label="Search announcements">
-                            <button type="submit" class="btn btn-primary">
+                            <button type="submit" class="btn btn-danger">
                                 <i class="bi bi-search me-2 d-none d-md-inline"></i>Search
                             </button>
                         </div>
@@ -161,6 +161,19 @@ $selected_courses = [];
 
                             <li class="nav-item">
                                 <a href="features/manage_student.php"><i class="fas fa-users-cog me-2"></i>Manage Accounts</a>
+                            </li>
+
+                            <?php if (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'superadmin'): ?>
+                            <li class="nav-item">
+                                <a href="features/manage_admin.php"><i class="fas fa-user-shield me-2"></i>Manage Admins</a>
+                            </li>
+                            <?php endif; ?>
+
+                            <li class="nav-item">
+                                <a href="features/feedbackPage.php">
+                                    <i class="fas fa-comments me-2"></i>
+                                    <span class="menu-text">Feedback</span>
+                                </a>
                             </li>
                         </ul>
                     </div>
@@ -477,6 +490,12 @@ $selected_courses = [];
                 <a href="../admin/features/manage.php" class="btn nav-bottom-btn">
                     <i class="fas fa-user"></i>
                 </a>
+
+                <?php if (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'superadmin'): ?>
+                <a href="features/manage_admin.php" class="btn nav-bottom-btn">
+                    <i class="fas fa-user-shield"></i>
+                </a>
+                <?php endif; ?>
             </div>
         </nav>
     </main>

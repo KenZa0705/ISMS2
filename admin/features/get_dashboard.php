@@ -88,17 +88,31 @@
         smsChart = new Chart(smsCtx, {
             type: 'doughnut',
             data: {
-                labels: <?php echo json_encode(array_map(function ($item) {
-                            return ucfirst($item['status']) . ' (' . $item['percentage'] . '%)';
-                        }, $sms_stats)); ?>,
+                labels: ['Sent', 'Failed'],
                 datasets: [{
-                    data: <?php echo json_encode(array_map(function ($item) {
-                                return $item['count'];
-                            }, $sms_stats)); ?>,
+                    data: [
+                        <?php echo (isset($sms_stats[0]['count']) ? $sms_stats[0]['count'] : 0); ?>,
+                        <?php echo (isset($sms_stats[1]['count']) ? $sms_stats[1]['count'] : 0); ?>
+                    ],
                     backgroundColor: [chartColors.green, chartColors.red]
                 }]
             },
-            options: commonOptions
+            options: {
+                ...commonOptions,
+                plugins: {
+                    ...commonOptions.plugins,
+                    tooltip: {
+                        ...commonOptions.plugins.tooltip,
+                        callbacks: {
+                            label: function(context) {
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((context.raw / total) * 100).toFixed(1);
+                                return `${context.label}: ${context.raw} (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
         });
 
         // Department Chart
@@ -107,12 +121,12 @@
             type: 'bar',
             data: {
                 labels: <?php echo json_encode(array_map(function ($item) {
-                            return $item['department_name'];
+                            return isset($item['department_name']) ? $item['department_name'] : 'Unknown';
                         }, $dept_stats)); ?>,
                 datasets: [{
                     label: 'Announcements',
                     data: <?php echo json_encode(array_map(function ($item) {
-                                return $item['count'];
+                                return isset($item['count']) ? intval($item['count']) : 0;
                             }, $dept_stats)); ?>,
                     backgroundColor: chartColors.blue,
                     borderRadius: 6
@@ -131,11 +145,18 @@
                         grid: {
                             drawBorder: false,
                             color: '#f0f0f0'
+                        },
+                        ticks: {
+                            precision: 0
                         }
                     },
                     x: {
                         grid: {
                             display: false
+                        },
+                        ticks: {
+                            maxRotation: 45,
+                            minRotation: 45
                         }
                     }
                 }
