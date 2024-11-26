@@ -14,6 +14,40 @@ $last_name = $_SESSION['user']['last_name'];
 $email = $_SESSION['user']['email'];
 $contact_number = $_SESSION['user']['contact_number'];
 $department_id = $_SESSION['user']['department_id'];
+
+// Add this function to handle CSV export
+function exportLogsToCSV($logs) {
+    header('Content-Type: text/csv');
+    header('Content-Disposition: attachment; filename="logs.csv"');
+    $output = fopen('php://output', 'w');
+    fputcsv($output, ['Log ID', 'User ID', 'User Type', 'Action', 'Description', 'Timestamp']); // CSV header
+
+    foreach ($logs as $row) {
+        fputcsv($output, $row);
+    }
+    fclose($output);
+    exit();
+}
+
+// Fetch logs for export if requested
+if (isset($_GET['export']) && $_GET['export'] === 'csv') {
+    $logs = []; // Initialize an array to hold logs
+    // Fetch logs based on user role
+    if ($_SESSION['user']['role'] === 'superadmin') {
+        $query = "SELECT log_id, user_id, user_type, action, description, timestamp FROM logs ORDER BY timestamp DESC";
+    } else {
+        $query = "SELECT log_id, user_id, user_type, action, description, timestamp FROM logs WHERE user_id = :admin_id ORDER BY timestamp DESC";
+    }
+    $stmt = $pdo->prepare($query);
+    if ($_SESSION['user']['role'] !== 'superadmin') {
+        $stmt->bindParam(':admin_id', $admin_id, PDO::PARAM_INT);
+    }
+    $stmt->execute();
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $logs[] = $row; // Collect logs
+    }
+    exportLogsToCSV($logs); // Call the export function
+}
 ?>
 
 <!doctype html>
@@ -104,9 +138,12 @@ $department_id = $_SESSION['user']['department_id'];
 
                 <!-- main content -->
                 <div class="col-12 col-lg-9 main-content px-5 mt-5" style="margin: 0 auto;">
-
+                
                     <div class="card shadow mt-5">
                         <div class="card-body">
+                        <div>
+                            <a href="?export=csv" class="btn btn-primary">Export to CSV</a>
+                        </div>
                             <div class="table-responsive log-table">
                                 <table class="table table-bordered table-hover display nowrap">
                                     <thead>

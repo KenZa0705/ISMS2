@@ -261,12 +261,12 @@ function addNewStudent($s_first_name, $s_last_name, $s_email, $s_contact_number,
         // Content
         $mail->isHTML(true);
         $mail->Subject = 'Your Account for the ISMS Portal was created successfully';
-        $setupLink = "localhost/I-SMS/login/login.php";
+        $setupLink = "localhost/SIA-final/index.php";
         $mail->Body = "Your account was created successfully. <br> 
                         You can login using your email address and your password will be your first name + the last four digits of your contact number. <br>
                         Example: if first name is 'John' and contact number is '09635242249', password will be 'John2249' <br>
                         Note: The first letter of your first name is uppercase. 
-                        Log in to the website by clicking on the link below.<br>
+                        Log in to the website by clicking on the link below.<br><br>
                         <a href='" . $setupLink . "'>Login Here</a>";
 
         $mail->send();

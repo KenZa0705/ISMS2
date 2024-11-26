@@ -18,11 +18,7 @@ $profile_picture = $_SESSION['user']['profile_picture'];
 <nav class="navbar navbar-expand-lg bg-white text-black fixed-top" style="border-bottom: 1px solid #e9ecef; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);">
     <div class="container-fluid">
         <div class="user-left d-flex">
-            <div class="d-md-none ms-0 mt-2 me-3">
-                <button class="navbar-toggler border-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-            </div>
+            
 
             <a class="navbar-brand d-flex align-items-center" href="#"><img src="../img/brand.png" class="img-fluid branding" alt=""></a>
         </div>

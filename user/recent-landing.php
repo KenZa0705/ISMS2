@@ -81,6 +81,7 @@ if (isset($_GET['id'])) {
     <link rel="stylesheet" href="../admin/css/feeds-card.css">
     <link rel="stylesheet" href="../admin/css/bsu-bg.css">
     <link rel="stylesheet" href="../admin/css/filter-modal.css">
+    <link rel="stylesheet" href="../admin/css/nav-bottom.css">
 </head>
 
 <body>
@@ -93,33 +94,47 @@ if (isset($_GET['id'])) {
                 </div>
 
                 <div class="user-right d-flex align-items-center justify-content-center">
-                    <p class="username d-flex align-items-center m-0"><?php echo htmlspecialchars($first_name); ?></p>
+                    <p class="username d-flex align-items-center m-0"><?php echo $first_name ?></p>
                     <div class="user-profile">
                         <div class="dropdown">
                             <button class="dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" style="border: none; background: none; padding: 0;">
-                                <img src="<?php echo "uploads/" . htmlspecialchars($profile_pic); ?>" alt="Profile Picture" style="width: 40px; height: 40px; border-radius: 50%;">
+                                <img src="<?php echo "uploads/" . htmlspecialchars($profile_picture); ?>" alt="Profile Picture" style="height: 40px; width: 40px; border-radius; 50%;">
                             </button>
-                            <ul class="dropdown-menu mt-3" style="left: auto; right:1px;">
+                            <ul class="dropdown-menu dropdown-menu-end mt-2 py-2 shadow-sm" style="width: 300px;">
+
                                 <li>
-                                    <div class="dropdown-item text-center">
-                                        <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
-                                            Change Password
-                                        </button>
+                                    <div class="px-2 py-2 d-flex align-items-center">
+                                        <img class="rounded-circle me-2" src="<?php echo 'uploads/' . htmlspecialchars($profile_picture); ?>" alt="Profile Picture" style="width: 40px; height: 40px; object-fit: cover;">
+                                        <div>
+                                            <p class="mb-0 small"><?php echo htmlspecialchars($first_name . " " . $last_name); ?></p>
+                                            <p class="mb-0 small text-muted"><?php echo htmlspecialchars($email); ?></p>
+                                        </div>
                                     </div>
                                 </li>
+
                                 <li>
-                                    <div class="dropdown-item text-center">
-                                        <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#changeProfilePictureModal">
-                                            Change Profile Picture
-                                        </button>
-                                    </div>
+                                    <hr class="dropdown-divider">
                                 </li>
-                                <li><a class="dropdown-item text-center" onclick="alert('Logged Out Successfully')" href="../login/logout.php">Logout</a></li>
+
+                                <li>
+                                    <a class="dropdown-item d-flex align-items-center py-2" href="#" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                                        <i class="bi bi-key me-2"></i>
+                                        Change Password
+                                    </a>
+                                </li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li>
+                                    <a class="dropdown-item d-flex align-items-center py-2 text-danger" href="#" onclick="return confirmLogout()">
+                                        <i class="bi bi-box-arrow-right me-2"></i>
+                                        Logout
+                                    </a>
+                                </li>
                             </ul>
                         </div>
                     </div>
                 </div>
-            </div>
         </nav>
     </header>
 
@@ -155,15 +170,15 @@ if (isset($_GET['id'])) {
                                         </div>
                                         <p class="ms-1 mt-1"><?php echo htmlspecialchars($admin_name); ?></p>
                                     </div>
-
-                                    <div class="image-container mx-3">
-                                        <div class="blur-background"></div>
-                                        <a href="../admin/uploads/<?php echo htmlspecialchars($image); ?>" data-lightbox="image-<?php echo $announcement_id; ?>" data-title="<?php echo htmlspecialchars($title); ?>">
-                                            <img src="../admin/uploads/<?php echo htmlspecialchars($image); ?>" alt="Post Image" class="img-fluid">
-                                        </a>
-                                        <script src="../admin/js/blur.js"></script>
-                                    </div>
-
+                                    <?php if (!empty($row['image'])): ?>
+                                        <div class="image-container mx-3">
+                                            <div class="blur-background"></div>
+                                            <a href="../admin/uploads/<?php echo htmlspecialchars($image); ?>" data-lightbox="image-<?php echo $announcement_id; ?>" data-title="<?php echo htmlspecialchars($title); ?>">
+                                                <img src="../admin/uploads/<?php echo htmlspecialchars($image); ?>" alt="Post Image" class="img-fluid">
+                                            </a>
+                                            <script src="../admin/js/blur.js"></script>
+                                        </div>
+                                    <?php endif; ?>
                                     <div class="card-body">
                                         <h5 class="card-title"><?php echo htmlspecialchars($title); ?></h5>
                                         <div class="card-text">
@@ -189,6 +204,20 @@ if (isset($_GET['id'])) {
                 </div>
             </div>
         </div>
+
+        <nav class="navbar nav-bottom fixed-bottom d-block d-lg-none mt-5">
+            <div class="container-fluid d-flex justify-content-around">
+                <a href="user.php" class="btn nav-bottom-btn">
+                    <i class="fas fa-newspaper"></i>
+                </a>
+
+                <a href="features/logPage.php" class="btn nav-bottom-btn">
+                    <i class="fas fa-clipboard-list"></i>
+                </a>
+            </div>
+        </nav>
+
+        <?php include 'features/changePassMainPage.html' ?>
     </main>
 
 

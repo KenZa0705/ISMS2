@@ -224,11 +224,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     continue;
                 }
 
-                $s_first_name = $row[0];
-                $s_last_name = $row[1];
-                $s_email = $row[2];
-                $s_contact_number = $row[3];
-
+                // Validate year level, department, and course
                 $s_year_level_id = $pdo->prepare("SELECT year_level_id FROM year_level WHERE year_level = :ylevel");
                 $s_year_level_id->execute([':ylevel' => $row[4]]);
                 $s_year = (int)$s_year_level_id->fetchColumn();
@@ -240,6 +236,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $s_course_id = $pdo->prepare("SELECT course_id FROM course WHERE course_name = :cname");
                 $s_course_id->execute([':cname' => $row[6]]);
                 $s_course = (int)$s_course_id->fetchColumn();
+
+                // Check if year level, department, or course are valid
+                if (!$s_year || !$s_dept || !$s_course) {
+                    $failedRows[] = $i + 1;
+                    $errorDetails[$i + 1] = "Incorrect year level, department, or course";
+                    continue;
+                }
+
+                $s_first_name = $row[0];
+                $s_last_name = $row[1];
+                $s_email = $row[2];
+                $s_contact_number = $row[3];
 
                 $duplicateCheck = $pdo->prepare("SELECT * FROM student WHERE email = :email OR contact_number = :contact_number");
                 $duplicateCheck->execute([':email' => $s_email, ':contact_number' => $s_contact_number]);

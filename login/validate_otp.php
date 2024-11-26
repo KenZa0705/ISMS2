@@ -3,6 +3,7 @@
 use GuzzleHttp\Psr7\Header;
 
 include 'dbh.inc.php';
+include '../admin/features/log.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = $_POST['email'];
@@ -29,11 +30,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     if ($user_found) {
+        if ($user_type == 'student') {
+            logAction($pdo, $result_student['student_id'], 'Student', 'Password Reset Attempt', 'student', $result_student['student_id'], 'OTP Validation Successful');
+        } else {
+            if($result_staff['role'] === 'superadmin'){
+                $role = 'superadmin';
+            } else {
+                $role = 'admin';
+            }
+            logAction($pdo, $result_staff['admin_id'], $role, 'Password Reset Attempt', 'admin', $result_staff['admin_id'], 'OTP Validation Successful');
+        }
         header("Location: resetpassword.php?email=$email&type=$user_type");
     } else {
-        echo '<script>
-            const errorMessage = "Invalid OTP";
-            window.location.href = "send_otp.php?error=" + encodeURIComponent(errorMessage);</script>';
+        
+            
+            header('Location:login.php?error=Invalid OTP');
         exit();
     }
 }

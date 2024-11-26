@@ -237,11 +237,13 @@ $selected_courses = [];
                                                                             <a style="color:black; text-decoration: none;" href="recent-landing.php?id=<?php echo $id; ?>"><?php echo htmlspecialchars($title); ?></a>
                                                                         </div>
                                                                     </div>
+                                                                    <?php if (!empty($row['image'])): ?>
                                                                     <div class="col-md-4 post-img">
                                                                         <div class="post-img-container">
                                                                             <img class="post-image" src="uploads/<?php echo htmlspecialchars($image); ?>" alt="Post Image" class="img-fluid">
                                                                         </div>
                                                                     </div>
+                                                                    <?php endif;?>
                                                                 </div>
                                                             </div>
                                                     <?php

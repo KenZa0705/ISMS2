@@ -1,9 +1,7 @@
 <?php
 require_once '../login/dbh.inc.php';
 session_start();
-if (!isset($_SESSION['user']) || $_SESSION['user_type'] !== 'admin') {
-    $_SESSION = [];
-    session_destroy();
+if (!isset($_SESSION['user'])) {
     header("Location: ../login/login.php");
     exit();
 }
@@ -11,20 +9,22 @@ if (!isset($_SESSION['user']) || $_SESSION['user_type'] !== 'admin') {
 $viewed_admin_id = isset($_GET['id']) ? (int)$_GET['id'] : $_SESSION['user']['admin_id'];
 
 $user = $_SESSION['user'];
-$admin_id = $user['admin_id'];
-$first_name = $user['first_name'];
-$last_name = $user['last_name'];
-$email = $user['email'];
-$contact_number = $user['contact_number'];
-$department_id = $user['department_id'];
-$profile_picture = $user['profile_picture'];
+$student_id = $_SESSION['user']['student_id'];
+$user_id = $_SESSION['user']['student_id'];
+$first_name = $_SESSION['user']['first_name'];
+$last_name = $_SESSION['user']['last_name'];
+$email = $_SESSION['user']['email'];
+$contact_number = $_SESSION['user']['contact_number'];
+$department_id = $_SESSION['user']['department_id'];
+$profile_picture = $_SESSION['user']['profile_picture'];
 
-$query = "SELECT cover_photo, profile_picture FROM admin WHERE admin_id = ?";
-$stmt = $pdo->prepare($query);
-$stmt->execute([$admin_id]);
-$adminPhotos = $stmt->fetch(PDO::FETCH_ASSOC);
+if (isset($_GET['id'])) {
+    $query = "SELECT cover_photo, profile_picture FROM admin WHERE admin_id = ?";
+    $stmt = $pdo->prepare($query);
+    $adminPhotos = $stmt->fetch(PDO::FETCH_ASSOC);
 
-$cover_photo = $adminPhotos['cover_photo'] ?? 'default_cover.jpg';
+    $cover_photo = $adminPhotos['cover_photo'] ?? 'default_cover.jpg';
+}
 
 ?>
 
@@ -38,13 +38,14 @@ $cover_photo = $adminPhotos['cover_photo'] ?? 'default_cover.jpg';
 
     <!-- head CDN links -->
     <?php include '../cdn/head.html'; ?>
-    <link rel="stylesheet" href="css/admin.css">
-    <link rel="stylesheet" href="css/modals.css">
-    <link rel="stylesheet" href="css/sidebar.css">
-    <link rel="stylesheet" href="css/feeds-card.css">
-    <link rel="stylesheet" href="css/bsu-bg.css">
-    <link rel="stylesheet" href="css/cover-photo.css">
-    <link rel="stylesheet" href="css/nav-bottom.css">
+    <link rel="stylesheet" href="../admin/css/admin.css">
+    <link rel="stylesheet" href="../admin/css/modals.css">
+    <link rel="stylesheet" href="../admin/css/sidebar.css">
+    <link rel="stylesheet" href="../admin/css/feeds-card.css">
+    <link rel="stylesheet" href="../admin/css/bsu-bg.css">
+    <link rel="stylesheet" href="../admin/css/filter-modal.css">
+    <link rel="stylesheet" href="../admin/css/cover-photo.css">
+    <link rel="stylesheet" href="../admin/css/nav-bottom.css">
 </head>
 
 <body>
@@ -56,13 +57,14 @@ $cover_photo = $adminPhotos['cover_photo'] ?? 'default_cover.jpg';
                 </div>
 
                 <div class="user-right d-flex align-items-center justify-content-center">
-                    <p class="username d-flex align-items-center m-0 me-2"><?php echo $first_name ?></p>
+                    <p class="username d-flex align-items-center m-0"><?php echo $first_name ?></p>
                     <div class="user-profile">
                         <div class="dropdown">
                             <button class="dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" style="border: none; background: none; padding: 0;">
-                                <img src="<?php echo "uploads/" . htmlspecialchars($profile_picture); ?>" alt="Profile Picture" style="height: 40px; width: 40px; border-radius: 50%;">
+                                <img src="<?php echo "uploads/" . htmlspecialchars($profile_picture); ?>" alt="Profile Picture" style="height: 40px; width: 40px; border-radius; 50%;">
                             </button>
-                            <ul class="dropdown-menu dropdown-menu-end mt-2 py-2 shadow-sm">
+                            <ul class="dropdown-menu dropdown-menu-end mt-2 py-2 shadow-sm" style="width: 300px;">
+
                                 <li>
                                     <div class="px-2 py-2 d-flex align-items-center">
                                         <img class="rounded-circle me-2" src="<?php echo 'uploads/' . htmlspecialchars($profile_picture); ?>" alt="Profile Picture" style="width: 40px; height: 40px; object-fit: cover;">
@@ -72,19 +74,15 @@ $cover_photo = $adminPhotos['cover_photo'] ?? 'default_cover.jpg';
                                         </div>
                                     </div>
                                 </li>
+
                                 <li>
                                     <hr class="dropdown-divider">
                                 </li>
+
                                 <li>
                                     <a class="dropdown-item d-flex align-items-center py-2" href="#" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
                                         <i class="bi bi-key me-2"></i>
                                         Change Password
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item d-flex align-items-center py-2" href="#" data-bs-toggle="modal" data-bs-target="#changeProfilePictureModal">
-                                        <i class="bi bi-person-circle me-2"></i>
-                                        Change Profile Picture
                                     </a>
                                 </li>
                                 <li>
@@ -109,35 +107,15 @@ $cover_photo = $adminPhotos['cover_photo'] ?? 'default_cover.jpg';
                 <div class="col-lg-3 sidebar sidebar-left d-none d-lg-block">
                     <div class="sticky-sidebar">
                         <ul class="nav flex-column">
+
                             <li class="nav-item">
-                                <a href="features/dashboard.php"><i class="fas fa-chart-line me-2"></i>Dashboard</a>
+                                <a href="user.php"><i class="fas fa-newspaper me-2"></i>Feed</a>
                             </li>
-                            <li class="nav-item">
-                                <a href="admin.php"><i class="fas fa-newspaper me-2"></i>Feed</a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="features/manage.php"><i class="fas fa-user me-2"></i>My Profile</a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="features/create.php"><i class="fas fa-bullhorn me-2"></i>Create Announcement</a>
-                            </li>
+
                             <li class="nav-item">
                                 <a href="features/logPage.php"><i class="fas fa-clipboard-list me-2"></i>Logs</a>
                             </li>
-                            <li class="nav-item">
-                                <a href="features/manage_student.php"><i class="fas fa-users-cog me-2"></i>Manage Accounts</a>
-                            </li>
-                            <?php if (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'superadmin'): ?>
-                                <li class="nav-item">
-                                    <a href="features/manage_admin.php"><i class="fas fa-user-shield me-2"></i>Manage Admins</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="features/feedbackPage.php">
-                                        <i class="fas fa-comments me-2"></i>
-                                        <span class="menu-text">Feedback</span>
-                                    </a>
-                                </li>
-                            <?php endif; ?>
+
                         </ul>
                     </div>
                 </div>
@@ -147,7 +125,7 @@ $cover_photo = $adminPhotos['cover_photo'] ?? 'default_cover.jpg';
                     <div class="row g-0">
                         <?php
                         try {
-                            $query = "SELECT admin_id, first_name, last_name, profile_picture, cover_photo, bio FROM admin WHERE admin_id = :admin_id";
+                            $query = "SELECT admin_id, first_name, last_name, profile_picture FROM admin WHERE admin_id = :admin_id";
 
                             $stmt = $pdo->prepare($query);
                             $stmt->bindParam(':admin_id', $viewed_admin_id, PDO::PARAM_INT);
@@ -159,8 +137,6 @@ $cover_photo = $adminPhotos['cover_photo'] ?? 'default_cover.jpg';
                                 $admin_id = $admin['admin_id'];
                                 $admin_name = $admin['first_name'] . " " . $admin['last_name'];
                                 $admin_profile_picture = $admin['profile_picture'];
-                                $admin_cp = $admin['cover_photo'];
-                                $admin_bio = $admin['bio'];
                             } else {
                                 echo "<p>Admin not found.</p>";
                             }
@@ -172,14 +148,14 @@ $cover_photo = $adminPhotos['cover_photo'] ?? 'default_cover.jpg';
                         <!-- Desktop Layout -->
                         <div class="col-12 col-xxl-12 cover desktop-layout">
                             <div class="cover-photo-container" style="position: relative;">
-                                <a href="<?php echo 'uploads/' . htmlspecialchars($admin_cp); ?>" data-lightbox="cover" data-title="Cover Photo">
-                                    <img src="<?php echo 'uploads/' . htmlspecialchars($admin_cp); ?>" alt="Cover Photo">
+                                <a href="<?php echo '../admin/uploads/' . htmlspecialchars($cover_photo); ?>" data-lightbox="cover" data-title="Cover Photo">
+                                    <img src="<?php echo '../admin/uploads/' . htmlspecialchars($cover_photo); ?>" alt="Cover Photo">
                                 </a>
                             </div>
                             <div class="profile-section">
                                 <div class="profile-photo-container" style="position: relative;">
-                                    <a href="<?php echo 'uploads/' . htmlspecialchars($admin_profile_picture); ?>" data-lightbox="profile" data-title="Profile Photo">
-                                        <img src="<?php echo 'uploads/' . htmlspecialchars($admin_profile_picture); ?>" alt="Profile Photo">
+                                    <a href="<?php echo '../admin/uploads/' . htmlspecialchars($admin_profile_picture); ?>" data-lightbox="profile" data-title="Profile Photo">
+                                        <img src="<?php echo '../admin/uploads/' . htmlspecialchars($admin_profile_picture); ?>" alt="Profile Photo">
                                     </a>
                                 </div>
                                 <div class="username-container">
@@ -190,11 +166,11 @@ $cover_photo = $adminPhotos['cover_photo'] ?? 'default_cover.jpg';
 
                         <div class="col-12 mobile-layout">
                             <div class="cover-photo-container">
-                                <img src="<?php echo 'uploads/' . htmlspecialchars($admin_cp); ?>" alt="">
+                                <img src="<?php echo '../admin/uploads/' . htmlspecialchars($cover_photo); ?>" alt="">
                             </div>
                             <div class="profile-section">
                                 <div class="profile-photo-container">
-                                    <img src="<?php echo 'uploads/' . htmlspecialchars($admin_profile_picture); ?>" alt="">
+                                    <img src="<?php echo '../admin/uploads/' . htmlspecialchars($admin_profile_picture); ?>" alt="">
                                 </div>
                                 <div class="username-container">
                                     <h5 class="name"><?php echo htmlspecialchars($admin_name); ?></h5>
@@ -249,22 +225,21 @@ $cover_photo = $adminPhotos['cover_photo'] ?? 'default_cover.jpg';
                                         <div class="card mb-3">
                                             <div class="profile-container d-flex px-3 pt-3">
                                                 <div class="profile-pic">
-                                                    <img src="<?php echo 'uploads/' . htmlspecialchars($admin_profile_picture); ?>" alt="Profile Picture">
+                                                    <img src="<?php echo '../admin/uploads/' . htmlspecialchars($admin_profile_picture); ?>" alt="Profile Picture">
                                                 </div>
                                                 <p class="ms-1 mt-1"><?php echo htmlspecialchars($admin_name); ?></p>
                                                 <?php if (isset($admin_id) && isset($announcement_admin_id) && (string)$admin_id === (string)$announcement_admin_id) : ?>
                                                 <?php endif; ?>
                                             </div>
                                             <?php if (!empty($row['image'])): ?>
-                                            <div class="image-container mx-3" style="position: relative; overflow: hidden;">
-                                                <div class="blur-background"></div>
-                                                <a href="uploads/<?php echo htmlspecialchars($row['image']); ?>" data-lightbox="image-<?php echo $row['announcement_id']; ?>" data-title="<?php echo htmlspecialchars($row['title']); ?>">
-                                                    <img src="uploads/<?php echo htmlspecialchars($row['image']); ?>" alt="Post Image" class="img-fluid">
-                                                    <script src="js/blur.js"></script>
-                                                </a>
-                                            </div>
+                                                <div class="image-container mx-3" style="position: relative; overflow: hidden;">
+                                                    <div class="blur-background"></div>
+                                                    <a href="../admin/uploads/<?php echo htmlspecialchars($row['image']); ?>" data-lightbox="image-<?php echo $row['announcement_id']; ?>" data-title="<?php echo htmlspecialchars($row['title']); ?>">
+                                                        <img src="../admin/uploads/<?php echo htmlspecialchars($row['image']); ?>" alt="Post Image" class="img-fluid">
+                                                        <script src="../admin/js/blur.js"></script>
+                                                    </a>
+                                                </div>
                                             <?php endif; ?>
-
                                             <div class="card-body">
                                                 <h5 class="card-title"><?php echo htmlspecialchars($title); ?></h5>
                                                 <div class="card-text">
@@ -300,8 +275,7 @@ $cover_photo = $adminPhotos['cover_photo'] ?? 'default_cover.jpg';
                                 <div class="card card-info p-4">
                                     <div class="left-card">
                                         <div class="d-flex flex-column">
-                                            <h6>My Bio:</h6>
-                                            <p><?php echo htmlspecialchars($admin_bio); ?></p>
+                                            <p>No bio yet</p>
                                         </div>
                                     </div>
                                 </div>
@@ -311,6 +285,19 @@ $cover_photo = $adminPhotos['cover_photo'] ?? 'default_cover.jpg';
                 </div>
             </div>
         </div>
+        <nav class="navbar nav-bottom fixed-bottom d-block d-lg-none mt-5">
+            <div class="container-fluid d-flex justify-content-around">
+                <a href="user.php" class="btn nav-bottom-btn">
+                    <i class="fas fa-newspaper"></i>
+                </a>
+
+                <a href="features/logPage.php" class="btn nav-bottom-btn">
+                    <i class="fas fa-clipboard-list"></i>
+                </a>
+            </div>
+        </nav>
+
+        <?php include 'features/changePassMainPage.html' ?>
     </main>
 
     <!-- Body CDN links -->

@@ -36,6 +36,7 @@ $selected_courses = [];
     <link rel="stylesheet" href="../admin/css/feeds-card.css">
     <link rel="stylesheet" href="../admin/css/bsu-bg.css">
     <link rel="stylesheet" href="../admin/css/filter-modal.css">
+    <link rel="stylesheet" href="../admin/css/nav-bottom.css">
 </head>
 
 <body>
@@ -46,7 +47,7 @@ $selected_courses = [];
                     <a class="navbar-brand d-flex align-items-center" href="#"><img src="img/brand.png" class="img-fluid branding" alt=""></a>
                 </div>
 
-                <div class="search-container">
+                <div class="search-container d-none d-md-block">
                     <form id="searchForm" class="d-flex align-items-center gap-2">
                         <!-- Filter Button -->
                         <button type="button" class="btn btn-light filter-btn" data-bs-toggle="modal" data-bs-target="#filterModal">
@@ -63,7 +64,7 @@ $selected_courses = [];
                                 class="form-control border-start-0 ps-0"
                                 placeholder="Search announcements..."
                                 aria-label="Search announcements">
-                            <button type="submit" class="btn btn-primary">
+                            <button type="submit" class="btn btn-danger">
                                 <i class="bi bi-search me-2 d-none d-md-inline"></i>Search
                             </button>
                         </div>
@@ -75,24 +76,39 @@ $selected_courses = [];
                     <div class="user-profile">
                         <div class="dropdown">
                             <button class="dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" style="border: none; background: none; padding: 0;">
-                                <img src="<?php echo "uploads/" . htmlspecialchars($profile_picture); ?>" alt="Profile Picture">
+                                <img src="<?php echo "uploads/" . htmlspecialchars($profile_picture); ?>" alt="Profile Picture" style="height: 40px; width: 40px; border-radius; 50%;">
                             </button>
-                            <ul class="dropdown-menu mt-3" style="left: auto; right:1px;">
+                            <ul class="dropdown-menu dropdown-menu-end mt-2 py-2 shadow-sm" style="width: 300px;">
+
                                 <li>
-                                    <div class="dropdown-item text-center">
-                                        <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
-                                            Change Password
-                                        </button>
+                                    <div class="px-2 py-2 d-flex align-items-center">
+                                        <img class="rounded-circle me-2" src="<?php echo 'uploads/' . htmlspecialchars($profile_picture); ?>" alt="Profile Picture" style="width: 40px; height: 40px; object-fit: cover;">
+                                        <div>
+                                            <p class="mb-0 small"><?php echo htmlspecialchars($first_name . " " . $last_name); ?></p>
+                                            <p class="mb-0 small text-muted"><?php echo htmlspecialchars($email); ?></p>
+                                        </div>
                                     </div>
                                 </li>
+
                                 <li>
-                                    <div class="dropdown-item text-center">
-                                        <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#changeProfilePictureModal">
-                                            Change Profile Picture
-                                        </button>
-                                    </div>
+                                    <hr class="dropdown-divider">
                                 </li>
-                                <li><a class="dropdown-item text-center" onclick="alert('Logged Out Successfully')" href="../login/logout.php">Logout</a></li>
+
+                                <li>
+                                    <a class="dropdown-item d-flex align-items-center py-2" href="#" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                                        <i class="bi bi-key me-2"></i>
+                                        Change Password
+                                    </a>
+                                </li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li>
+                                    <a class="dropdown-item d-flex align-items-center py-2 text-danger" href="../login/logout.php" onclick="return confirmLogout()">
+                                        <i class="bi bi-box-arrow-right me-2"></i>
+                                        Logout
+                                    </a>
+                                </li>
                             </ul>
                         </div>
                     </div>
@@ -171,22 +187,27 @@ $selected_courses = [];
                                                                 <div class="row">
                                                                     <div class="col-md-8 recent-profile-container">
                                                                         <div class="recent-container d-flex">
-                                                                            <img class="profile-picture" src="<?php echo "../admin/uploads/" . htmlspecialchars($admin_pp); ?>" alt="Profile Picture">
-                                                                            <p class="mt-1 ms-2"><?php echo htmlspecialchars($admin_name) ?></p>
+                                                                            <a href="profile-landing.php?id=<?php echo htmlspecialchars($row['admin_id']); ?>">
+                                                                                <img class="profile-picture" src="<?php echo "../admin/uploads/" . htmlspecialchars($admin_pp); ?>" alt="Profile Picture">
+                                                                            </a>
+                                                                            <a href="profile-landing.php?id=<?php echo htmlspecialchars($row['admin_id']); ?>" style="text-decoration: none; color: black;">
+                                                                                <p class="mt-1 ms-2"><?php echo htmlspecialchars($admin_name); ?></p>
+                                                                            </a>
                                                                         </div>
                                                                         <div class="title-container mt-0">
                                                                             <a style="color:black; text-decoration: none;" href="recent-landing.php?id=<?php echo $id; ?>"><?php echo htmlspecialchars($title); ?></a>
                                                                         </div>
                                                                     </div>
+                                                                    <?php if (!empty($row['image'])): ?>
                                                                     <div class="col-md-4 post-img">
                                                                         <div class="post-img-container">
                                                                             <img class="post-image" src="../admin/uploads/<?php echo htmlspecialchars($image); ?>" alt="Post Image" class="img-fluid">
                                                                         </div>
                                                                     </div>
+                                                                    <?php endif; ?>
                                                                 </div>
                                                             </div>
                                                     <?php
-                                                            // Only display <hr> if it's not the last announcement
                                                             if ($index < $announcementCount - 1) {
                                                                 echo '<hr>';
                                                             }
@@ -407,6 +428,17 @@ $selected_courses = [];
                 </div>
             </div>
         </div>
+        <nav class="navbar nav-bottom fixed-bottom d-block d-lg-none mt-5">
+            <div class="container-fluid d-flex justify-content-around">
+                <a href="user.php" class="btn nav-bottom-btn active-btn">
+                    <i class="fas fa-newspaper"></i>
+                </a>
+
+                <a href="features/logPage.php" class="btn nav-bottom-btn">
+                    <i class="fas fa-clipboard-list"></i>
+                </a>
+            </div>
+        </nav>
         <?php require 'features/changePassMainPage.html'; ?>
     </main>
 
@@ -497,6 +529,12 @@ $selected_courses = [];
                     alert('An error occurred while submitting feedback');
                 });
         });
+        function confirmLogout() {
+            if (confirm('Are you sure you want to sign out?')) {
+                window.location.href = '../login/logout.php';
+            }
+            return false;
+        }
     </script>
     <script src="../admin/js/admin.js"></script>
 

@@ -155,7 +155,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['admin_id'])) {
         );
     }
 
-    header("Location: manage_admin.php?error=Admin infor updated successfully");
+    header("Location: manage_admin.php?error=Admin information updated successfully");
     exit();
 }
 

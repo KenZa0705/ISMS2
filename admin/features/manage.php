@@ -16,6 +16,7 @@ $last_name = $_SESSION['user']['last_name'];
 $email = $_SESSION['user']['email'];
 $contact_number = $_SESSION['user']['contact_number'];
 $department_id = $_SESSION['user']['department_id'];
+$bio = $_SESSION['user']['bio'];
 
 // Fetch admin details including photos
 $query = "SELECT cover_photo, profile_picture FROM admin WHERE admin_id = ?";
@@ -24,6 +25,21 @@ $stmt->execute([$admin_id]);
 $adminPhotos = $stmt->fetch(PDO::FETCH_ASSOC);
 
 $cover_photo = $adminPhotos['cover_photo'] ?? 'default_cover.jpg';
+
+// Add this block to handle the bio update
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bio'])) {
+    try {
+        $bio = $_POST['bio'];
+        $query = "UPDATE admin SET bio = :bio WHERE admin_id = :admin_id";
+        $stmt = $pdo->prepare($query);
+        $stmt->bindParam(':bio', $bio);
+        $stmt->bindParam(':admin_id', $admin_id, PDO::PARAM_INT);
+        $stmt->execute();
+        echo "<script>alert('Bio updated successfully!');</script>";
+    } catch (PDOException $e) {
+        echo "Error: " . $e->getMessage();
+    }
+}
 
 ?>
 
@@ -236,13 +252,15 @@ $cover_photo = $adminPhotos['cover_photo'] ?? 'default_cover.jpg';
                                                 <?php endif; ?>
                                             </div>
 
-                                            <div class="image-container mx-3" style="position: relative; overflow: hidden;">
-                                                <div class="blur-background"></div>
-                                                <a href="../uploads/<?php echo htmlspecialchars($row['image']); ?>" data-lightbox="image-<?php echo $row['announcement_id']; ?>" data-title="<?php echo htmlspecialchars($row['title']); ?>">
-                                                    <img src="../uploads/<?php echo htmlspecialchars($row['image']); ?>" alt="Post Image" class="img-fluid">
-                                                    <script src="../js/blur.js"></script>
-                                                </a>
-                                            </div>
+                                            <?php if (!empty($row['image'])): ?>
+                                                <div class="image-container mx-3" style="position: relative; overflow: hidden;">
+                                                    <div class="blur-background"></div>
+                                                        <a href="../uploads/<?php echo htmlspecialchars($row['image']); ?>" data-lightbox="image-<?php echo $row['announcement_id']; ?>" data-title="<?php echo htmlspecialchars($row['title']); ?>">
+                                                            <img src="../uploads/<?php echo htmlspecialchars($row['image']); ?>" alt="Post Image" class="img-fluid">
+                                                            <script src="../admin/js/blur.js"></script>
+                                                        </a>
+                                                </div>
+                                            <?php endif; ?>
 
                                             <div class="card-body">
                                                 <h5 class="card-title"><?php echo htmlspecialchars($title); ?></h5>
@@ -280,12 +298,16 @@ $cover_photo = $adminPhotos['cover_photo'] ?? 'default_cover.jpg';
                                 <div class="card card-info p-4">
                                     <div class="left-card">
                                         <div class="d-flex flex-column">
+                                        <div class="bio-display-container">
+                                            <h6>My Bio:</h6>
+                                            <p><?php echo htmlspecialchars($bio); ?></p>
+                                        </div>
                                             <div class="bio-form-container d-none">
-                                                <form action="">
-                                                    <textarea id="bio" class="form-control text-center" rows="4" placeholder="Describe who you are"></textarea>
+                                                <form action="" method="post">
+                                                <textarea id="bio" name="bio" class="form-control text-center" rows="4" placeholder="Describe who you are"><?php echo htmlspecialchars($bio); ?></textarea>
                                                     <div class="button-container d-flex justify-content-end mt-2">
                                                         <div class="btn btn-danger me-2" id="cancelBio">Cancel</div>
-                                                        <div class="btn btn-danger">Save</div>
+                                                        <button type="submit" class="btn btn-danger">Save</button>
                                                     </div>
                                                 </form>
                                             </div>

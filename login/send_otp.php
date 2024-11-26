@@ -89,8 +89,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         if ($user_type == 'student') {
             $update_stmt = $pdo->prepare("UPDATE student SET otp = :otp, otp_expiry = :otp_expiry WHERE email = :email");
+            logAction($pdo, $result_student['student_id'], 'Student', 'Password Reset Attempt', 'student', $result_student['student_id'], 'An OTP has been sent');
         } else {
             $update_stmt = $pdo->prepare("UPDATE admin SET otp = :otp, otp_expiry = :otp_expiry WHERE email = :email");
+            if($result_staff['role'] === 'superadmin'){
+                $role = 'superadmin';
+            } else {
+                $role = 'admin';
+            }
+            logAction($pdo, $result_staff['admin_id'], $role, 'Password Reset Attempt', 'admin', $result_staff['admin_id'], 'An OTP has been sent');
         }
 
         $update_stmt->execute([
@@ -328,6 +335,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <?php
 
     } else {
-        echo "Email does not exist in either student or school staff records.";
+        echo '<script>alert("Email does not exist in either student or admin records.")</script>';
+        header('Location: login.php?error=Email does not exist in either student or admin records');
     }
 }

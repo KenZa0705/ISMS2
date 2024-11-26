@@ -156,7 +156,10 @@ $department_id = $_SESSION['user']['department_id'];
                                     logAction($pdo, $admin_id, 'admin', 'update', 'announcement_course', $new_courses_id, 'updated an announcement, modified courses');
                                 }
                                 // Handle image upload
-                                if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+                                if (isset($_POST['remove_image'])) {
+                                    $new_image = null; // Set image to NULL if checkbox is checked
+                                    logAction($pdo, $admin_id, 'admin', 'update', 'announcement', $announcement_id, 'removed the image from the announcement');
+                                } elseif (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
                                     $image_tmp_name = $_FILES['image']['tmp_name'];
                                     $image_name = $_FILES['image']['name'];
                                     $uploadDir = '../uploads/';
@@ -257,6 +260,12 @@ $department_id = $_SESSION['user']['department_id'];
                                             style="position: absolute; top: 10px; right: 10px; display: none; cursor: pointer;"
                                             onclick="deleteImage()"></i>
                                     </div>
+                                </div>
+
+                                <!-- Checkbox to remove image -->
+                                <div class="form-check mb-4">
+                                    <input type="checkbox" class="form-check-input" id="removeImage" name="remove_image">
+                                    <label class="form-check-label" for="removeImage">Remove current image</label>
                                 </div>
 
                                 <!-- Submit button -->

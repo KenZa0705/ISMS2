@@ -6,20 +6,20 @@ require_once '../login/dbh.inc.php';
     <div class="profile-container d-flex px-3 pt-3">
         <div class="profile-pic">
             <a href="profile-landing.php?id=<?php echo htmlspecialchars($row['admin_id']); ?>"> <!-- Use the appropriate identifier -->
-                <img class="img-fluid" src="<?php echo 'uploads/' . htmlspecialchars($row['profile_picture']); ?>" alt="Profile Picture">
+                <img src="<?php echo 'uploads/' . htmlspecialchars($row['profile_picture']); ?>" alt="Profile Picture" class="img-fluid rounded-circle" style="width: 30px;height: 40px;object-fit: cover;border-radius: 50%;">
             </a>
         </div>
         <p class="ms-1 mt-1"><?php echo htmlspecialchars($row['first_name'] . ' ' . $row['last_name']); ?></p>
     </div>
-
-    <div class="image-container mx-3" style="position: relative; overflow: hidden;">
-        <div class="blur-background"></div>
-        <a href="uploads/<?php echo htmlspecialchars($row['image']); ?>" data-lightbox="image-<?php echo $row['announcement_id']; ?>" data-title="<?php echo htmlspecialchars($row['title']); ?>">
-            <img src="uploads/<?php echo htmlspecialchars($row['image']); ?>" alt="Post Image" class="img-fluid">
-            <script src="../admin/js/blur.js"></script>
-        </a>
-    </div>
-
+    <?php if (!empty($row['image'])): ?>
+        <div class="image-container mx-3" style="position: relative; overflow: hidden;">
+            <div class="blur-background"></div>
+                <a href="uploads/<?php echo htmlspecialchars($row['image']); ?>" data-lightbox="image-<?php echo $row['announcement_id']; ?>" data-title="<?php echo htmlspecialchars($row['title']); ?>">
+                    <img src="uploads/<?php echo htmlspecialchars($row['image']); ?>" alt="Post Image" class="img-fluid">
+                    <script src="../admin/js/blur.js"></script>
+                </a>
+        </div>
+    <?php endif; ?>
     <div class="card-body">
         <h5 class="card-title"><?php echo htmlspecialchars($row['title']); ?></h5>
         <div class="card-text">
