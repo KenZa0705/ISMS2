@@ -1,4 +1,7 @@
 <?php
+
+use GuzzleHttp\Psr7\Header;
+
 include 'dbh.inc.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -28,7 +31,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($user_found) {
         header("Location: resetpassword.php?email=$email&type=$user_type");
     } else {
-        echo "Invalid or expired OTP.";
+        echo '<script>
+            const errorMessage = "Invalid OTP";
+            window.location.href = "send_otp.php?error=" + encodeURIComponent(errorMessage);</script>';
+        exit();
     }
 }
-?>

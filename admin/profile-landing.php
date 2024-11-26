@@ -1,23 +1,24 @@
 <?php
-require_once '../../login/dbh.inc.php';
+require_once '../login/dbh.inc.php';
 session_start();
 if (!isset($_SESSION['user']) || $_SESSION['user_type'] !== 'admin') {
     $_SESSION = [];
     session_destroy();
-    header("Location: ../../login/login.php");
+    header("Location: ../login/login.php");
     exit();
 }
 
-//Get info from admin session
-$user = $_SESSION['user'];
-$admin_id = $_SESSION['user']['admin_id'];
-$first_name = $_SESSION['user']['first_name'];
-$last_name = $_SESSION['user']['last_name'];
-$email = $_SESSION['user']['email'];
-$contact_number = $_SESSION['user']['contact_number'];
-$department_id = $_SESSION['user']['department_id'];
+$viewed_admin_id = isset($_GET['id']) ? (int)$_GET['id'] : $_SESSION['user']['admin_id'];
 
-// Fetch admin details including photos
+$user = $_SESSION['user'];
+$admin_id = $user['admin_id'];
+$first_name = $user['first_name'];
+$last_name = $user['last_name'];
+$email = $user['email'];
+$contact_number = $user['contact_number'];
+$department_id = $user['department_id'];
+$profile_picture = $user['profile_picture'];
+
 $query = "SELECT cover_photo, profile_picture FROM admin WHERE admin_id = ?";
 $stmt = $pdo->prepare($query);
 $stmt->execute([$admin_id]);
@@ -33,24 +34,73 @@ $cover_photo = $adminPhotos['cover_photo'] ?? 'default_cover.jpg';
 <head>
     <title>Manage Posts</title>
     <meta charset="utf-8" />
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 
     <!-- head CDN links -->
-    <?php include '../../cdn/head.html'; ?>
-    <link rel="stylesheet" href="../css/admin.css">
-    <link rel="stylesheet" href="../css/modals.css">
-    <link rel="stylesheet" href="../css/sidebar.css">
-    <link rel="stylesheet" href="../css/feeds-card.css">
-    <link rel="stylesheet" href="../css/bsu-bg.css">
-    <link rel="stylesheet" href="../css/cover-photo.css">
-    <link rel="stylesheet" href="../css/nav-bottom.css">
+    <?php include '../cdn/head.html'; ?>
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="css/modals.css">
+    <link rel="stylesheet" href="css/sidebar.css">
+    <link rel="stylesheet" href="css/feeds-card.css">
+    <link rel="stylesheet" href="css/bsu-bg.css">
+    <link rel="stylesheet" href="css/cover-photo.css">
+    <link rel="stylesheet" href="css/nav-bottom.css">
 </head>
 
 <body>
     <header>
-        <?php include '../../cdn/navbar.php'; ?>
+        <nav class="navbar navbar-expand-lg bg-white text-black fixed-top mb-5" style="border-bottom: 1px solid #e9ecef; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);">
+            <div class="container-fluid">
+                <div class="user-left d-flex">
+                    <a class="navbar-brand d-flex align-items-center" href="#"><img src="img/brand.png" class="img-fluid branding" alt=""></a>
+                </div>
+
+                <div class="user-right d-flex align-items-center justify-content-center">
+                    <p class="username d-flex align-items-center m-0 me-2"><?php echo $first_name ?></p>
+                    <div class="user-profile">
+                        <div class="dropdown">
+                            <button class="dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" style="border: none; background: none; padding: 0;">
+                                <img src="<?php echo "uploads/" . htmlspecialchars($profile_picture); ?>" alt="Profile Picture" style="height: 40px; width: 40px; border-radius: 50%;">
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end mt-2 py-2 shadow-sm">
+                                <li>
+                                    <div class="px-2 py-2 d-flex align-items-center">
+                                        <img class="rounded-circle me-2" src="<?php echo 'uploads/' . htmlspecialchars($profile_picture); ?>" alt="Profile Picture" style="width: 40px; height: 40px; object-fit: cover;">
+                                        <div>
+                                            <p class="mb-0 small"><?php echo htmlspecialchars($first_name . " " . $last_name); ?></p>
+                                            <p class="mb-0 small text-muted"><?php echo htmlspecialchars($email); ?></p>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li>
+                                    <a class="dropdown-item d-flex align-items-center py-2" href="#" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                                        <i class="bi bi-key me-2"></i>
+                                        Change Password
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item d-flex align-items-center py-2" href="#" data-bs-toggle="modal" data-bs-target="#changeProfilePictureModal">
+                                        <i class="bi bi-person-circle me-2"></i>
+                                        Change Profile Picture
+                                    </a>
+                                </li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li>
+                                    <a class="dropdown-item d-flex align-items-center py-2 text-danger" href="#" onclick="return confirmLogout()">
+                                        <i class="bi bi-box-arrow-right me-2"></i>
+                                        Logout
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+        </nav>
     </header>
     <main>
         <div class="container-fluid pt-5">
@@ -62,27 +112,21 @@ $cover_photo = $adminPhotos['cover_photo'] ?? 'default_cover.jpg';
                             <li class="nav-item">
                                 <a href="dashboard.php"><i class="fas fa-chart-line me-2"></i>Dashboard</a>
                             </li>
-
                             <li class="nav-item">
-                                <a href="../admin.php"><i class="fas fa-newspaper me-2"></i>Feed</a>
+                                <a href="admin.php"><i class="fas fa-newspaper me-2"></i>Feed</a>
                             </li>
-
                             <li class="nav-item">
-                                <a class="active" href="manage.php"><i class="fas fa-user me-2"></i>My Profile</a>
+                                <a href="features/manage.php"><i class="fas fa-user me-2"></i>My Profile</a>
                             </li>
-
                             <li class="nav-item">
                                 <a href="create.php"><i class="fas fa-bullhorn me-2"></i>Create Announcement</a>
                             </li>
-
                             <li class="nav-item">
                                 <a href="logPage.php"><i class="fas fa-clipboard-list me-2"></i>Logs</a>
                             </li>
-
                             <li class="nav-item">
                                 <a href="manage_student.php"><i class="fas fa-users-cog me-2"></i>Manage Accounts</a>
                             </li>
-
                             <?php if (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'superadmin'): ?>
                                 <li class="nav-item">
                                     <a href="manage_admin.php"><i class="fas fa-user-shield me-2"></i>Manage Admins</a>
@@ -103,46 +147,37 @@ $cover_photo = $adminPhotos['cover_photo'] ?? 'default_cover.jpg';
                     <div class="row g-0">
                         <?php
                         try {
-                            // Query to fetch admin data
-                            $query = "SELECT first_name, last_name FROM admin WHERE admin_id = :admin_id";
+                            $query = "SELECT admin_id, first_name, last_name, profile_picture FROM admin WHERE admin_id = :admin_id";
 
-                            // Prepare and execute the query
                             $stmt = $pdo->prepare($query);
-                            $stmt->bindParam(':admin_id', $_SESSION['user']['admin_id'], PDO::PARAM_INT);
+                            $stmt->bindParam(':admin_id', $viewed_admin_id, PDO::PARAM_INT);
                             $stmt->execute();
 
-                            // Fetch the admin data
                             $admin = $stmt->fetch(PDO::FETCH_ASSOC);
 
-                            // Display the admin name if found
                             if ($admin) {
+                                $admin_id = $admin['admin_id'];
                                 $admin_name = $admin['first_name'] . " " . $admin['last_name'];
+                                $admin_profile_picture = $admin['profile_picture'];
                             } else {
                                 echo "<p>Admin not found.</p>";
                             }
                         } catch (PDOException $e) {
-                            // Handle database errors
                             echo "Error: " . $e->getMessage();
                         }
                         ?>
 
-
                         <!-- Desktop Layout -->
                         <div class="col-12 col-xxl-12 cover desktop-layout">
                             <div class="cover-photo-container" style="position: relative;">
-                                <a href="<?php echo '../uploads/' . htmlspecialchars($cover_photo); ?>" data-lightbox="cover" data-title="Cover Photo">
-                                    <img src="<?php echo '../uploads/' . htmlspecialchars($cover_photo); ?>" alt="Cover Photo">
+                                <a href="<?php echo 'uploads/' . htmlspecialchars($cover_photo); ?>" data-lightbox="cover" data-title="Cover Photo">
+                                    <img src="<?php echo 'uploads/' . htmlspecialchars($cover_photo); ?>" alt="Cover Photo">
                                 </a>
-                                <!-- Button to change cover photo -->
-                                <form action="upload_photo.php" method="post" enctype="multipart/form-data" style="position: absolute; bottom: 10px; right: 10px;">
-                                    <input type="file" name="coverPhoto" id="coverPhotoInput" style="display: none;" onchange="this.form.submit()">
-                                    <button type="button" class="edit-btn" onclick="document.getElementById('coverPhotoInput').click()">Edit</button>
-                                </form>
                             </div>
                             <div class="profile-section">
                                 <div class="profile-photo-container" style="position: relative;">
-                                    <a href="<?php echo '../uploads/' . htmlspecialchars($profile_picture); ?>" data-lightbox="profile" data-title="Profile Photo">
-                                        <img src="<?php echo '../uploads/' . htmlspecialchars($profile_picture); ?>" alt="Profile Photo">
+                                    <a href="<?php echo 'uploads/' . htmlspecialchars($admin_profile_picture); ?>" data-lightbox="profile" data-title="Profile Photo">
+                                        <img src="<?php echo 'uploads/' . htmlspecialchars($admin_profile_picture); ?>" alt="Profile Photo">
                                     </a>
                                 </div>
                                 <div class="username-container">
@@ -151,24 +186,22 @@ $cover_photo = $adminPhotos['cover_photo'] ?? 'default_cover.jpg';
                             </div>
                         </div>
 
-                        <!-- Mobile Layout -->
                         <div class="col-12 mobile-layout">
                             <div class="cover-photo-container">
-                                <img src="<?php echo '../uploads/' . htmlspecialchars($cover_photo); ?>" alt="">
+                                <img src="<?php echo 'uploads/' . htmlspecialchars($cover_photo); ?>" alt="">
                             </div>
                             <div class="profile-section">
                                 <div class="profile-photo-container">
-                                    <img src="<?php echo '../uploads/' . htmlspecialchars($profile_picture); ?>" alt="">
+                                    <img src="<?php echo 'uploads/' . htmlspecialchars($admin_profile_picture); ?>" alt="">
                                 </div>
                                 <div class="username-container">
                                     <h5 class="name"><?php echo htmlspecialchars($admin_name); ?></h5>
+
                                 </div>
                             </div>
                         </div>
                         <div class="col-xxl-7 col-lg-12 feed-container">
                             <?php
-                            require_once '../../login/dbh.inc.php';
-
                             try {
                                 $query = "
                                 SELECT a.*, ad.first_name, ad.last_name,
@@ -214,33 +247,18 @@ $cover_photo = $adminPhotos['cover_photo'] ?? 'default_cover.jpg';
                                         <div class="card mb-3">
                                             <div class="profile-container d-flex px-3 pt-3">
                                                 <div class="profile-pic">
-                                                    <img src="<?php echo '../uploads/' . htmlspecialchars($profile_picture); ?>" alt="Profile Picture">
+                                                    <img src="<?php echo 'uploads/' . htmlspecialchars($admin_profile_picture); ?>" alt="Profile Picture">
                                                 </div>
                                                 <p class="ms-1 mt-1"><?php echo htmlspecialchars($admin_name); ?></p>
                                                 <?php if (isset($admin_id) && isset($announcement_admin_id) && (string)$admin_id === (string)$announcement_admin_id) : ?>
-                                                    <div class="dropdown ms-auto">
-                                                        <span id="dropdownMenuButton<?php echo $announcement_id; ?>" data-bs-toggle="dropdown" aria-expanded="false">
-                                                            <i class="bi bi-three-dots"></i>
-                                                        </span>
-                                                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton<?php echo $announcement_id; ?>">
-                                                            <li><a class="dropdown-item" href="edit_announcement.php?id=<?php echo $announcement_id; ?>">Edit</a></li>
-                                                            <li>
-                                                                <a class="dropdown-item text-danger" href="#"
-                                                                    data-bs-toggle="modal"
-                                                                    data-bs-target="#deletePost"
-                                                                    data-announcement-id="<?php echo $announcement_id; ?>">Delete</a>
-                                                            </li>
-
-                                                        </ul>
-                                                    </div>
                                                 <?php endif; ?>
                                             </div>
 
                                             <div class="image-container mx-3" style="position: relative; overflow: hidden;">
                                                 <div class="blur-background"></div>
-                                                <a href="../uploads/<?php echo htmlspecialchars($row['image']); ?>" data-lightbox="image-<?php echo $row['announcement_id']; ?>" data-title="<?php echo htmlspecialchars($row['title']); ?>">
-                                                    <img src="../uploads/<?php echo htmlspecialchars($row['image']); ?>" alt="Post Image" class="img-fluid">
-                                                    <script src="../js/blur.js"></script>
+                                                <a href="uploads/<?php echo htmlspecialchars($row['image']); ?>" data-lightbox="image-<?php echo $row['announcement_id']; ?>" data-title="<?php echo htmlspecialchars($row['title']); ?>">
+                                                    <img src="uploads/<?php echo htmlspecialchars($row['image']); ?>" alt="Post Image" class="img-fluid">
+                                                    <script src="js/blur.js"></script>
                                                 </a>
                                             </div>
 
@@ -253,7 +271,6 @@ $cover_photo = $adminPhotos['cover_photo'] ?? 'default_cover.jpg';
                                                     <?php
 
                                                     $all_tags = array_merge($year_levels, $departments, $courses);
-
 
                                                     foreach ($all_tags as $tag) : ?>
                                                         <span class="badge rounded-pill bg-danger mb-2"><?php echo htmlspecialchars(trim($tag)); ?></span>
@@ -280,17 +297,7 @@ $cover_photo = $adminPhotos['cover_photo'] ?? 'default_cover.jpg';
                                 <div class="card card-info p-4">
                                     <div class="left-card">
                                         <div class="d-flex flex-column">
-                                            <div class="bio-form-container d-none">
-                                                <form action="">
-                                                    <textarea id="bio" class="form-control text-center" rows="4" placeholder="Describe who you are"></textarea>
-                                                    <div class="button-container d-flex justify-content-end mt-2">
-                                                        <div class="btn btn-danger me-2" id="cancelBio">Cancel</div>
-                                                        <div class="btn btn-danger">Save</div>
-                                                    </div>
-                                                </form>
-                                            </div>
-
-                                            <button class="btn btn-danger" id="addBio">Edit Bio</button>
+                                            <p>No bio yet</p>
                                         </div>
                                     </div>
                                 </div>
@@ -300,88 +307,12 @@ $cover_photo = $adminPhotos['cover_photo'] ?? 'default_cover.jpg';
                 </div>
             </div>
         </div>
-
-        <script>
-            document.getElementById('addBio').addEventListener('click', function() {
-                document.querySelector('.bio-form-container').classList.remove('d-none');
-                this.style.display = 'none'; // Hide the "Add bio" button
-            });
-
-            document.getElementById('cancelBio').addEventListener('click', function() {
-                document.querySelector('.bio-form-container').classList.add('d-none');
-                document.getElementById('addBio').style.display = 'block'; // Show the "Add bio" button
-            });
-        </script>
-
-        <!-- Delete modal -->
-        <div class="modal fade" id="deletePost" tabindex="-1" aria-labelledby="deletePost" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-sm">
-                <div class="modal-content custom" style="border-radius: 15px;">
-                    <div class="modal-header pb-1" style="border: none">
-                        <h1 class="modal-title fs-5" id="exampleModalLabel">Delete Post?</h1>
-                        <button type="button" class="btn-close delete-modal-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body py-0" style="border: none;">
-                        <p style="font-size: 15px;">Once you delete this post, it can't be restored.</p>
-                    </div>
-                    <div class="modal-footer pt-0" style="border: none;">
-                        <button type="button" class="btn go-back-btn" data-bs-dismiss="modal">Go Back</button>
-                        <button type="button" class="btn delete-btn" id="confirm-delete-btn">Yes, Delete</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- after deletion modal -->
-        <div class="modal fade" id="postDelete" tabindex="-1" aria-labelledby="deleteConfirmationModal" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-sm">
-                <div class="modal-content text-center">
-                    <div class="modal-body p-4">
-                        <div class="mb-2">
-                            <i class="bi bi-check-circle-fill text-success" style="font-size: 2rem;"></i>
-                        </div>
-                        <h6 class="modal-title mb-1" id="deleteConfirmationModal">Success</h6>
-                        <p class="small mb-3">The announcement has been successfully deleted.</p>
-                        <button type="button" class="btn btn-success btn-sm w-100" data-bs-dismiss="modal">OK</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <nav class="navbar nav-bottom fixed-bottom d-block d-lg-none mt-5">
-            <div class="container-fluid d-flex justify-content-around">
-                <a href="dashboard.php" class="btn nav-bottom-btn">
-                    <i class="fas fa-chart-line"></i>
-                </a>
-
-                <a href="../admin.php" class="btn nav-bottom-btn">
-                    <i class="fas fa-newspaper"></i>
-                </a>
-
-                <a href="create.php" class="btn nav-bottom-btn">
-                    <i class="fas fa-bullhorn"></i>
-                </a>
-
-                <a href="logPage.php" class="btn nav-bottom-btn">
-                    <i class="fas fa-clipboard-list"></i>
-                </a>
-
-                <a href="manage_student.php" class="btn nav-bottom-btn">
-                    <i class="fas fa-users-cog"></i>
-                </a>
-
-                <a href="manage.php" class="btn nav-bottom-btn active-btn">
-                    <i class="fas fa-user"></i>
-                </a>
-            </div>
-        </nav>
-
-        <?php include 'changePassOtherPage.html'; ?>
     </main>
+
     <!-- Body CDN links -->
-    <?php include '../../cdn/body.html'; ?>
-    <script src="../js/admin.js"></script>
-    <script src="../js/manage.js"></script>
+    <?php include '..//cdn/body.html'; ?>
+    <script src="js/admin.js"></script>
+    <script src="js/manage.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         function confirmLogout() {
@@ -391,7 +322,6 @@ $cover_photo = $adminPhotos['cover_photo'] ?? 'default_cover.jpg';
             return false;
         }
     </script>
-
 </body>
 
 </html>

@@ -6,7 +6,7 @@ if (!isset($_SESSION['user']) || $_SESSION['user_type'] !== 'admin') {
     session_destroy();
     header("Location: ../login/login.php");
     exit();
-} 
+}
 
 //Get info from admin session
 $user = $_SESSION['user'];
@@ -164,17 +164,18 @@ $selected_courses = [];
                             </li>
 
                             <?php if (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'superadmin'): ?>
-                            <li class="nav-item">
-                                <a href="features/manage_admin.php"><i class="fas fa-user-shield me-2"></i>Manage Admins</a>
-                            </li>
+                                <li class="nav-item">
+                                    <a href="features/manage_admin.php"><i class="fas fa-user-shield me-2"></i>Manage Admins</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="features/feedbackPage.php">
+                                        <i class="fas fa-comments me-2"></i>
+                                        <span class="menu-text">Feedback</span>
+                                    </a>
+                                </li>
                             <?php endif; ?>
 
-                            <li class="nav-item">
-                                <a href="features/feedbackPage.php">
-                                    <i class="fas fa-comments me-2"></i>
-                                    <span class="menu-text">Feedback</span>
-                                </a>
-                            </li>
+
                         </ul>
                     </div>
                 </div>
@@ -195,7 +196,7 @@ $selected_courses = [];
                             require_once '../login/dbh.inc.php';
 
                             try {
-                                $query = "SELECT a.*, b.first_name, b.last_name 
+                                $query = "SELECT a.*, b.first_name, b.last_name,  b.profile_picture
                                 FROM announcement a 
                                 JOIN admin b ON a.admin_id = b.admin_id 
                                 ORDER BY a.updated_at DESC 
@@ -222,17 +223,18 @@ $selected_courses = [];
                                                             $image = $row['image'];
                                                             $admin_first_name = $row['first_name'];
                                                             $admin_last_name = $row['last_name'];
+                                                            $admin_pp = $row['profile_picture'];
                                                             $admin_name =  $admin_first_name . ' ' . $admin_last_name;
                                                     ?>
                                                             <div class="d-flex flex-column recent mb-2">
                                                                 <div class="row">
                                                                     <div class="col-md-8 recent-profile-container">
                                                                         <div class="recent-container d-flex">
-                                                                            <img class="profile-picture" src="<?php echo "uploads/" . htmlspecialchars($profile_picture); ?>" alt="Profile Picture">
+                                                                            <img class="profile-picture" src="<?php echo "uploads/" . htmlspecialchars($admin_pp); ?>" alt="Profile Picture">
                                                                             <p class="mt-1 ms-2"><?php echo htmlspecialchars($admin_name) ?></p>
                                                                         </div>
                                                                         <div class="title-container mt-0">
-                                                                            <a style="color:black; text-decoration: none;" href="try.php?id=<?php echo $id; ?>"><?php echo htmlspecialchars($title); ?></a>
+                                                                            <a style="color:black; text-decoration: none;" href="recent-landing.php?id=<?php echo $id; ?>"><?php echo htmlspecialchars($title); ?></a>
                                                                         </div>
                                                                     </div>
                                                                     <div class="col-md-4 post-img">
@@ -492,9 +494,9 @@ $selected_courses = [];
                 </a>
 
                 <?php if (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'superadmin'): ?>
-                <a href="features/manage_admin.php" class="btn nav-bottom-btn">
-                    <i class="fas fa-user-shield"></i>
-                </a>
+                    <a href="features/manage_admin.php" class="btn nav-bottom-btn">
+                        <i class="fas fa-user-shield"></i>
+                    </a>
                 <?php endif; ?>
             </div>
         </nav>
@@ -611,10 +613,10 @@ $selected_courses = [];
                 }, 10);
             });
         });
-        
+
         document.getElementById('customerFeedback').addEventListener('submit', function(e) {
             e.preventDefault();
-            
+
             const formData = {
                 name: document.getElementById('name').value,
                 email: document.getElementById('email').value,
@@ -622,26 +624,26 @@ $selected_courses = [];
             };
 
             fetch('features/handle_feedback.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData)
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    alert('Thank you for your feedback!');
-                    document.getElementById('customerFeedback').reset();
-                    closeFeedbackForm();
-                } else {
-                    alert(data.message || 'An error occurred');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred while submitting feedback');
-            });
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        alert('Thank you for your feedback!');
+                        document.getElementById('customerFeedback').reset();
+                        closeFeedbackForm();
+                    } else {
+                        alert(data.message || 'An error occurred');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while submitting feedback');
+                });
         });
 
         function confirmLogout() {

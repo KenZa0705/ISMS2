@@ -249,18 +249,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     continue; // Skip duplicate
                 }
 
-                addNewStudent($s_first_name, $s_last_name, $s_email, $s_contact_number, $s_year, $s_dept, $s_course);
-                $successfulRows[] = $i + 1;
-                // Add logging for each successful addition
-                logAction(
-                    $pdo,
-                    $admin_id,
-                    'admin',
-                    'ADD',
-                    'student',
-                    null,
-                    "Added student via Excel import: $s_first_name $s_last_name"
-                );
+                // Attempt to add the student
+                try {
+                    addNewStudent($s_first_name, $s_last_name, $s_email, $s_contact_number, $s_year, $s_dept, $s_course);
+                    $successfulRows[] = $i + 1;
+                    // Add logging for each successful addition
+                    logAction(
+                        $pdo,
+                        $admin_id,
+                        'admin',
+                        'ADD',
+                        'student',
+                        null,
+                        "Added student via Excel import: $s_first_name $s_last_name"
+                    );
+                } catch (Exception $e) {
+                    $failedRows[] = $i + 1; // Row number
+                    $errorDetails[$i + 1] = "Error adding student: " . addslashes($e->getMessage());
+                }
             }
 
             // Prepare detailed error message

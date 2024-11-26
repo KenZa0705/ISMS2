@@ -103,25 +103,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         // Send Email with OTP
         $mail = new PHPMailer(true);
-        try {
-            //Server settings
-            $mail->isSMTP();
-            $mail->Host = 'smtp.gmail.com';
-            $mail->SMTPAuth = true;
-            $mail->Username = 'ismsbatstateu@gmail.com';
-            $mail->Password = 'vkfy htwr ldkd qoav';
-            $mail->SMTPSecure = 'tls';
-            $mail->Port = 587;
 
-            //Recipients
-            $mail->setFrom('ismsbatstateu@gmail.com', 'ISMS - BSU Announcement Portal');
-            $mail->addAddress($email);
+        //Server settings
+        $mail->isSMTP();
+        $mail->Host = 'smtp.gmail.com';
+        $mail->SMTPAuth = true;
+        $mail->Username = 'ismsbatstateu@gmail.com';
+        $mail->Password = 'vkfy htwr ldkd qoav';
+        $mail->SMTPSecure = 'tls';
+        $mail->Port = 587;
 
-            //Content
-            $mail->isHTML(true);
-            $mail->addEmbeddedImage('pics/brand.png', 'brand_logo');
-            $mail->Subject = 'Your Password Reset OTP';
-            $mail->Body = '
+        //Recipients
+        $mail->setFrom('ismsbatstateu@gmail.com', 'ISMS - BSU Announcement Portal');
+        $mail->addAddress($email);
+
+        //Content
+        $mail->isHTML(true);
+        $mail->addEmbeddedImage('pics/brand.png', 'brand_logo');
+        $mail->Subject = 'Your Password Reset OTP';
+        $mail->Body = '
             <!DOCTYPE html>
             <html lang="en">
             <head>
@@ -172,150 +172,161 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </body>
             </html>
             ';
-            $mail->send();
+        $mail->send();
 
-            // Send SMS with OTP
-            // $smsMessage = "Your OTP is: $otp. It is valid for 10 minutes.";
-            // sendMessage($contact_number, $smsMessage);
+        // Send SMS with OTP
+        // $smsMessage = "Your OTP is: $otp. It is valid for 10 minutes.";
+        // sendMessage($contact_number, $smsMessage);
 
 ?>
-            <!DOCTYPE html>
-            <html lang="en">
+        <!DOCTYPE html>
+        <html lang="en">
 
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Validation OTP</title>
-                <?php include '../cdn/head.html'; ?>
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Validation OTP</title>
+            <?php include '../cdn/head.html'; ?>
 
-                <link rel="stylesheet" href="login.css">
-            </head>
+            <link rel="stylesheet" href="login.css">
+        </head>
 
-            <body class="d-flex flex-column min-vh-100">
-                <header class="header_container bg-white">
-                    <div class="container">
-                        <div class="row align-items-center">
-                            <div class="col-3">
-                                <a href="#" class="d-block">
-                                    <img
-                                        src="pics/brand.png"
-                                        alt="Brand Logo"
-                                        class="img-fluid"
-                                        width="150"
-                                        height="auto">
-                                </a>
-                            </div>
-                            <div class="col-6">
-                                <h1 class="text-center fw-bold m-0">ISMS ANNOUNCEMENTS</h1>
-                            </div>
-                            <div class="col-3 text-end">
-                                <a href="#" class="d-block">
-                                    <img
-                                        src="pics/bsu_logo.png"
-                                        alt="BSU Logo"
-                                        class="img-fluid"
-                                        width="150"
-                                        height="auto">
-                                </a>
-                            </div>
+        <body class="d-flex flex-column min-vh-100">
+            <header class="header_container bg-white">
+                <div class="container">
+                    <div class="row align-items-center">
+                        <div class="col-3">
+                            <a href="#" class="d-block">
+                                <img
+                                    src="pics/brand.png"
+                                    alt="Brand Logo"
+                                    class="img-fluid"
+                                    width="150"
+                                    height="auto">
+                            </a>
+                        </div>
+                        <div class="col-6">
+                            <h1 class="text-center fw-bold m-0">ISMS ANNOUNCEMENTS</h1>
+                        </div>
+                        <div class="col-3 text-end">
+                            <a href="#" class="d-block">
+                                <img
+                                    src="pics/bsu_logo.png"
+                                    alt="BSU Logo"
+                                    class="img-fluid"
+                                    width="150"
+                                    height="auto">
+                            </a>
                         </div>
                     </div>
-                </header>
+                </div>
+            </header>
 
 
-                <section class="login_container flex-grow-1 d-flex justify-content-center align-items-center py-4">
-                    <div class="container">
-                        <div class="row justify-content-center">
-                            <div class="col-12 col-md-6 col-lg-5">
-                                <div class="card shadow-lg border-0">
-                                    <div class="card-body p-4">
-                                        <div class="text-center mb-3">
-                                            <h2 class="fw-bold">Verify OTP</h2>
-                                            <p class="text-muted mb-0">Please check your email for the OTP code</p>
+            <section class="login_container flex-grow-1 d-flex justify-content-center align-items-center py-4">
+                <div class="container">
+                    <div class="row justify-content-center">
+                        <div class="col-12 col-md-6 col-lg-5">
+                            <div class="card shadow-lg border-0">
+                                <div class="card-body p-4">
+                                    <div class="text-center mb-3">
+                                        <h2 class="fw-bold">Verify OTP</h2>
+                                        <p class="text-muted mb-0">Please check your email for the OTP code</p>
+                                    </div>
+
+                                    <form id="otp_form" method="POST" action="validate_otp.php">
+                                        <?php if (isset($_GET['message'])): ?>
+                                            <div class="alert alert-danger py-2"><?php echo $_GET['message']; ?></div>
+                                        <?php endif; ?>
+
+                                        <?php if (isset($_GET['error'])): ?>
+                                            <div class="alert alert-danger py-2">
+                                                <?php echo htmlspecialchars($_GET['error']); ?>
+                                            </div>
+                                            <script>
+                                                $(document).ready(function() {
+                                                    setTimeout(function() {
+                                                        $(".alert").fadeOut('slow');
+                                                    }, 3000);
+                                                });
+                                            </script>
+                                        <?php endif; ?>
+
+                                        <div class="form-floating mt-3">
+                                            <input
+                                                type="email"
+                                                name="email"
+                                                id="email"
+                                                class="form-control"
+                                                placeholder="name@example.com"
+                                                value="<?php echo htmlspecialchars($display_email); ?>"
+                                                readonly
+                                                required>
+
+                                            <label for="email">Email address</label>
+                                            <div class="invalid-feedback"></div>
                                         </div>
 
-                                        <form id="otp_form" method="POST" action="validate_otp.php">
-                                            <?php if (isset($_GET['message'])): ?>
-                                                <div class="alert alert-danger py-2"><?php echo $_GET['message']; ?></div>
-                                            <?php endif; ?>
-
-                                            <div class="form-floating mt-3">
-                                                <input
-                                                    type="email"
-                                                    name="email"
-                                                    id="email"
-                                                    class="form-control"
-                                                    placeholder="name@example.com"
-                                                    value="<?php echo htmlspecialchars($display_email); ?>"
-                                                    readonly
-                                                    required>
-
-                                                <label for="email">Email address</label>
-                                                <div class="invalid-feedback"></div>
+                                        <div class="mt-3">
+                                            <label class="form-label">Enter OTP Code</label>
+                                            <div class="d-flex gap-2 justify-content-center">
+                                                <input type="text" class="form-control text-center otp-input" maxlength="1" data-index="1" style="width: 45px; height: 45px; padding: 0;">
+                                                <input type="text" class="form-control text-center otp-input" maxlength="1" data-index="2" style="width: 45px; height: 45px; padding: 0;">
+                                                <input type="text" class="form-control text-center otp-input" maxlength="1" data-index="3" style="width: 45px; height: 45px; padding: 0;">
+                                                <input type="text" class="form-control text-center otp-input" maxlength="1" data-index="4" style="width: 45px; height: 45px; padding: 0;">
+                                                <input type="text" class="form-control text-center otp-input" maxlength="1" data-index="5" style="width: 45px; height: 45px; padding: 0;">
+                                                <input type="text" class="form-control text-center otp-input" maxlength="1" data-index="6" style="width: 45px; height: 45px; padding: 0;">
                                             </div>
+                                            <input type="hidden" name="otp" id="otp">
+                                            <div class="invalid-feedback text-center"></div>
+                                        </div>
 
-                                            <div class="mt-3">
-                                                <label class="form-label">Enter OTP Code</label>
-                                                <div class="d-flex gap-2 justify-content-center">
-                                                    <input type="text" class="form-control text-center otp-input" maxlength="1" data-index="1" style="width: 45px; height: 45px; padding: 0;">
-                                                    <input type="text" class="form-control text-center otp-input" maxlength="1" data-index="2" style="width: 45px; height: 45px; padding: 0;">
-                                                    <input type="text" class="form-control text-center otp-input" maxlength="1" data-index="3" style="width: 45px; height: 45px; padding: 0;">
-                                                    <input type="text" class="form-control text-center otp-input" maxlength="1" data-index="4" style="width: 45px; height: 45px; padding: 0;">
-                                                    <input type="text" class="form-control text-center otp-input" maxlength="1" data-index="5" style="width: 45px; height: 45px; padding: 0;">
-                                                    <input type="text" class="form-control text-center otp-input" maxlength="1" data-index="6" style="width: 45px; height: 45px; padding: 0;">
-                                                </div>
-                                                <input type="hidden" name="otp" id="otp">
-                                                <div class="invalid-feedback text-center"></div>
-                                            </div>
+                                        <button type="submit" class="btn btn-danger w-100 py-2 mt-3">
+                                            Verify OTP
+                                        </button>
 
-                                            <button type="submit" class="btn btn-danger w-100 py-2 mt-3">
-                                                Verify OTP
+                                        <div class="text-center text-danger mt-3">
+                                            <button type="button" id="resendOTP" class="btn btn-link text-decoration-none p-0" disabled>
+                                                Resend OTP (60s)
                                             </button>
-
-                                            <div class="text-center text-danger mt-3">
-                                                <button type="button" id="resendOTP" class="btn btn-link text-decoration-none p-0" disabled>
-                                                    Resend OTP (60s)
-                                                </button>
-                                            </div>
-                                        </form>
-                                    </div>
+                                        </div>
+                                    </form>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </section>
+                </div>
+            </section>
 
 
-                <footer class="bg-black py-3">
-                    <div class="container">
-                        <div class="row align-items-center">
-                            <div class="col-8">
-                                <h2 class="h5 text-white mb-2">BATANGAS STATE UNIVERSITY</h2>
-                                <p class="text-white-50 mb-2">A premier national university that develops leaders in the global knowledge economy</p>
-                                <p class="text-white-50 small mb-0">Copyright &copy; <?php echo date('Y'); ?></p>
-                            </div>
-                            <div class="col-4">
-                                <div class="text-end">
-                                    <img
-                                        src="pics/redspartan-logo.png"
-                                        alt="Red Spartan Logo"
-                                        class="img-fluid"
-                                        width="150"
-                                        height="auto">
-                                </div>
+            <footer class="bg-black py-3">
+                <div class="container">
+                    <div class="row align-items-center">
+                        <div class="col-8">
+                            <h2 class="h5 text-white mb-2">BATANGAS STATE UNIVERSITY</h2>
+                            <p class="text-white-50 mb-2">A premier national university that develops leaders in the global knowledge economy</p>
+                            <p class="text-white-50 small mb-0">Copyright &copy; <?php echo date('Y'); ?></p>
+                        </div>
+                        <div class="col-4">
+                            <div class="text-end">
+                                <img
+                                    src="pics/redspartan-logo.png"
+                                    alt="Red Spartan Logo"
+                                    class="img-fluid"
+                                    width="150"
+                                    height="auto">
                             </div>
                         </div>
                     </div>
-                </footer>
-                <?php include '../cdn/body.html'; ?>
-                <script src="resend-otp.js"></script>
-            </body>
+                </div>
+            </footer>
+            <?php include '../cdn/body.html'; ?>
+            <script src="resend-otp.js"></script>
+        </body>
 
-            </html>
+        </html>
 <?php
-        } catch (Exception $e) {
-            echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
-        }
+
     } else {
         echo "Email does not exist in either student or school staff records.";
     }

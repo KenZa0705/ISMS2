@@ -2,7 +2,7 @@
 require_once '../../login/dbh.inc.php';
 //Get info from admin session
 $user = $_SESSION['user'];
-if ($_SESSION['user_type'] === 'admin'){
+if ($_SESSION['user_type'] === 'admin') {
     $admin_id = $_SESSION['user']['admin_id'];
 } else {
     $user_id = $_SESSION['user']['student_id'];

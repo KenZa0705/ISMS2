@@ -133,23 +133,7 @@ $department_id = $_SESSION['user']['department_id'];
             </div>
         </div>
 
-        <div class="modal fade" id="announcementPosted" tabindex="-1" aria-labelledby="announcementPostedModal" aria-hidden="true">
-            <div class="modal-dialog modal-md">
-                <div class="modal-content">
-                    <div class="modal-header bg-light">
-                        <h5 class="modal-title" id="announcementPostedModal">
-                            <i class="fas fa-check-circle text-success me-2"></i>Success
-                        </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body py-4">
-                        <p class="mb-0"> </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <nav class="navbar nav-bottom fixed-bottom d-block d-lg-none mt-5">
+        <nav class="navbar nav-bottom fixed-bottom d-block d-xxl-none mt-5">
             <div class="container-fluid d-flex justify-content-around">
                 <a href="dashboard.php" class="btn nav-bottom-btn">
                     <i class="fas fa-chart-line"></i>
@@ -178,133 +162,8 @@ $department_id = $_SESSION['user']['department_id'];
         </nav>
     </main>
     <!-- Body CDN links -->
-    <script src="../js/create-post-validation.js">
-        // document.addEventListener('DOMContentLoaded', function() {
-        //     const form = document.querySelector('form');
 
-        //     // Error Modal Function
-        //     function showErrorModal(message) {
-        //         const modalHtml = `
-        //         <div class="modal error-modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
-        //             <div class="modal-dialog modal-dialog-centered modal-sm">
-        //                 <div class="modal-content text-center">
-        //                     <div class="modal-body p-4">
-        //                         <div class="mb-2">
-        //                             <i class="bi bi-x-circle-fill text-danger" style="font-size: 2rem;"></i>
-        //                         </div>
-        //                         <h6 class="modal-title mb-1" id="errorModalLabel">Error</h6>
-        //                         <p class="small mb-3">${message}</p>
-        //                         <button type="button" class="btn btn-danger btn-sm w-100" data-bs-dismiss="modal">OK</button>
-        //                     </div>
-        //                 </div>
-        //             </div>
-        //         </div>`;
-        //         // Remove existing modal if any
-        //         const existingModal = document.getElementById('errorModal');
-        //         if (existingModal) {
-        //             existingModal.remove();
-        //         }
-
-        //         // Add modal to body
-        //         document.body.insertAdjacentHTML('beforeend', modalHtml);
-
-        //         // Show modal
-        //         const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
-        //         errorModal.show();
-        //     }
-
-        //     function showSuccessModal() {
-        //         window.location.href = '../admin.php?status=success';
-        //     }
-
-        //     form.addEventListener('submit', async function(e) {
-        //         e.preventDefault();
-
-        //         // Get form elements
-        //         const title = document.getElementById('title').value.trim();
-        //         const description = document.getElementById('description').value.trim();
-        //         const imageInput = document.getElementById('image');
-        //         const tagsSelected = validateTags();
-
-        //         // Validate title
-        //         if (!title) {
-        //             showErrorModal('Please enter a title for the announcement');
-        //             return;
-        //         }
-
-        //         // Validate description
-        //         if (!description) {
-        //             showErrorModal('Please enter a description for the announcement');
-        //             return;
-        //         }
-
-        //         // Validate image only if one is selected
-        //         if (imageInput.files && imageInput.files[0]) {
-        //             // Validate image type
-        //             const file = imageInput.files[0];
-        //             const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
-        //             if (!allowedTypes.includes(file.type)) {
-        //                 showErrorModal('Please select a valid image file (JPG, PNG, or GIF)');
-        //                 return;
-        //             }
-
-        //             // Validate image size (5MB max)
-        //             const maxSize = 5 * 1024 * 1024; // 5MB in bytes
-        //             if (file.size > maxSize) {
-        //                 showErrorModal('Image size should not exceed 5MB');
-        //                 return;
-        //             }
-        //         }
-
-        //         // Validate tags
-        //         if (!tagsSelected) {
-        //             showErrorModal('Please select at least one tag for the announcement');
-        //             return;
-        //         }
-
-        //         // If all validations pass
-        //         showLoadingState();
-        //         try {
-        //             const formData = new FormData(this);
-        //             const response = await fetch(this.action, {
-        //                 method: 'POST',
-        //                 body: formData
-        //             });
-
-        //             if (response.ok) {
-        //                 showSuccessModal();
-        //             } else {
-        //                 showErrorModal('An error occurred while posting the announcement');
-        //             }
-        //         } catch (error) {
-        //             showErrorModal('An error occurred while posting the announcement');
-        //         }
-        //     });
-
-        //     function validateTags() {
-        //         const yearLevels = document.querySelectorAll('input[name="year_level[]"]:checked');
-        //         const departments = document.querySelectorAll('input[name="department[]"]:checked');
-        //         const courses = document.querySelectorAll('input[name="course[]"]:checked');
-
-        //         return yearLevels.length > 0 || departments.length > 0 || courses.length > 0;
-        //     }
-
-        //     function showLoadingState() {
-        //         const submitBtn = document.getElementById('submitBtn');
-        //         submitBtn.disabled = true;
-        //         submitBtn.innerHTML = '<i class="bi bi-send-fill me-2"></i>Posting...';
-        //     }
-        // });
-    </script>
-    <script>
-        function confirmLogout() {
-            if (confirm('Are you sure you want to sign out?')) {
-                window.location.href = '../../login/logout.php';
-            }
-            return false;
-        }
-    </script>
-    <?php include 'modals.php' ?>
+    <script src="../js/create-post-validation.js"></script>
     <?php include '../../cdn/body.html'; ?>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="../js/create.js"></script>

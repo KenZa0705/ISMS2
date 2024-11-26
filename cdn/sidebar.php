@@ -29,14 +29,15 @@
                 <li class="nav-item">
                     <a href="manage_admin.php"><i class="fas fa-user-shield me-2"></i>Manage Admins</a>
                 </li>
+                <li class="nav-item">
+                    <a href="feedbackPage.php">
+                        <i class="fas fa-comments me-2"></i>
+                        <span class="menu-text">Feedback</span>
+                    </a>
+                </li>
             <?php endif; ?>
 
-            <li class="nav-item">
-                <a href="feedbackPage.php">
-                    <i class="fas fa-comments me-2"></i>
-                    <span class="menu-text">Feedback</span>
-                </a>
-            </li>
+
         </ul>
     </div>
 </div>

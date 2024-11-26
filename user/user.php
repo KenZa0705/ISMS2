@@ -43,15 +43,6 @@ $selected_courses = [];
         <nav class="navbar navbar-expand-lg bg-white text-black fixed-top mb-5" style="border-bottom: 1px solid #e9ecef; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);">
             <div class="container-fluid">
                 <div class="user-left d-flex">
-                    <div class="d-md-none ms-0 mt-2 me-3">
-                        <button type="button" class="btn btn-filter" data-bs-toggle="modal" data-bs-target="#filterModal"
-                            style="border-radius: 50%; outline: none !important; box-shadow: none !important; border: none !important;"
-                            onmousedown="this.style.outline='none'"
-                            onfocus="this.style.outline='none'">
-                            <i class="bi bi-funnel"></i>
-                        </button>
-                    </div>
-
                     <a class="navbar-brand d-flex align-items-center" href="#"><img src="img/brand.png" class="img-fluid branding" alt=""></a>
                 </div>
 
@@ -84,7 +75,7 @@ $selected_courses = [];
                     <div class="user-profile">
                         <div class="dropdown">
                             <button class="dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" style="border: none; background: none; padding: 0;">
-                                <img class="img-fluid w-100" src="<?php echo "uploads/" . htmlspecialchars($profile_picture); ?>" alt="Profile Picture">
+                                <img src="<?php echo "uploads/" . htmlspecialchars($profile_picture); ?>" alt="Profile Picture">
                             </button>
                             <ul class="dropdown-menu mt-3" style="left: auto; right:1px;">
                                 <li>
@@ -107,7 +98,7 @@ $selected_courses = [];
                     </div>
                 </div>
         </nav>
-        
+
     </header>
 
     <main>
@@ -125,7 +116,7 @@ $selected_courses = [];
                             <li class="nav-item">
                                 <a href="features/logPage.php"><i class="fas fa-clipboard-list me-2"></i>Logs</a>
                             </li>
-                            
+
                         </ul>
                     </div>
                 </div>
@@ -184,7 +175,7 @@ $selected_courses = [];
                                                                             <p class="mt-1 ms-2"><?php echo htmlspecialchars($admin_name) ?></p>
                                                                         </div>
                                                                         <div class="title-container mt-0">
-                                                                            <a style="color:black; text-decoration: none;" href="try.php?id=<?php echo $id; ?>"><?php echo htmlspecialchars($title); ?></a>
+                                                                            <a style="color:black; text-decoration: none;" href="recent-landing.php?id=<?php echo $id; ?>"><?php echo htmlspecialchars($title); ?></a>
                                                                         </div>
                                                                     </div>
                                                                     <div class="col-md-4 post-img">
@@ -477,7 +468,7 @@ $selected_courses = [];
 
         document.getElementById('customerFeedback').addEventListener('submit', function(e) {
             e.preventDefault();
-            
+
             const formData = {
                 name: document.getElementById('name').value,
                 email: document.getElementById('email').value,
@@ -485,26 +476,26 @@ $selected_courses = [];
             };
 
             fetch('features/handle_feedback.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData)
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    alert('Thank you for your feedback!');
-                    document.getElementById('customerFeedback').reset();
-                    closeFeedbackForm();
-                } else {
-                    alert(data.message || 'An error occurred');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred while submitting feedback');
-            });
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        alert('Thank you for your feedback!');
+                        document.getElementById('customerFeedback').reset();
+                        closeFeedbackForm();
+                    } else {
+                        alert(data.message || 'An error occurred');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while submitting feedback');
+                });
         });
     </script>
     <script src="../admin/js/admin.js"></script>

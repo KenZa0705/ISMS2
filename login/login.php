@@ -1,15 +1,15 @@
 <?php
-require_once 'dbh.inc.php'; 
+require_once 'dbh.inc.php';
 session_start();
 if (isset($_SESSION['user'])) {
-    if ($_SESSION['user_type'] === 'admin'){
+    if ($_SESSION['user_type'] === 'admin') {
         header("Location: ../admin/admin.php");
-    exit();
+        exit();
     } else {
         header("Location: ../user/user.php");
         exit();
     }
-} 
+}
 ?>
 
 <!doctype html>
@@ -70,6 +70,17 @@ if (isset($_SESSION['user'])) {
                                     <div class="alert alert-danger py-2">
                                         <?php echo htmlspecialchars($_GET['error']); ?>
                                     </div>
+                                    <script>
+                                        $(document).ready(function() {
+                                            setTimeout(function() {
+                                                $(".alert").fadeOut('slow');
+                                            }, 3000);
+                                        });
+                                    </script>
+                                <?php endif; ?>
+
+                                <?php if (isset($_GET['message'])): ?>
+                                    <div class="alert alert-danger py-2"><?php echo $_GET['message']; ?></div>
                                     <script>
                                         $(document).ready(function() {
                                             setTimeout(function() {

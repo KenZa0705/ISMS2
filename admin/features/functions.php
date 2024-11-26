@@ -279,4 +279,3 @@ function addNewStudent($s_first_name, $s_last_name, $s_email, $s_contact_number,
         echo "<script>alert('Error: Could not add student.');</script>";
     }
 }
-

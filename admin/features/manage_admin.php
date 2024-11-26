@@ -5,7 +5,7 @@ session_start();
 if (!isset($_SESSION['user'])) {
     header("Location: ../../login/login.php");
     exit();
-} else if ($_SESSION['user']['role'] !== 'superadmin'){
+} else if ($_SESSION['user']['role'] !== 'superadmin') {
     echo '<script>
         alert("You are not a superadmin. Logging out in 3 seconds...");
         let count = 3;
@@ -33,7 +33,7 @@ $profile_picture = $_SESSION['user']['profile_picture'];
 // Handle admin updates
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['admin_id'])) {
     $target_admin_id = $_POST['admin_id'];
-    
+
     // Prevent role modification for currently logged-in superadmin
     if ($target_admin_id == $_SESSION['user']['admin_id'] && $_SESSION['user']['role'] === 'superadmin') {
         $a_role = 'superadmin'; // Force role to remain as superadmin
@@ -58,7 +58,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['admin_id'])) {
         FROM student 
         WHERE email = :email OR contact_number = :contact_number
     ");
-    
+
     $duplicateCheck->execute([
         ':email' => $a_email,
         ':contact_number' => $a_contact_number,
@@ -68,7 +68,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['admin_id'])) {
     if ($duplicateCheck->rowCount() > 0) {
         $duplicateData = $duplicateCheck->fetch(PDO::FETCH_ASSOC);
         $userType = $duplicateData['source'];
-        
+
         if ($duplicateData['email'] === $a_email && $duplicateData['contact_number'] === $a_contact_number) {
             $message = "Both email and contact number are already in use by another " . $userType . ".";
         } else {
@@ -155,9 +155,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['admin_id'])) {
         );
     }
 
-    echo "<script>alert('Admin information updated successfully.');</script>";
-    echo "<script>window.location.href = 'manage_admin.php';</script>";
-    exit;
+    header("Location: manage_admin.php?error=Admin infor updated successfully");
+    exit();
 }
 
 // Handle new admin creation
@@ -167,11 +166,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['admin_id'])) {
     $a_email = $_POST['email'];
     $a_contact_number = "+63" . $_POST['contactNumber'];
     $a_role = $_POST['role'];
-    
+
     // Set default profile and cover photos
     $default_profile = 'default_profile.jpg';
     $default_cover = 'default_cover.jpg';
-    
+
     // Check for duplicates in both admin and student tables
     $duplicateCheck = $pdo->prepare("
         SELECT 'admin' as source, email, contact_number 
@@ -182,16 +181,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['admin_id'])) {
         FROM student 
         WHERE email = :email OR contact_number = :contact_number
     ");
-    
+
     $duplicateCheck->execute([
         ':email' => $a_email,
         ':contact_number' => $a_contact_number
     ]);
-    
+
     if ($duplicateCheck->rowCount() > 0) {
         $duplicateData = $duplicateCheck->fetch(PDO::FETCH_ASSOC);
         $userType = $duplicateData['source'];
-        
+
         if ($duplicateData['email'] === $a_email && $duplicateData['contact_number'] === $a_contact_number) {
             $message = "Both email and contact number are already in use by another " . $userType . ".";
         } else {
@@ -210,10 +209,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['admin_id'])) {
 
     // Generate default password
     $default_password = password_hash("Admin@123", PASSWORD_DEFAULT);
-    
+
     $insertStmt = $pdo->prepare("INSERT INTO admin (first_name, last_name, email, contact_number, department_id, role, password, profile_picture, cover_photo) 
         VALUES (:first_name, :last_name, :email, :contact_number, :department_id, :role, :password, :profile_picture, :cover_photo)");
-    
+
     $insertStmt->execute([
         ':first_name' => $a_first_name,
         ':last_name' => $a_last_name,
@@ -245,6 +244,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['admin_id'])) {
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <title>Manage Admins - ISMS Portal</title>
     <meta charset="utf-8" />
@@ -287,7 +287,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['admin_id'])) {
                             <li class="nav-item">
                                 <a href="manage_student.php"><i class="fas fa-users-cog me-2"></i>Manage Accounts</a>
                             </li>
-                            
+
                             <?php if (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'superadmin'): ?>
                                 <li class="nav-item">
                                     <a href="manage_admin.php"><i class="fas fa-user-shield me-2"></i>Manage Admins</a>
@@ -310,7 +310,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['admin_id'])) {
                             <i class="bi bi-person-plus-fill me-2"></i>Add New Admin
                         </button>
                     </div>
-
+                    <?php if (isset($_GET['error'])): ?>
+                        <div class="alert alert-danger py-2">
+                            <?php echo htmlspecialchars($_GET['error']); ?>
+                        </div>
+                        <script>
+                            $(document).ready(function() {
+                                setTimeout(function() {
+                                    $(".alert").fadeOut('slow');
+                                }, 3000);
+                            });
+                        </script>
+                    <?php endif; ?>
                     <div class="card shadow">
                         <div class="card-body">
                             <?php
@@ -339,7 +350,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['admin_id'])) {
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <?php foreach ($admins as $admin): 
+                                                <?php foreach ($admins as $admin):
                                                     // Skip the current superadmin
                                                     if ($admin['admin_id'] === $admin_id) continue;
                                                 ?>
@@ -432,8 +443,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['admin_id'])) {
                                     <label for="contactNumber" class="form-label">Contact Number</label>
                                     <div class="input-group">
                                         <span class="input-group-text">+63</span>
-                                        <input type="text" class="form-control" id="contactNumber" name="contactNumber" 
-                                               pattern="9[0-9]{9}" title="Enter 10 digits starting with 9" required>
+                                        <input type="text" class="form-control" id="contactNumber" name="contactNumber"
+                                            pattern="9[0-9]{9}" title="Enter 10 digits starting with 9" required>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -494,8 +505,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['admin_id'])) {
                                     <label for="editContactNumber" class="form-label">Contact Number</label>
                                     <div class="input-group">
                                         <span class="input-group-text">+63</span>
-                                        <input type="text" class="form-control" id="editContactNumber" name="contactNumber" 
-                                               pattern="9[0-9]{9}" title="Enter 10 digits starting with 9" required>
+                                        <input type="text" class="form-control" id="editContactNumber" name="contactNumber"
+                                            pattern="9[0-9]{9}" title="Enter 10 digits starting with 9" required>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -512,9 +523,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['admin_id'])) {
                                 </div>
                                 <div class="col-md-6">
                                     <label for="editRole" class="form-label">Role</label>
-                                    <select class="form-select" id="editRole" name="role" required 
+                                    <select class="form-select" id="editRole" name="role" required
                                         <?php if ($admin['admin_id'] === $_SESSION['user']['admin_id'] && $_SESSION['user']['role'] === 'superadmin'): ?>
-                                            disabled
+                                        disabled
                                         <?php endif; ?>>
                                         <option value="admin">Admin</option>
                                         <option value="superadmin">Superadmin</option>
@@ -575,9 +586,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['admin_id'])) {
                     <i class="fas fa-user"></i>
                 </a>
                 <?php if (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'superadmin'): ?>
-                <a href="manage_admin.php" class="btn nav-bottom-btn active-btn">
-                    <i class="fas fa-user-shield"></i>
-                </a>
+                    <a href="manage_admin.php" class="btn nav-bottom-btn active-btn">
+                        <i class="fas fa-user-shield"></i>
+                    </a>
                 <?php endif; ?>
             </div>
         </nav>
@@ -586,13 +597,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['admin_id'])) {
     <?php include '../../cdn/body.html'; ?>
     <script type="text/javascript" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
-    
+
     <script>
         $(document).ready(function() {
             // Initialize DataTable
             $('.table').DataTable({
                 responsive: true,
-                order: [[1, 'asc']], // Sort by Full Name column by default
+                order: [
+                    [1, 'asc']
+                ], // Sort by Full Name column by default
                 pageLength: 10,
                 lengthChange: false
             });
@@ -619,7 +632,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['admin_id'])) {
                     $.ajax({
                         url: 'delete_admin.php',
                         method: 'POST',
-                        data: { admin_id: adminIdToDelete },
+                        data: {
+                            admin_id: adminIdToDelete
+                        },
                         dataType: 'json',
                         success: function(response) {
                             if (response.success) {
@@ -634,7 +649,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['admin_id'])) {
                             try {
                                 const response = JSON.parse(xhr.responseText);
                                 errorMessage = response.error || errorMessage;
-                            } catch(e) {}
+                            } catch (e) {}
                             alert(errorMessage);
                         }
                     });
@@ -651,4 +666,5 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['admin_id'])) {
         }
     </script>
 </body>
+
 </html>

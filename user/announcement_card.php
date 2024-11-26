@@ -1,11 +1,11 @@
-<?php 
+<?php
 require_once '../login/dbh.inc.php';
 
 ?>
 <div class="card mb-3">
     <div class="profile-container d-flex px-3 pt-3">
         <div class="profile-pic">
-            <img class="img-fluid w-100" src="<?php echo '../admin/uploads/' . htmlspecialchars($row['profile_picture']); ?>" alt="Profile Picture">
+            <img src="<?php echo '../admin/uploads/' . htmlspecialchars($row['profile_picture']); ?>" alt="Profile Picture">
         </div>
         <p class="ms-1 mt-1"><?php echo htmlspecialchars($row['first_name'] . ' ' . $row['last_name']); ?></p>
     </div>

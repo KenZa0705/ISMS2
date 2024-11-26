@@ -86,7 +86,7 @@ $department_id = $_SESSION['user']['department_id'];
                                     <span class="menu-text">Manage Accounts</span>
                                 </a>
                             </li>
-                                            
+
                             <?php if (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'superadmin'): ?>
                                 <li class="nav-item">
                                     <a href="manage_admin.php"><i class="fas fa-user-shield me-2"></i>Manage Admins</a>
@@ -124,10 +124,17 @@ $department_id = $_SESSION['user']['department_id'];
                                         require_once '../../login/dbh.inc.php';
 
                                         try {
-                                            $query = "SELECT * FROM logs WHERE user_id = :admin_id ORDER BY timestamp DESC";
-                                            $stmt = $pdo->prepare($query);
-                                            $stmt->bindParam(':admin_id', $admin_id, PDO::PARAM_INT);
-                                            $stmt->execute();
+
+                                            if ($_SESSION['user']['role'] === 'superadmin') {
+                                                $query = "SELECT * FROM logs ORDER BY timestamp DESC";
+                                                $stmt = $pdo->prepare($query);
+                                                $stmt->execute();
+                                            } else {
+                                                $query = "SELECT * FROM logs WHERE user_id = :admin_id ORDER BY timestamp DESC";
+                                                $stmt = $pdo->prepare($query);
+                                                $stmt->bindParam(':admin_id', $admin_id, PDO::PARAM_INT);
+                                                $stmt->execute();
+                                            }
 
                                             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                                                 $log_id = htmlspecialchars($row['log_id'] ?? '');
